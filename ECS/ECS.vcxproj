@@ -140,9 +140,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ECS.cpp" />
+    <ClCompile Include="EntityManager\EntityManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ECSConstants.h" />
+    <ClInclude Include="EntityManager\EntityManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
