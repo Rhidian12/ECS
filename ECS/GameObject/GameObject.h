@@ -11,6 +11,18 @@ namespace GO
 
 		void AddComponent(class Component* pComponent);
 
+		template<typename Type>
+		Type* GetComponent() const
+		{
+			const std::type_info& typeInfo{ typeid(Type) };
+
+			for (Component* pC : Components)
+				if (typeid(*pC) == typeInfo)
+					return static_cast<Type*>(pC);
+
+			return nullptr;
+		}
+
 		void Update();
 
 	private:

@@ -148,7 +148,7 @@
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
-    <ClCompile Include="GOComponent.cpp" />
+    <ClCompile Include="GOComponent\GOComponent.cpp" />
     <ClCompile Include="SystemManager\SystemManager.cpp" />
   </ItemGroup>
   <ItemGroup>
