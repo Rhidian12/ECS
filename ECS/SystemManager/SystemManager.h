@@ -25,6 +25,11 @@ namespace ECS
 	private:
 		struct SystemInfo final
 		{
+			SystemInfo(const SystemID& id, ISystem* _pSystem)
+				: SystemID{ id }
+				, pSystem{ _pSystem }
+			{}
+
 			SystemID SystemID;
 			ISystem* pSystem;
 		};
@@ -50,10 +55,14 @@ namespace ECS
 
 		if (cIt == Systems.cend())
 		{
-			Systems.push_back(SystemInfo{ DerivedSystem::GetSystemID(), new DerivedSystem{} });
+			Systems.push_back({ DerivedSystem::GetSystemID(), new DerivedSystem{} });
 
-			SystemTypes = typelist::tlist_push_back<DerivedSystem, SystemTypes>::type;
+			using SystemTypes = typelist::tlist_push_back<DerivedSystem, SystemTypes>::type;
+
+			return Systems.back();
 		}
+
+		return nullptr;
 	}
 
 	template<typename DerivedSystem>

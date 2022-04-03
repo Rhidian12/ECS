@@ -14,7 +14,7 @@ namespace ECS
 	};
 
 	template<typename DerivedSystem>
-	class System
+	class System : public ISystem
 	{
 	public:
 		virtual ~System() = default;
