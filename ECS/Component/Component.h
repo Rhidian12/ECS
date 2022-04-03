@@ -24,6 +24,6 @@ namespace ECS
 		__forceinline auto GetComponentID() const noexcept { return ComponentID; }
 
 	protected:
-		const ComponentType ComponentID{ FamilyTypeID<IComponent>::Get<DerivedComponent>() };
+		inline static const ComponentType ComponentID{ FamilyTypeID<IComponent>::Get<DerivedComponent>() };
 	};
 }
