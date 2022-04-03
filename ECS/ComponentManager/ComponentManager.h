@@ -14,7 +14,7 @@ namespace ECS
 		void AddComponent(const Entity id, IComponent* const pComponent) noexcept;
 
 		template<typename Type>	
-		Type* GetComponent(const Entity id, const ComponentType ComponentID) const noexcept;
+		Type* GetComponent(const Entity id) const noexcept;
 
 	private:
 		struct ComponentData
@@ -72,8 +72,9 @@ namespace ECS
 	}
 
 	template<typename Type>
-	Type* ComponentManager::GetComponent(const Entity id, const ComponentType componentID) const noexcept
+	Type* ComponentManager::GetComponent(const Entity id) const noexcept
 	{
+		const auto componentID{ Type::GetComponentID() };
 		auto it = std::find_if(Components.begin(), Components.end(), [&componentID](const ComponentKey& key)->bool
 			{
 				return key.ComponentID == componentID;
