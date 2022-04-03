@@ -13,7 +13,7 @@ namespace ECS
 	};
 
 	template<typename Type>
-	concept IsDerivedComponent = std::is_base_of_v<Type, class Component>;
+	concept IsDerivedComponent = std::is_base_of_v<class Component, Type>;
 
 	template<IsDerivedComponent DerivedComponent>
 	class Component : public IComponent
