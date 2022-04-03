@@ -10,6 +10,8 @@
 #include "Component/Component.h"
 #include "SystemManager/SystemManager.h"
 
+#include <chrono>
+
 __forceinline float RandomFloat(float min, float max)
 {
 	return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
@@ -62,7 +64,7 @@ public:
 
 		for (const Entity& entity : Entities)
 		{
-			if ((pEntityManager->GetSignatureUnsafe(entity) & flags) != 0)
+			if ((pEntityManager->GetEntitySignatureSafe(entity) & flags) != 0)
 			{
 				RigidBodyComponent* const rigidBody = pComponentManager->GetComponent<RigidBodyComponent>(entity);
 				TransformComponent* const transform = pComponentManager->GetComponent<TransformComponent>(entity);
@@ -85,14 +87,16 @@ int main(int*, char* [])
 {
 	using namespace ECS;
 
-	// constexpr int Iterations{ 1'000'000 };
-	constexpr int Iterations{ 1 };
+	constexpr int Iterations{ ECS::MaxEntities };
 
 	EntityManager* pEntityManager{ new EntityManager{} };
 	ComponentManager* pComponentManager{ new ComponentManager{} };
 	SystemManager* pSystemManager{ new SystemManager{} };
 
 	GravitySystem* pSystem{ pSystemManager->AddSystem<GravitySystem>() };
+
+	pSystem->pEntityManager = pEntityManager;
+	pSystem->pComponentManager = pComponentManager;
 
 	for (int i{}; i < Iterations; ++i)
 	{
@@ -102,9 +106,9 @@ int main(int*, char* [])
 		pComponentManager->AddComponent<RigidBodyComponent>(entity, new RigidBodyComponent{});
 		pComponentManager->AddComponent<GravityComponent>(entity, new GravityComponent{});
 
-		pEntityManager->SetSignatureUnsafe(entity, TransformComponent::GetComponentID());
-		pEntityManager->SetSignatureUnsafe(entity, RigidBodyComponent::GetComponentID());
-		pEntityManager->SetSignatureUnsafe(entity, GravityComponent::GetComponentID());
+		pEntityManager->SetSignatureSafe(entity, TransformComponent::GetComponentID());
+		pEntityManager->SetSignatureSafe(entity, RigidBodyComponent::GetComponentID());
+		pEntityManager->SetSignatureSafe(entity, GravityComponent::GetComponentID());
 
 		pSystem->AddEntity(entity);
 	}

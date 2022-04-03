@@ -14,7 +14,7 @@ namespace ECS
 		Entity CreateEntity() noexcept;
 		void DestroyEntity(const Entity id) noexcept;
 
-		void SetSignatureSafe(const Entity id, const EntitySignature& signature);
+		void SetSignatureSafe(const Entity id, const ComponentType& signature);
 		const EntitySignature& GetEntitySignatureSafe(const Entity id) noexcept;
 
 		__forceinline auto SetSignatureUnsafe(const Entity id, const EntitySignature& signature) noexcept { EntitySignatures[id] = signature; }
