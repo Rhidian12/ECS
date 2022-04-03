@@ -141,6 +141,9 @@
   <ItemGroup>
     <ClCompile Include="ECS.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ECSConstants.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
