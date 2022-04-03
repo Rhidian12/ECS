@@ -14,10 +14,10 @@ namespace ECS
 	public:
 		~SystemManager();
 
-		template<IsDerivedSystem DerivedSystem>
+		template<typename DerivedSystem>
 		DerivedSystem* const AddSystem() noexcept;
 
-		template<IsDerivedSystem DerivedSystem>
+		template<typename DerivedSystem>
 		DerivedSystem* const GetSystem(const SystemID systemID) noexcept;
 
 		void Update() noexcept;
@@ -40,7 +40,7 @@ namespace ECS
 		void ExecuteSystems(std::index_sequence<Indices...>);
 	};
 
-	template<IsDerivedSystem DerivedSystem>
+	template<typename DerivedSystem>
 	DerivedSystem* const SystemManager::AddSystem() noexcept
 	{
 		auto cIt{ std::find_if(Systems.cbegin(), Systems.cend(), [](const SystemInfo& sInfo)
@@ -56,7 +56,7 @@ namespace ECS
 		}
 	}
 
-	template<IsDerivedSystem DerivedSystem>
+	template<typename DerivedSystem>
 	DerivedSystem* const SystemManager::GetSystem(const SystemID systemID) noexcept
 	{
 		auto cIt{ std::find_if(Systems.cbegin(), Systems.cend(), [&systemID](const SystemInfo& sInfo)
@@ -81,8 +81,6 @@ namespace ECS
 	template<size_t ...Indices>
 	void SystemManager::ExecuteSystems(std::index_sequence<Indices...>)
 	{
-		//static_cast<typelist::tlist_type_at<Indices..., SystemTypes>::type*>(Systems.at(Indices...).pSystem)->UpdateSystem();
-
 		(ExecuteSystems<Indices>(), ...);
 	}
 }
