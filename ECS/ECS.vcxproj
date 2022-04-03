@@ -148,6 +148,7 @@
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
+    <ClCompile Include="GOComponent.cpp" />
     <ClCompile Include="SystemManager\SystemManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="ECSConstants.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
     <ClInclude Include="GameObject\GameObject.h" />
+    <ClInclude Include="GOComponent\GOComponent.h" />
     <ClInclude Include="SystemManager\SystemManager.h" />
     <ClInclude Include="TypeList\TypeList.h" />
     <ClInclude Include="System\System.h" />
