@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector> /* std::vector */
+#include <typeinfo>
 
 namespace GO
 {
