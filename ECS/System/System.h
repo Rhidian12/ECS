@@ -1,5 +1,6 @@
 #pragma once
 #include "../ECSConstants.h"
+#include "../ComponentTypeCounter/ComponentTypeCounter.h"
 
 #include <concepts> /* Concepts */
 #include <unordered_set> /* std::unordered_set */
@@ -33,4 +34,16 @@ namespace ECS
 
 		std::unordered_set<Entity> Entities;
 	};
+
+	template<IsDerivedSystem DerivedSystem>
+	void System<DerivedSystem>::AddEntity(const Entity id) noexcept
+	{
+		Entities.insert(id);
+	}
+
+	template<IsDerivedSystem DerivedSystem>
+	inline void System<DerivedSystem>::RemoveEntity(const Entity id) noexcept
+	{
+		Entities.erase(id);
+	}
 }

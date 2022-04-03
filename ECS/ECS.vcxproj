@@ -148,7 +148,6 @@
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
     <ClCompile Include="SystemManager\SystemManager.cpp" />
-    <ClCompile Include="System\System.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ComponentTypeCounter\ComponentTypeCounter.h" />
