@@ -26,7 +26,7 @@ namespace ECS
 
 		virtual void UpdateSystem() = 0; /* This function will never be called from a System*, it just enforces inheritance */
 
-		__forceinline auto GetSystemID() const noexcept { return SystemID; }
+		static __forceinline auto GetSystemID() const noexcept { return SystemID; }
 
 	protected:
 		inline static const SystemID SystemID{ FamilyTypeID<ISystem>::Get<DerivedSystem>() };
