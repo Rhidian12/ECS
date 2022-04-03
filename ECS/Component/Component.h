@@ -1,9 +1,22 @@
 #pragma once
 #include "../ECSConstants.h"
+#include "../ComponentTypeCounter/ComponentTypeCounter.h"
+
+#include <concepts> /* Concepts */
 
 namespace ECS
 {
-	class Component
+	class IComponent
+	{
+	public:
+		virtual ~IComponent() = default;
+	};
+
+	template<typename Type>
+	concept IsDerivedComponent = std::is_base_of_v<Type, class Component>;
+
+	template<IsDerivedComponent DerivedComponent>
+	class Component : public IComponent
 	{
 	public:
 		virtual ~Component() = default;
@@ -11,7 +24,6 @@ namespace ECS
 		__forceinline auto GetComponentID() const noexcept { return ComponentID; }
 
 	protected:
-		/* we need a way to differentiate components from one another, and I refuse to use typeid() [cus it's fucking cringe] */
-		ComponentType ComponentID;
+		const ComponentType ComponentID{ FamilyTypeID<IComponent>::Get<DerivedComponent>() };
 	};
 }
