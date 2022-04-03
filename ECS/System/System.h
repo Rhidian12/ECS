@@ -29,7 +29,7 @@ namespace ECS
 		static __forceinline auto GetSystemID() noexcept { return SystemID; }
 
 	protected:
-		inline static const SystemID SystemID{ FamilyTypeID<ISystem>::Get<DerivedSystem>() };
+		inline static const SystemID SystemID{ ComponentTypeCounter<ISystem>::Get<DerivedSystem>() };
 
 		std::unordered_set<Entity> Entities;
 	};
