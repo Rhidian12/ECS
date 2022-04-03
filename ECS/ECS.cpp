@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <numeric>
 #include <vector>
+#include <string>
 
 __forceinline float RandomFloat(float min, float max)
 {
@@ -137,7 +138,8 @@ int main(int*, char* [])
 	using namespace ECS;
 	using namespace GO;
 
-	constexpr int Iterations{ ECS::MaxEntities };
+	constexpr int AmountOfEntities{ 10000 };
+	constexpr int Iterations{ 100 };
 
 	EntityManager* pEntityManager{ new EntityManager{} };
 	ComponentManager* pComponentManager{ new ComponentManager{} };
@@ -153,7 +155,7 @@ int main(int*, char* [])
 	std::deque<long long> ECSTimes{};
 	std::deque<long long> GOTimes{};
 
-	for (int i{}; i < Iterations; ++i)
+	for (int i{}; i < AmountOfEntities; ++i)
 	{
 		Entity entity{ pEntityManager->CreateEntity() };
 
@@ -176,28 +178,27 @@ int main(int*, char* [])
 		GameObjects.push_back(pG);
 	}
 
+	std::chrono::steady_clock::time_point t1{};
+	std::chrono::steady_clock::time_point t2{};
 
 	for (int i{}; i < Iterations; ++i)
 	{
-		std::chrono::steady_clock::time_point t1{ std::chrono::steady_clock::now() };
+		t1 = std::chrono::steady_clock::now();
 
 		pSystem->UpdateSystem();
 
-		std::chrono::steady_clock::time_point t2{ std::chrono::steady_clock::now() };
+		t2 = std::chrono::steady_clock::now();
 
 		ECSTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
-	}
 
-	for (int i{}; i < Iterations; ++i)
-	{
-		std::chrono::steady_clock::time_point t1{ std::chrono::steady_clock::now() };
+		t1 = std::chrono::steady_clock::now();
 
 		for (GameObject* const pG : GameObjects)
 		{
 			pG->Update();
 		}
 
-		std::chrono::steady_clock::time_point t2{ std::chrono::steady_clock::now() };
+		t2 = std::chrono::steady_clock::now();
 
 		GOTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 	}
@@ -214,8 +215,8 @@ int main(int*, char* [])
 		GOTimes.pop_front();
 	}
 
-	std::cout << "ECS Average: " << std::accumulate(ECSTimes.begin(), ECSTimes.end(), 0.f) << "\n";
-	std::cout << "GO Average: " << std::accumulate(GOTimes.begin(), GOTimes.end(), 0.f) << "\n";
+	std::cout << "ECS Average: " << std::to_string(std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0)) << " nanoseconds\n";
+	std::cout << "GO Average: " << std::to_string(std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0)) << " nanoseconds\n";
 
 	delete pEntityManager;
 	delete pComponentManager;
