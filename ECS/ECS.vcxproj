@@ -143,7 +143,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ComponentTypeCounter\ComponentTypeCounter.cpp" />
     <ClCompile Include="Component\Component.cpp" />
     <ClCompile Include="ComponentManager\ComponentManager.cpp" />
     <ClCompile Include="ECS.cpp" />
