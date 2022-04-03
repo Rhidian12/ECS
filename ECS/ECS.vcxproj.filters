@@ -44,5 +44,8 @@
     <ClInclude Include="ComponentTypeCounter\ComponentTypeCounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="System\System.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -154,6 +154,7 @@
     <ClInclude Include="ComponentManager\ComponentManager.h" />
     <ClInclude Include="ECSConstants.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="System\System.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
