@@ -13,10 +13,7 @@ namespace ECS
 		virtual ~ISystem() = default;
 	};
 
-	template<typename Type>
-	concept IsDerivedSystem = std::is_base_of_v<class System, Type>;
-
-	template<IsDerivedSystem DerivedSystem>
+	template<typename DerivedSystem>
 	class System
 	{
 	public:
@@ -35,13 +32,13 @@ namespace ECS
 		std::unordered_set<Entity> Entities;
 	};
 
-	template<IsDerivedSystem DerivedSystem>
+	template<typename DerivedSystem>
 	void System<DerivedSystem>::AddEntity(const Entity id) noexcept
 	{
 		Entities.insert(id);
 	}
 
-	template<IsDerivedSystem DerivedSystem>
+	template<typename DerivedSystem>
 	inline void System<DerivedSystem>::RemoveEntity(const Entity id) noexcept
 	{
 		Entities.erase(id);

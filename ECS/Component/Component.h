@@ -12,10 +12,7 @@ namespace ECS
 		virtual ~IComponent() = default;
 	};
 
-	template<typename Type>
-	concept IsDerivedComponent = std::is_base_of_v<class Component, Type>;
-
-	template<IsDerivedComponent DerivedComponent>
+	template<typename DerivedComponent>
 	class Component : public IComponent
 	{
 	public:
