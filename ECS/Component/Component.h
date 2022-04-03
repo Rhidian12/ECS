@@ -21,7 +21,7 @@ namespace ECS
 	public:
 		virtual ~Component() = default;
 
-		static __forceinline auto GetComponentID() const noexcept { return ComponentID; }
+		static __forceinline auto GetComponentID() noexcept { return ComponentID; }
 
 	protected:
 		inline static const ComponentType ComponentID{ FamilyTypeID<IComponent>::Get<DerivedComponent>() };
