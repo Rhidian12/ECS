@@ -72,19 +72,19 @@ namespace ECS
 	}
 
 	template<typename Type>
-	inline Type* ComponentManager::GetComponent(const Entity id, const ComponentType componentID) const noexcept
+	Type* ComponentManager::GetComponent(const Entity id, const ComponentType componentID) const noexcept
 	{
-		auto it{ std::find_if(Components.begin(), Components.end(), [&componentID](const ComponentKey& key)->bool
+		auto it = std::find_if(Components.begin(), Components.end(), [&componentID](const ComponentKey& key)->bool
 			{
 				return key.ComponentID == componentID;
-			}) };
+			});
 
 		if (it != Components.end())
 		{
-			auto componentKeyCIt{ std::find_if(it->ComponentsData.cbegin(), it->ComponentsData.cend(),[&id](const ComponentData& cData)->
+			auto componentKeyCIt = std::find_if(it->ComponentsData.cbegin(), it->ComponentsData.cend(),[&id](const ComponentData& cData)->bool
 			{
 				return id == cData.EntityID;
-			})};
+			});
 
 			if (componentKeyCIt != it->ComponentsData.cend())
 			{
