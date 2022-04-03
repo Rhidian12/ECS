@@ -59,7 +59,7 @@ namespace ECS
 
 			using SystemTypes = typelist::tlist_push_back<DerivedSystem, SystemTypes>::type;
 
-			return Systems.back();
+			return static_cast<DerivedSystem*>(Systems.back().pSystem);
 		}
 
 		return nullptr;
