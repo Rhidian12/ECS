@@ -143,12 +143,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ComponentTypeCounter\ComponentTypeCounter.cpp" />
     <ClCompile Include="Component\Component.cpp" />
     <ClCompile Include="ComponentManager\ComponentManager.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="EntityManager\EntityManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ComponentTypeCounter\ComponentTypeCounter.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="ComponentManager\ComponentManager.h" />
     <ClInclude Include="ECSConstants.h" />
