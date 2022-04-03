@@ -1,4 +1,5 @@
 #include "GameObject.h"
+#include "../GOComponent/GOComponent.h"
 
 GO::GameObject::~GameObject()
 {
@@ -16,8 +17,8 @@ void GO::GameObject::AddComponent(Component* pComponent)
 
 void GO::GameObject::Update()
 {
-	for (Component* const pComponent : Component)
+	for (Component* const pComponent : Components)
 	{
-
+		pComponent->Update();
 	}
 }
