@@ -56,5 +56,8 @@
     <ClInclude Include="SystemManager\SystemManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TypeList\TypeList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
