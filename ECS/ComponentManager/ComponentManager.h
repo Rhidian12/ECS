@@ -74,9 +74,7 @@ namespace ECS
 		{
 			return static_cast<Type*>(key.Components[id]);
 		}
-		else
-		{
-			return nullptr;
-		}
+
+		return nullptr;
 	}
 }

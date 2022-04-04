@@ -2,8 +2,7 @@
 #include "../ECSConstants.h"
 #include "../TypeCounter/TypeCounter.h"
 
-#include <concepts> /* Concepts */
-#include <unordered_set> /* std::unordered_set */
+#include <array> /* std::array */
 
 namespace ECS
 {
@@ -17,30 +16,39 @@ namespace ECS
 	class System : public ISystem
 	{
 	public:
+		System();
 		virtual ~System() = default;
 
 		void AddEntity(const Entity id) noexcept;
 		void RemoveEntity(const Entity id) noexcept;
-
-		//virtual void UpdateSystem() = 0; /* This function will never be called from a System*, it just enforces inheritance */
 
 		static __forceinline auto GetSystemID() noexcept { return SystemID; }
 
 	protected:
 		inline static const SystemID SystemID{ TypeCounter<ISystem>::Get<DerivedSystem>() };
 
-		std::unordered_set<Entity> Entities;
+		std::array<Entity, MaxEntities> Entities;
 	};
+
+	template<typename DerivedSystem>
+	System<DerivedSystem>::System()
+		: Entities{}
+	{
+		for (Entity& entity : Entities)
+		{
+			entity = InvalidEntityID;
+		}
+	}
 
 	template<typename DerivedSystem>
 	void System<DerivedSystem>::AddEntity(const Entity id) noexcept
 	{
-		Entities.insert(id);
+		Entities[id] = id;
 	}
 
 	template<typename DerivedSystem>
 	inline void System<DerivedSystem>::RemoveEntity(const Entity id) noexcept
 	{
-		Entities.erase(id);
+		Entities[id] = InvalidEntityID;
 	}
 }
