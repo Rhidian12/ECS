@@ -70,6 +70,8 @@ namespace ECS
 		else /* This type of component has not been added yet, so add it */
 		{
 			Components[componentID].ComponentID = componentID;
+			Components[componentID].Components.reserve(MaxEntities);
+			Components[componentID].Components.resize(MaxEntities);
 			Components[componentID].Components[id] = pComponent;
 		}
 	}
