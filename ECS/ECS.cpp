@@ -72,7 +72,7 @@ public:
 
 		for (const Entity& entity : Entities)
 		{
-			if ((pEntityManager->GetEntitySignatureSafe(entity) & flags) != 0)
+			if (pEntityManager->GetEntitySignatureSafe(entity) == flags)
 			{
 				RigidBodyComponent* const rigidBody = pComponentManager->GetComponent<RigidBodyComponent>(entity);
 				TransformComponent* const transform = pComponentManager->GetComponent<TransformComponent>(entity);
@@ -138,8 +138,8 @@ int main(int*, char* [])
 	using namespace ECS;
 	using namespace GO;
 
-	constexpr int AmountOfEntities{ 10000 };
-	constexpr int Iterations{ 100 };
+	constexpr Entity AmountOfEntities{ MaxEntities };
+	constexpr int Iterations{ 1'000 };
 
 	EntityManager* pEntityManager{ new EntityManager{} };
 	ComponentManager* pComponentManager{ new ComponentManager{} };
@@ -215,8 +215,8 @@ int main(int*, char* [])
 		GOTimes.pop_front();
 	}
 
-	std::cout << "ECS Average: " << std::to_string(std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0)) << " nanoseconds\n";
-	std::cout << "GO Average: " << std::to_string(std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0)) << " nanoseconds\n";
+	std::cout << "ECS Average:\t\t" << std::to_string(std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0)) << " nanoseconds\n";
+	std::cout << "GO Average:\t\t" << std::to_string(std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0)) << " nanoseconds\n";
 
 	delete pEntityManager;
 	delete pComponentManager;
