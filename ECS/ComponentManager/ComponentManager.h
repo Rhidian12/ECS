@@ -10,22 +10,24 @@ namespace ECS
 	class ComponentManager final
 	{
 	public:
+		ComponentManager();
+
 		template<typename Type>
 		void AddComponent(const Entity id, IComponent* const pComponent) noexcept;
 
-		template<typename Type>	
+		template<typename Type>
 		Type* GetComponent(const Entity id) const noexcept;
 
 	private:
 		struct ComponentData
 		{
-			Entity EntityID;
 			IComponent* pComponent;
+			Entity EntityID{ InvalidEntityID };
 		};
 		struct ComponentKey final
 		{
-			ComponentType ComponentID;
-			std::vector<ComponentData> ComponentsData;
+			ComponentType ComponentID{ InvalidComponentID }; /* Make sure this is default init to an invalid ComponentType */
+			std::vector<IComponent*> Components;
 		};
 
 		/* http://scottmeyers.blogspot.com/2015/09/should-you-be-using-something-instead.html */
@@ -49,48 +51,40 @@ namespace ECS
 		/* At the moment I'll make a base class for Components and store pointers to those*/
 	};
 
+
 	template<typename Type>
 	void ComponentManager::AddComponent(const Entity id, IComponent* const pComponent) noexcept
 	{
+		if (id == InvalidEntityID)
+			return;
+
 		Component<Type>* const pCastComponent{ static_cast<Component<Type>*>(pComponent) };
 		const ComponentType componentID{ pCastComponent->GetComponentID() };
+		ComponentKey& key{ Components[componentID] };
 
-		auto it{ std::find_if(Components.begin(), Components.end(), [&componentID](const ComponentKey& key)->bool
-			{
-				return key.ComponentID == componentID;
-			})};
-
-		/* This type of component has not been added yet, so add it */
-		if (it == Components.end())
+		/* This type of component has already been added, so add it to the vector */
+		if (key.ComponentID != InvalidComponentID)
 		{
-			Components.push_back(ComponentKey{ componentID, std::vector<ComponentData>{ { id, pComponent } } });
+			key.Components[id] = pComponent;
 		}
-		else /* This type of component has already been added, so add it to the vector */
+		else /* This type of component has not been added yet, so add it */
 		{
-			it->ComponentsData.push_back({ id, pComponent });
+			Components[componentID] = ComponentKey{ componentID, std::vector<IComponent*>{ pComponent } };
 		}
 	}
 
 	template<typename Type>
 	Type* ComponentManager::GetComponent(const Entity id) const noexcept
 	{
+		if (id == InvalidEntityID)
+			return nullptr;
+
 		const auto componentID{ Type::GetComponentID() };
-		auto it = std::find_if(Components.begin(), Components.end(), [&componentID](const ComponentKey& key)->bool
-			{
-				return key.ComponentID == componentID;
-			});
+		const ComponentKey& key{ Components[componentID] };
 
-		if (it != Components.end())
+		if (key.ComponentID != InvalidComponentID)
 		{
-			auto componentKeyCIt = std::find_if(it->ComponentsData.cbegin(), it->ComponentsData.cend(),[&id](const ComponentData& cData)->bool
-			{
-				return id == cData.EntityID;
-			});
-
-			if (componentKeyCIt != it->ComponentsData.cend())
-			{
-				return static_cast<Type*>(componentKeyCIt->pComponent);
-			}
+			return static_cast<Type*>(Components[componentID].Components[id]);
 		}
 
 		return nullptr;
