@@ -1,6 +1,6 @@
 # ECS
 
-### Introduction
+## Introduction
 An Entity-Component-System (ECS) is an alternative way of storing information regarding Components and Entities.
 The traditional approach is to have a `GameObject` that has a list of `Component`, in which the `GameObject` acts as a wrapper around the `Component` list and manages all of them. This is a very good approach, but has some drawbacks:
 - There are a lot of virtual function calls present, since the `GameObject` (usually) has a pointer to a base `Component` class, on which it calls an `Update` function for example.
@@ -79,7 +79,9 @@ This means that whenever data is requested from memory, the cache will grab not 
 The way we can follow this Data Oriented Design and pay heed to the Locality of Reference is by making sure that all of our data is stored contiguously in memory.
 For those who are unaware of what contiguous storage means: `std::vector`, the standard C-array (`int[]`) and many other containers use contiguous storage, which means that they store all of their data directly next to each other in memory.
 
-### Implementation
+## Implementation
+
+### Components
 
 This ECS uses a `ComponentManager` to store all Components and their Component ID's. Each Component has a unique ID which the ComponentManager uses to distinguish between different Components. <br>
 The way Components have different ID's is by using a combination of static variables and templating. <br>
@@ -135,4 +137,31 @@ namespace ECS
 }
 ```
 
-The `ComponentManager` itself has a `std::vector` of Components
+The `ComponentManager` itself has a `std::vector` of `ComponentKey`, a struct which holds a Component ID and a list of `IComponent*`. <br>
+When a new Component gets added to the ComponentManager, it is placed in the list at the index of its ComponentID. This makes it very easy to access Components via `GetComponent`, since all that is required is the ComponentID, and an EntityID. The ComponentID is always available, since it is a static function, which allows me to easily use `Type::GetComponentID()`, which works, as long as `Type` is a class that is derived from `Component`.<br>
+A possible safety check for this is using SFINAE, in the form of `std::enable_if_t<std::is_base_of_v<Component, Type>>`.
+
+```cpp
+template<typename Type>
+Type* ComponentManager::GetComponent(const Entity id) const noexcept
+{
+  if (id == InvalidEntityID)
+    return nullptr;
+
+  const auto componentID{ Type::GetComponentID() };
+  const ComponentKey& key{ Components[componentID] };
+
+  if (key.ComponentID != InvalidComponentID)
+  {
+    return static_cast<Type*>(Components[componentID].Components[id]);
+  }
+  else
+  {
+    return nullptr;
+  }
+}
+  ```
+
+### Entities
+
+Entities are managed by the `EntityManager`
