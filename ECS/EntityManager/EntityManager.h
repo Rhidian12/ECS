@@ -2,7 +2,7 @@
 #include "../ECSConstants.h"
 
 #include <queue> /* std::queue */
-#include <array> /* std::array  */
+#include <array> /* std::array */
 
 namespace ECS
 {
