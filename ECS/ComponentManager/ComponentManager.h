@@ -57,8 +57,7 @@ namespace ECS
 		if (id == InvalidEntityID)
 			return;
 
-		Component<Type>* const pCastComponent{ static_cast<Component<Type>*>(pComponent) };
-		const ComponentType componentID{ pCastComponent->GetComponentID() };
+		const ComponentType componentID{ Type::GetComponentID() };
 		ComponentKey& key{ Components[componentID] };
 
 		/* This type of component has already been added, so add it to the vector */
