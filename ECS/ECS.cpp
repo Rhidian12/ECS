@@ -63,13 +63,6 @@ public:
 	{
 		using namespace ECS;
 
-		if (flags.none())
-		{
-			flags.set(TransformComponent::GetComponentID());
-			flags.set(GravityComponent::GetComponentID());
-			flags.set(RigidBodyComponent::GetComponentID());
-		}
-
 		for (const Entity& entity : Entities)
 		{
 			if (pEntityManager->GetEntitySignatureSafe(entity) == flags)
@@ -150,7 +143,10 @@ int main(int*, char* [])
 
 	pSystem->pEntityManager = pEntityManager;
 	pSystem->pComponentManager = pComponentManager;
-
+	pSystem->flags.set(TransformComponent::GetComponentID());
+	pSystem->flags.set(GravityComponent::GetComponentID());
+	pSystem->flags.set(RigidBodyComponent::GetComponentID());
+	
 	std::vector<GameObject*> GameObjects;
 
 	std::deque<long long> ECSTimes{};
