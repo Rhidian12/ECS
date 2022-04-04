@@ -164,4 +164,128 @@ Type* ComponentManager::GetComponent(const Entity id) const noexcept
 
 ### Entities
 
-Entities are managed by the `EntityManager`
+Entities are managed by the `EntityManager`, which holds a list of all possible Entities in existence, whether they're being used or not. It also allows the user to create and destroy entities, by reassigning Entity ID's. I used a `std::queue` to hold all possible Entity ID's, since it allows for easy pushing and popping of ID's.
+
+```cpp
+#pragma once
+#include "../ECSConstants.h"
+
+#include <queue> /* std::queue */
+#include <array> /* std::array */
+
+namespace ECS
+{
+  class EntityManager final
+  {
+  public:
+    EntityManager();
+
+    Entity CreateEntity() noexcept;
+    void DestroyEntity(const Entity id) noexcept;
+
+    void SetSignatureSafe(const Entity id, const ComponentType& signature) noexcept;
+    const EntitySignature& GetEntitySignatureSafe(const Entity id) noexcept;
+
+    __forceinline auto SetSignatureUnsafe(const Entity id, const EntitySignature& signature) noexcept { EntitySignatures[id] = signature; }
+    __forceinline auto GetSignatureUnsafe(const Entity id) const noexcept { return EntitySignatures[id]; }
+
+  private:
+    std::queue<Entity> AvailableEntityIDs;
+    std::array<EntitySignature, MaxEntities> EntitySignatures;
+  };
+}
+```
+
+### Systems
+
+The Systems are managed by the `SystemManager`. It manages the lifetime of all the Systems, creates them, and also executes them for ease-of-use. <br>
+The systems themselves are almost identical to the Components. They have a list of Entities and a static templated SystemID.
+
+```cpp
+#pragma once
+#include "../ECSConstants.h"
+#include "../TypeCounter/TypeCounter.h"
+
+#include <array> /* std::array */
+
+namespace ECS
+{
+  class ISystem
+  {
+  public:
+    virtual ~ISystem() = default;
+  };
+
+  template<typename DerivedSystem>
+  class System : public ISystem
+  {
+  public:
+    System();
+    virtual ~System() = default;
+
+    void AddEntity(const Entity id) noexcept;
+    void RemoveEntity(const Entity id) noexcept;
+
+    static __forceinline auto GetSystemID() noexcept { return SystemID; }
+
+  protected:
+    inline static const SystemID SystemID{ TypeCounter<ISystem>::Get<DerivedSystem>() };
+
+    std::array<Entity, MaxEntities> Entities;
+  };
+}
+```
+
+```cpp
+#pragma once
+#include "../ECSConstants.h"
+#include "../System/System.h"
+
+#include "../TypeList/TypeList.h"
+
+#include <array> /* std::array */
+
+namespace ECS
+{
+  class SystemManager final
+  {
+  public:
+    ~SystemManager();
+
+    template<typename DerivedSystem>
+    DerivedSystem* const AddSystem() noexcept;
+
+    template<typename DerivedSystem>
+    DerivedSystem* const GetSystem() noexcept;
+
+    void Update() noexcept;
+
+  private:
+    struct SystemInfo final
+    {
+      SystemInfo()
+        : SystemID{ InvalidSystemID }
+        , pSystem{}
+      {}
+
+      SystemInfo(const SystemID& id, ISystem* _pSystem)
+        : SystemID{ id }
+        , pSystem{ _pSystem }
+      {}
+
+      SystemID SystemID;
+      ISystem* pSystem;
+    };
+
+    std::array<SystemInfo, MaxSystems> Systems;
+
+    using SystemTypes = typelist::tlist<>;
+
+    template<size_t Index>
+    void ExecuteSystems();
+
+    template<size_t ... Indices>
+    void ExecuteSystems(std::index_sequence<Indices...>);
+  };
+}
+```
