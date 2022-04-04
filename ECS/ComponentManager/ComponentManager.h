@@ -3,7 +3,6 @@
 #include "../Component/Component.h"
 
 #include <vector> /* std::vector */
-#include <algorithm> /* std::find, std::find_if, ... */
 
 namespace ECS
 {
@@ -89,7 +88,9 @@ namespace ECS
 		{
 			return static_cast<Type*>(Components[componentID].Components[id]);
 		}
-
-		return nullptr;
+		else
+		{
+			return nullptr;
+		}
 	}
 }
