@@ -2,8 +2,6 @@
 #include "../ECSConstants.h"
 #include "../ComponentTypeCounter/ComponentTypeCounter.h"
 
-#include <concepts> /* Concepts */
-
 namespace ECS
 {
 	class IComponent
