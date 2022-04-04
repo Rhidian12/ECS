@@ -53,7 +53,7 @@ class RigidBodyComponent final : public ECS::Component<RigidBodyComponent>
 {
 public:
 	float Mass{ RandomFloat(0.f, 100.f) };
-	Point2f Velocity;
+	Point2f Velocity{};
 };
 
 class GravitySystem final : public ECS::System<GravitySystem>
@@ -87,8 +87,8 @@ public:
 	}
 
 	inline static std::bitset<ECS::MaxComponentTypes> flags{};
-	ECS::EntityManager* pEntityManager;
-	ECS::ComponentManager* pComponentManager;
+	ECS::EntityManager* pEntityManager{};
+	ECS::ComponentManager* pComponentManager{};
 };
 
 class GOGravityComponent final : public GO::Component
@@ -102,6 +102,7 @@ class GORigidBodyComponent final : public GO::Component
 public:
 	GORigidBodyComponent(GOGravityComponent* const pGravityComponent)
 		: pGravityComponent{ pGravityComponent }
+		, Velocity{}
 	{}
 
 	virtual void Update() override
