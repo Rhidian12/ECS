@@ -2,7 +2,7 @@
 #include "../ECSConstants.h"
 
 #include <queue> /* std::queue */
-#include <vector> /* std::vector */
+#include <array> /* std::array  */
 
 namespace ECS
 {
@@ -22,6 +22,6 @@ namespace ECS
 
 	private:
 		std::queue<Entity> AvailableEntityIDs;
-		std::vector<EntitySignature> EntitySignatures; /* Although this vector's size will be constant, we need dynamically allocated memory */
+		std::array<EntitySignature, MaxEntities> EntitySignatures;
 	};
 }

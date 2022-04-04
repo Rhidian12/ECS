@@ -10,9 +10,6 @@ namespace ECS
 		{
 			AvailableEntityIDs.push(id);
 		}
-
-		EntitySignatures.reserve(MaxEntities);
-		EntitySignatures.resize(MaxEntities);
 	}
 
 	Entity EntityManager::CreateEntity() noexcept
