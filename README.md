@@ -258,6 +258,7 @@ namespace ECS
     template<typename DerivedSystem>
     DerivedSystem* const GetSystem() noexcept;
 
+    template<typename ... Systems>
     void Update() noexcept;
 
   private:
@@ -279,13 +280,24 @@ namespace ECS
 
     std::array<SystemInfo, MaxSystems> Systems;
 
-    using SystemTypes = typelist::tlist<>;
+    template<typename ... Systems, size_t ... Indices>
+    void Update(std::index_sequence<Indices...>);
 
-    template<size_t Index>
-    void ExecuteSystems();
-
-    template<size_t ... Indices>
-    void ExecuteSystems(std::index_sequence<Indices...>);
+    template<typename System, size_t Index>
+    void Update();
   };
 }
 ```
+
+### Conclusion
+
+I compared the ECS I wrote to a traditional GameObject - Component system, and the ECS is slightly faster.
+The way I tested this is by creating ~ 65,000 entities (and Game Objects) that both do the same thing. They simulate some very simple physics using 3 different components (RigidBody, Transform and Gravity). <br>
+I then timed how long it took to run `System->Update()` vs. `for (GameObject* pG : GameObjects) { pG->Update(); }`. <br>
+These benchmarks can be found in the `ECS.cpp` file.
+
+Visual Studio 2022, standard Release build on x64, times:
+- GameObject - Component: On average:    180589800 nanoseconds
+- Entity-Component-System: On average:   162662500 nanoseconds
+
+The ECS is slightly faster, but does come with the drawback of using more memory, since it allocates a lot of arrays in their entirety.
