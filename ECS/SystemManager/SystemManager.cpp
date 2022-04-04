@@ -9,8 +9,6 @@ namespace ECS
 			delete info.pSystem;
 			info.pSystem = nullptr;
 		}
-
-		Systems.clear();
 	}
 
 	void SystemManager::Update() noexcept

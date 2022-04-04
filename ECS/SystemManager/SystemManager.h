@@ -4,8 +4,7 @@
 
 #include "../TypeList/TypeList.h"
 
-#include <vector> /* std::vector */
-#include <algorithm> /* std::find, std::find_if, ... */
+#include <array> /* std::array */
 
 namespace ECS
 {
@@ -18,13 +17,18 @@ namespace ECS
 		DerivedSystem* const AddSystem() noexcept;
 
 		template<typename DerivedSystem>
-		DerivedSystem* const GetSystem(const SystemID systemID) noexcept;
+		DerivedSystem* const GetSystem() noexcept;
 
 		void Update() noexcept;
 
 	private:
 		struct SystemInfo final
 		{
+			SystemInfo()
+				: SystemID{ InvalidSystemID }
+				, pSystem{}
+			{}
+
 			SystemInfo(const SystemID& id, ISystem* _pSystem)
 				: SystemID{ id }
 				, pSystem{ _pSystem }
@@ -34,7 +38,7 @@ namespace ECS
 			ISystem* pSystem;
 		};
 
-		std::vector<SystemInfo> Systems;
+		std::array<SystemInfo, MaxSystems> Systems;
 
 		using SystemTypes = typelist::tlist<>;
 
@@ -48,34 +52,40 @@ namespace ECS
 	template<typename DerivedSystem>
 	DerivedSystem* const SystemManager::AddSystem() noexcept
 	{
-		auto cIt{ std::find_if(Systems.cbegin(), Systems.cend(), [](const SystemInfo& sInfo)
-			{
-				return sInfo.SystemID == DerivedSystem::GetSystemID();
-			}) };
+		const SystemID systemID{ DerivedSystem::GetSystemID() };
+		SystemInfo& systemInfo{ Systems[systemID] };
 
-		if (cIt == Systems.cend())
+		if (systemInfo.SystemID == InvalidSystemID)
 		{
-			Systems.push_back({ DerivedSystem::GetSystemID(), new DerivedSystem{} });
-
-			using SystemTypes = typelist::tlist_push_back<DerivedSystem, SystemTypes>::type;
-
-			return static_cast<DerivedSystem*>(Systems.back().pSystem);
+			systemInfo.SystemID = systemID;
 		}
 
-		return nullptr;
+		/* Safety check to avoid memory leaks */
+		if (systemInfo.pSystem)
+		{
+			delete systemInfo.pSystem;
+			systemInfo.pSystem = nullptr;
+		}
+
+		systemInfo.pSystem = new DerivedSystem{};
+		using SystemTypes = typelist::tlist_push_back<DerivedSystem, SystemTypes>::type;
+
+		return static_cast<DerivedSystem*>(systemInfo.pSystem);
 	}
 
 	template<typename DerivedSystem>
-	DerivedSystem* const SystemManager::GetSystem(const SystemID systemID) noexcept
+	DerivedSystem* const SystemManager::GetSystem() noexcept
 	{
-		auto cIt{ std::find_if(Systems.cbegin(), Systems.cend(), [&systemID](const SystemInfo& sInfo)
-			{
-				return sInfo.SystemID == systemID;
-			}) };
+		const SystemID systemID{ DerivedSystem::GetSystemID() };
 
-		if (cIt != Systems.cend())
+		if (systemID == InvalidSystemID)
+			return nullptr;
+
+		const SystemInfo& systemInfo{ Systems[systemID] };
+
+		if (systemInfo.SystemID != InvalidSystemID)
 		{
-			return static_cast<DerivedSystem*>(cIt->pSystem);
+			return static_cast<DerivedSystem*>(systemInfo.pSystem);
 		}
 
 		return nullptr;
