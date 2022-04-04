@@ -10,10 +10,4 @@ namespace ECS
 			info.pSystem = nullptr;
 		}
 	}
-
-	void SystemManager::Update() noexcept
-	{
-		// constexpr size_t size{ SystemTypes::size() };
-		ExecuteSystems(std::make_index_sequence<SystemTypes::size()>{});
-	}
 }

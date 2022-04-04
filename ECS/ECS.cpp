@@ -182,7 +182,7 @@ int main(int*, char* [])
 	{
 		t1 = std::chrono::steady_clock::now();
 
-		pSystem->UpdateSystem();
+		pSystemManager->Update<GravitySystem>();
 
 		t2 = std::chrono::steady_clock::now();
 

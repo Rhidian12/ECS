@@ -2,8 +2,6 @@
 #include "../ECSConstants.h"
 #include "../System/System.h"
 
-#include "../TypeList/TypeList.h"
-
 #include <array> /* std::array */
 
 namespace ECS
@@ -19,6 +17,7 @@ namespace ECS
 		template<typename DerivedSystem>
 		DerivedSystem* const GetSystem() noexcept;
 
+		template<typename ... Systems>
 		void Update() noexcept;
 
 	private:
@@ -40,13 +39,11 @@ namespace ECS
 
 		std::array<SystemInfo, MaxSystems> Systems;
 
-		using SystemTypes = typelist::tlist<>;
+		template<typename ... Systems, size_t ... Indices>
+		void Update(std::index_sequence<Indices...>);
 
-		template<size_t Index>
-		void ExecuteSystems();
-
-		template<size_t ... Indices>
-		void ExecuteSystems(std::index_sequence<Indices...>);
+		template<typename System, size_t Index>
+		void Update();
 	};
 
 	template<typename DerivedSystem>
@@ -68,7 +65,6 @@ namespace ECS
 		}
 
 		systemInfo.pSystem = new DerivedSystem{};
-		using SystemTypes = typelist::tlist_push_back<DerivedSystem, SystemTypes>::type;
 
 		return static_cast<DerivedSystem*>(systemInfo.pSystem);
 	}
@@ -90,16 +86,22 @@ namespace ECS
 
 		return nullptr;
 	}
-
-	template<size_t Index>
-	void SystemManager::ExecuteSystems()
+	
+	template<typename ...Systems>
+	void SystemManager::Update() noexcept
 	{
-		static_cast<typelist::tlist_type_at<Index, SystemTypes>::type*>(Systems[Index].pSystem)->UpdateSystem();
+		Update<Systems...>(std::make_index_sequence<sizeof...(Systems)>{});
+	}
+	
+	template<typename ...Systems, size_t ...Indices>
+	void SystemManager::Update(std::index_sequence<Indices...>)
+	{
+		(Update<Systems, Indices>(), ...);
 	}
 
-	template<size_t ...Indices>
-	void SystemManager::ExecuteSystems(std::index_sequence<Indices...>)
+	template<typename System, size_t Index>
+	void SystemManager::Update()
 	{
-		(ExecuteSystems<Indices>(), ...);
+		static_cast<System*>(Systems[Index].pSystem)->UpdateSystem();
 	}
 }
