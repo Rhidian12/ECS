@@ -33,7 +33,7 @@ namespace ECS
 		AvailableEntityIDs.push(id);
 	}
 
-	void EntityManager::SetSignatureSafe(const Entity id, const ComponentType& signature)
+	void EntityManager::SetSignatureSafe(const Entity id, const ComponentType& signature) noexcept
 	{
 		assert(id < MaxEntities);
 
