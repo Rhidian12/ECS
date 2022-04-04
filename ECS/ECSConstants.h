@@ -11,10 +11,14 @@ namespace ECS
 	using SystemID = ComponentType; /* This supports as many systems as there are Components */
 
 // #undef max /* This always causes issues with anythin std::<>::max() related */
-	constexpr ComponentType MaxComponentTypes{ std::numeric_limits<ComponentType>::max() };
-	constexpr Entity MaxEntities{ std::numeric_limits<Entity>::max() };
+	constexpr Entity MaxEntities{ std::numeric_limits<Entity>::max() - 1 };
+	constexpr ComponentType MaxComponentTypes{ std::numeric_limits<ComponentType>::max() -1 };
 	constexpr SystemID MaxSystems{ MaxComponentTypes };
 // #define max(a,b) (((a) > (b)) ? (a) : (b))
 
 	using EntitySignature = std::bitset<MaxComponentTypes>;
+
+	constexpr Entity InvalidEntityID{ std::numeric_limits<Entity>::max() };
+	constexpr ComponentType InvalidComponentID{ std::numeric_limits<ComponentType>::max() };
+	constexpr SystemID InvalidSystemID{ InvalidComponentID };
 }
