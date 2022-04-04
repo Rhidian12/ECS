@@ -59,7 +59,7 @@ public:
 class GravitySystem final : public ECS::System<GravitySystem>
 {
 public:
-	virtual void UpdateSystem() override
+	void UpdateSystem()
 	{
 		using namespace ECS;
 
@@ -133,7 +133,7 @@ int main(int*, char* [])
 	using namespace GO;
 
 	constexpr Entity AmountOfEntities{ MaxEntities };
-	constexpr int Iterations{ 1'000 };
+	constexpr int Iterations{ 100 };
 
 	EntityManager* pEntityManager{ new EntityManager{} };
 	ComponentManager* pComponentManager{ new ComponentManager{} };

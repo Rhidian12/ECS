@@ -18,7 +18,7 @@ namespace ECS
 		const EntitySignature& GetEntitySignatureSafe(const Entity id) noexcept;
 
 		__forceinline auto SetSignatureUnsafe(const Entity id, const EntitySignature& signature) noexcept { EntitySignatures[id] = signature; }
-		__forceinline auto GetSignatureUnsafe(const Entity id) noexcept { return EntitySignatures[id]; }
+		__forceinline auto GetSignatureUnsafe(const Entity id) const noexcept { return EntitySignatures[id]; }
 
 	private:
 		std::queue<Entity> AvailableEntityIDs;

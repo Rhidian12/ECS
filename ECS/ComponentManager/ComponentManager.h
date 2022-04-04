@@ -2,15 +2,13 @@
 #include "../ECSConstants.h"
 #include "../Component/Component.h"
 
-#include <vector> /* std::vector */
+#include <array> /* std::array */
 
 namespace ECS
 {
 	class ComponentManager final
 	{
 	public:
-		ComponentManager();
-
 		template<typename Type>
 		void AddComponent(const Entity id, IComponent* const pComponent) noexcept;
 
@@ -21,12 +19,12 @@ namespace ECS
 		struct ComponentKey final
 		{
 			ComponentType ComponentID{ InvalidComponentID }; /* Make sure this is default init to an invalid ComponentType */
-			std::vector<IComponent*> Components;
+			std::array<IComponent*, MaxEntities> Components;
 		};
 
 		/* http://scottmeyers.blogspot.com/2015/09/should-you-be-using-something-instead.html */
 		/* Why I use a vector over a std::unordered_map */
-		std::vector<ComponentKey> Components;
+		std::array<ComponentKey, MaxComponentTypes> Components;
 
 		/* The Component Manager needs to know about ALL types of components */
 		/* The easy way is of course to just make a base Component and store a pointer to that */
@@ -55,18 +53,12 @@ namespace ECS
 		const ComponentType componentID{ Type::GetComponentID() };
 		ComponentKey& key{ Components[componentID] };
 
-		/* This type of component has already been added, so add it to the vector */
-		if (key.ComponentID != InvalidComponentID)
-		{
-			key.Components[id] = pComponent;
-		}
-		else /* This type of component has not been added yet, so add it */
+		if (key.ComponentID == InvalidComponentID)
 		{
 			Components[componentID].ComponentID = componentID;
-			Components[componentID].Components.reserve(MaxEntities);
-			Components[componentID].Components.resize(MaxEntities);
-			Components[componentID].Components[id] = pComponent;
 		}
+
+		key.Components[id] = pComponent;
 	}
 
 	template<typename Type>
@@ -80,7 +72,7 @@ namespace ECS
 
 		if (key.ComponentID != InvalidComponentID)
 		{
-			return static_cast<Type*>(Components[componentID].Components[id]);
+			return static_cast<Type*>(key.Components[id]);
 		}
 		else
 		{

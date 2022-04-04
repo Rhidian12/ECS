@@ -22,7 +22,7 @@ namespace ECS
 		void AddEntity(const Entity id) noexcept;
 		void RemoveEntity(const Entity id) noexcept;
 
-		virtual void UpdateSystem() = 0; /* This function will never be called from a System*, it just enforces inheritance */
+		//virtual void UpdateSystem() = 0; /* This function will never be called from a System*, it just enforces inheritance */
 
 		static __forceinline auto GetSystemID() noexcept { return SystemID; }
 
