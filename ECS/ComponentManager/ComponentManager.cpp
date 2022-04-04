@@ -9,8 +9,8 @@ namespace ECS
 
         for (ComponentKey& key : Components)
         {
-            key.Components.reserve(MaxComponentTypes);
-            key.Components.resize(MaxComponentTypes);
+            key.Components.reserve(MaxEntities);
+            key.Components.resize(MaxEntities);
         }
     }
 }
