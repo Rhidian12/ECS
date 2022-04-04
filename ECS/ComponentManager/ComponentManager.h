@@ -69,7 +69,8 @@ namespace ECS
 		}
 		else /* This type of component has not been added yet, so add it */
 		{
-			Components[componentID] = ComponentKey{ componentID, std::vector<IComponent*>{ pComponent } };
+			Components[componentID].ComponentID = componentID;
+			Components[componentID].Components[id] = pComponent;
 		}
 	}
 
