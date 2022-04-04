@@ -50,7 +50,7 @@
     <ClInclude Include="Component\Component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComponentTypeCounter\ComponentTypeCounter.h">
+    <ClInclude Include="TypeCounter\TypeCounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\System.h">

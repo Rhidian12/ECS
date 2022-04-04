@@ -1,6 +1,6 @@
 #pragma once
 #include "../ECSConstants.h"
-#include "../ComponentTypeCounter/ComponentTypeCounter.h"
+#include "../TypeCounter/TypeCounter.h"
 
 #include <concepts> /* Concepts */
 #include <unordered_set> /* std::unordered_set */
@@ -27,7 +27,7 @@ namespace ECS
 		static __forceinline auto GetSystemID() noexcept { return SystemID; }
 
 	protected:
-		inline static const SystemID SystemID{ ComponentTypeCounter<ISystem>::Get<DerivedSystem>() };
+		inline static const SystemID SystemID{ TypeCounter<ISystem>::Get<DerivedSystem>() };
 
 		std::unordered_set<Entity> Entities;
 	};

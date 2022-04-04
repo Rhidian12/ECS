@@ -152,7 +152,7 @@
     <ClCompile Include="SystemManager\SystemManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ComponentTypeCounter\ComponentTypeCounter.h" />
+    <ClInclude Include="TypeCounter\TypeCounter.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="ComponentManager\ComponentManager.h" />
     <ClInclude Include="ECSConstants.h" />

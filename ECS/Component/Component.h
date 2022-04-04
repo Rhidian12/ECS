@@ -1,6 +1,6 @@
 #pragma once
 #include "../ECSConstants.h"
-#include "../ComponentTypeCounter/ComponentTypeCounter.h"
+#include "../TypeCounter/TypeCounter.h"
 
 namespace ECS
 {
@@ -19,6 +19,6 @@ namespace ECS
 		static __forceinline auto GetComponentID() noexcept { return ComponentID; }
 
 	protected:
-		inline static const ComponentType ComponentID{ ComponentTypeCounter<IComponent>::Get<DerivedComponent>() };
+		inline static const ComponentType ComponentID{ TypeCounter<IComponent>::Get<DerivedComponent>() };
 	};
 }
