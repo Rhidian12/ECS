@@ -18,11 +18,6 @@ namespace ECS
 		Type* GetComponent(const Entity id) const noexcept;
 
 	private:
-		struct ComponentData
-		{
-			IComponent* pComponent;
-			Entity EntityID{ InvalidEntityID };
-		};
 		struct ComponentKey final
 		{
 			ComponentType ComponentID{ InvalidComponentID }; /* Make sure this is default init to an invalid ComponentType */
