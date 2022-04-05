@@ -67,8 +67,7 @@ namespace ECS
 		if (id == InvalidEntityID)
 			return nullptr;
 
-		const auto componentID{ Type::GetComponentID() };
-		const ComponentKey& key{ Components[componentID] };
+		const ComponentKey& key{ Components[Type::GetComponentID()] };
 
 		if (key.ComponentID != InvalidComponentID)
 		{
