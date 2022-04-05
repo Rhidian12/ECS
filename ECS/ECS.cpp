@@ -20,6 +20,8 @@
 #include <vector>
 #include <string>
 
+#include "entt/entt.hpp"
+
 __forceinline float RandomFloat(float min, float max)
 {
 	return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
@@ -127,6 +129,37 @@ public:
 	Point2f Scale{ Point2f::CreateRandomPoint2f(0.f, 3.f) };
 };
 
+struct ENTTGravity final
+{
+	float Gravity{ -981.f };
+};
+
+struct ENTTTransformComponent final
+{
+	Point2f Position{ Point2f::CreateRandomPoint2f(0.f, 1000.f) };
+	Point2f Rotation{ Point2f::CreateRandomPoint2f(0.f, 360.f) };
+	Point2f Scale{ Point2f::CreateRandomPoint2f(0.f, 3.f) };
+};
+
+struct ENTTRigidBodyComponent final
+{
+	float Mass{ RandomFloat(0.f, 100.f) };
+	Point2f Velocity{};
+};
+
+void ENTTUpdate(entt::registry& registry)
+{
+	auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent, ENTTTransformComponent>();
+
+	view.each([](const auto& gravity, auto& rigidBody, auto& transform)
+		{
+			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+
+			transform.Position.x += rigidBody.Velocity.x;
+			transform.Position.y += rigidBody.Velocity.y;
+		});
+}
+
 int main(int*, char* [])
 {
 	using namespace ECS;
@@ -149,8 +182,11 @@ int main(int*, char* [])
 	
 	std::vector<GameObject*> GameObjects;
 
+	entt::registry registry;
+
 	std::deque<long long> ECSTimes{};
 	std::deque<long long> GOTimes{};
+	std::deque<long long> enttTimes{};
 
 	for (int i{}; i < AmountOfEntities; ++i)
 	{
@@ -173,6 +209,11 @@ int main(int*, char* [])
 		pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
 
 		GameObjects.push_back(pG);
+
+		const auto enttEntity{ registry.create() };
+		registry.emplace<ENTTGravity>(enttEntity);
+		registry.emplace<ENTTTransformComponent>(enttEntity);
+		registry.emplace<ENTTRigidBodyComponent>(enttEntity);
 	}
 
 	std::chrono::steady_clock::time_point t1{};
@@ -198,6 +239,14 @@ int main(int*, char* [])
 		t2 = std::chrono::steady_clock::now();
 
 		GOTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
+
+		t1 = std::chrono::steady_clock::now();
+
+		ENTTUpdate(registry);
+
+		t2 = std::chrono::steady_clock::now();
+
+		enttTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 	}
 
 	std::sort(ECSTimes.begin(), ECSTimes.end());
@@ -210,10 +259,14 @@ int main(int*, char* [])
 
 		GOTimes.pop_back();
 		GOTimes.pop_front();
+
+		enttTimes.pop_back();
+		enttTimes.pop_front();
 	}
 
 	std::cout << "ECS Average:\t\t" << std::to_string(std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0)) << " nanoseconds\n";
 	std::cout << "GO Average:\t\t" << std::to_string(std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0)) << " nanoseconds\n";
+	std::cout << "ENTT Average:\t\t" << std::to_string(std::accumulate(enttTimes.cbegin(), enttTimes.cend(), (long long)0)) << " nanoseconds\n";
 
 	delete pEntityManager;
 	delete pComponentManager;
