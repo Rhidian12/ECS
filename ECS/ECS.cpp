@@ -5,10 +5,7 @@
 #include <iostream>
 
 #include "System/System.h"
-#include "EntityManager/EntityManager.h"
-#include "ComponentManager/ComponentManager.h"
 #include "Component/Component.h"
-#include "SystemManager/SystemManager.h"
 
 #include "GOComponent/GOComponent.h"
 #include "GameObject/GameObject.h"
