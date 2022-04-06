@@ -53,7 +53,7 @@ namespace ECS
 		};
 
 		std::vector<Entity> Entities;
-		std::array<ComponentInfo, MaxComponentTypes> Components;
+		std::vector<ComponentInfo> Components;
 	};
 	
 	template<typename Component>
@@ -62,6 +62,12 @@ namespace ECS
 		assert(entity != InvalidEntityID);
 
 		const ComponentType componentID{ Component::GetComponentID() };
+
+		if (static_cast<size_t>(componentID) >= Components.size())
+		{
+			Components.resize(Components.size() + componentID + 1);
+		}
+
 		ComponentInfo& key{ Components[componentID] };
 
 		if (key.ComponentID == InvalidComponentID)
