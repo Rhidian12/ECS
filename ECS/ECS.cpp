@@ -58,34 +58,6 @@ public:
 	Point2f Velocity{};
 };
 
-//class GravitySystem final : public ECS::System<GravitySystem>
-//{
-//public:
-//	void UpdateSystem()
-//	{
-//		using namespace ECS;
-//
-//		for (const Entity& entity : Entities)
-//		{
-//			if (pEntityManager->GetEntitySignatureSafe(entity) == flags)
-//			{
-//				RigidBodyComponent* const rigidBody = pComponentManager->GetComponent<RigidBodyComponent>(entity);
-//				TransformComponent* const transform = pComponentManager->GetComponent<TransformComponent>(entity);
-//				const GravityComponent* const gravity = pComponentManager->GetComponent<GravityComponent>(entity);
-//
-//				rigidBody->Velocity.y += gravity->Gravity * rigidBody->Mass;
-//
-//				transform->Position.x += rigidBody->Velocity.x;
-//				transform->Position.y += rigidBody->Velocity.y;
-//			}
-//		}
-//	}
-//
-//	inline static std::bitset<ECS::MaxComponentTypes> flags{};
-//	ECS::EntityManager* pEntityManager{};
-//	ECS::ComponentManager* pComponentManager{};
-//};
-
 class GOGravityComponent final : public GO::Component
 {
 public:
@@ -185,18 +157,6 @@ int main(int*, char* [])
 	constexpr Entity AmountOfEntities{ MaxEntities };
 	constexpr int Iterations{ 100 };
 
-	EntityManager* pEntityManager{ new EntityManager{} };
-	ComponentManager* pComponentManager{ new ComponentManager{} };
-	SystemManager* pSystemManager{ new SystemManager{} };
-
-	//GravitySystem* pSystem{ pSystemManager->AddSystem<GravitySystem>() };
-
-	// pSystem->pEntityManager = pEntityManager;
-	// pSystem->pComponentManager = pComponentManager;
-	// pSystem->flags.set(TransformComponent::GetComponentID());
-	// pSystem->flags.set(GravityComponent::GetComponentID());
-	// pSystem->flags.set(RigidBodyComponent::GetComponentID());
-
 	System gravitySystem{};
 
 	std::vector<GameObject*> GameObjects;
@@ -209,18 +169,6 @@ int main(int*, char* [])
 
 	for (int i{}; i < AmountOfEntities; ++i)
 	{
-		//Entity entity{ pEntityManager->CreateEntity() };
-
-		//pComponentManager->AddComponent<TransformComponent>(entity, new TransformComponent{});
-		//pComponentManager->AddComponent<RigidBodyComponent>(entity, new RigidBodyComponent{});
-		//pComponentManager->AddComponent<GravityComponent>(entity, new GravityComponent{});
-
-		//pEntityManager->SetSignatureSafe(entity, TransformComponent::GetComponentID());
-		//pEntityManager->SetSignatureSafe(entity, RigidBodyComponent::GetComponentID());
-		//pEntityManager->SetSignatureSafe(entity, GravityComponent::GetComponentID());
-
-		//pSystem->AddEntity(entity);
-
 		Entity entity{ gravitySystem.CreateEntity() };
 
 		gravitySystem.AddComponent<TransformComponent>(entity);
@@ -248,7 +196,6 @@ int main(int*, char* [])
 	{
 		t1 = std::chrono::steady_clock::now();
 
-		//pSystemManager->Update<GravitySystem>();
 		GravityUpdate(gravitySystem);
 
 		t2 = std::chrono::steady_clock::now();
@@ -293,9 +240,6 @@ int main(int*, char* [])
 	std::cout << "ECS Average:\t\t" << std::to_string(std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0)) << " nanoseconds\n";
 	std::cout << "GO Average:\t\t" << std::to_string(std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0)) << " nanoseconds\n";
 	std::cout << "ENTT Average:\t\t" << std::to_string(std::accumulate(enttTimes.cbegin(), enttTimes.cend(), (long long)0)) << " nanoseconds\n";
-
-	delete pEntityManager;
-	delete pComponentManager;
 
 	for (GameObject* pG : GameObjects)
 		delete pG;
