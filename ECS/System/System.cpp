@@ -14,13 +14,11 @@ namespace ECS
 		}
 	}
 
-
-#ifdef DEBUG
 	Entity System::CreateEntity()
 	{
 		assert(static_cast<Entity>(Entities.size()) < MaxEntities);
 
+		EntitySignatures.emplace_back(EntitySignature{});
 		return Entities.emplace_back(static_cast<Entity>(Entities.size()));
 	}
-#endif
 }

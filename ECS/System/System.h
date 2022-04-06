@@ -6,7 +6,7 @@
 
 #include <array> /* std::array */
 #include <vector> /* std::vector */
-#include <assert.h>
+#include <assert.h> /* assert() */
 
 namespace ECS
 {
@@ -15,14 +15,10 @@ namespace ECS
 	public:
 		~System();
 
-#ifdef DEBUG
-		Entity CreateEntity();
-#else
-		__forceinline Entity CreateEntity() { return Entities.emplace_back(static_cast<Entity>(Entities.size())); }
-#endif
+		Entity CreateEntity() noexcept;
 
 		template<typename Component>
-		void AddComponent(const Entity& entity);
+		void AddComponent(const Entity& entity) noexcept;
 
 #ifdef DEBUG
 		template<typename Component>
@@ -52,12 +48,13 @@ namespace ECS
 			std::vector<IComponent*> Components;
 		};
 
+		std::vector<EntitySignature> EntitySignatures;
 		std::vector<Entity> Entities;
 		std::vector<ComponentInfo> Components;
 	};
 	
 	template<typename Component>
-	void System::AddComponent(const Entity& entity)
+	void System::AddComponent(const Entity& entity) noexcept
 	{
 		assert(entity != InvalidEntityID);
 
@@ -81,6 +78,8 @@ namespace ECS
 		}
 
 		key.Components[entity] = new Component{};
+
+		EntitySignatures[entity].set(componentID);
 	}
 	
 #ifdef DEBUG
