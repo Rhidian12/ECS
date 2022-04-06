@@ -6,7 +6,7 @@ namespace ECS
 	{
 		for (SystemInfo& info : Systems)
 		{
-			delete info.pSystem;
+			//delete info.pSystem;
 			info.pSystem = nullptr;
 		}
 	}

@@ -28,7 +28,7 @@ namespace ECS
 				, pSystem{}
 			{}
 
-			SystemInfo(const SystemID& id, ISystem* _pSystem)
+			SystemInfo(const SystemID& id, class ISystem* _pSystem)
 				: SystemID{ id }
 				, pSystem{ _pSystem }
 			{}
