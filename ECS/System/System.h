@@ -16,30 +16,21 @@ namespace ECS
 	class View final
 	{
 	public:
-		View(const std::vector<std::tuple<Components*...>>& components)
-			: Components{ components }
+		View(const std::vector<std::tuple<Components&...>>& components)
+			: EntityComponents{ components }
 			, ComponentsSize{ components.size() }
 		{}
 
-		void ForEach(std::function<void(Components&...)> function) const noexcept
+		void ForEach(const std::function<void(Components&...)>& function) noexcept
 		{
-			ForEach(std::move(function), std::make_index_sequence<MaxEntities>{});
+			for (size_t i{}; i < ComponentsSize; ++i)
+			{
+				std::apply(function, EntityComponents[i]);
+			}
 		}
 
 	private:
-		template<size_t ... Indices>
-		void ForEach(std::function<void(Components&...)>&& function, std::index_sequence<Indices...>) const noexcept
-		{
-			((Indices < ComponentsSize ? ApplyFunction<Indices>(std::move(function), std::make_index_sequence<sizeof ... (Components)>{}) : void()), ...);
-		}
-
-		template<size_t Index, size_t ... Indices>
-		void ApplyFunction(std::function<void(Components&...)>&& function, std::index_sequence<Indices...>) const noexcept
-		{
-			function((std::get<Indices>(Components[Index]), ...));
-		}
-
-		std::vector<std::tuple<Components*...>> Components;
+		std::vector<std::tuple<Components&...>> EntityComponents;
 		size_t ComponentsSize;
 	};
 
@@ -54,14 +45,12 @@ namespace ECS
 		void AddComponent(const Entity& entity) noexcept;
 
 		template<typename ... Components>
-		View<Components...> CreateView() const noexcept
+		View<Components&...> CreateView() const noexcept
 		{
-			std::vector<std::tuple<Components*...>> components{};
-
 			std::bitset<MaxComponentTypes> componentFlags{};
 			SetComponentFlags<Components...>(componentFlags);
 
-			return CreateView<Components...>(componentFlags, std::make_index_sequence<MaxEntities>{});
+			return CreateView<Components&...>(componentFlags, std::make_index_sequence<10>{});
 		}
 
 #ifdef DEBUG
@@ -92,17 +81,17 @@ namespace ECS
 		template<typename ... Components, size_t ... Indices>
 		View<Components...> CreateView(const EntitySignature& flags, std::index_sequence<Indices...>) const noexcept
 		{
-			std::vector<std::tuple<Components*...>> components{};
+			std::vector<std::tuple<Components&...>> components{};
 			const size_t componentsSize{ this->Components.size() };
 
-			( (Indices < componentsSize ? components.push_back(CreateTuple<Indices, Components...>(std::make_index_sequence<sizeof ... (Components)>)) : void()), ... );
-			return View<Components...>{ components };
+			((Indices < componentsSize ? components.push_back(CreateTuple<Indices, Components&...>(std::make_index_sequence<sizeof ... (Components)>{})) : void()), ...);
+			return View<Components&...>{ components };
 		}
 
 		template<size_t Index, typename ... Components, size_t ... Indices>
-		std::tuple<Components* ...> CreateTuple(std::index_sequence<Indices...>) const noexcept
+		std::tuple<Components& ...> CreateTuple(std::index_sequence<Indices...>) const noexcept
 		{
-			std::make_tuple( (this->Components[Index].Components[Indices], ...) );
+			return std::tuple<Components&...>{ (*(this->Components[Index].Components[Indices], ...)) };
 		}
 
 		struct ComponentInfo final
