@@ -131,19 +131,19 @@ void ENTTUpdate(entt::registry& registry)
 
 void GravityUpdate(ECS::System& system)
 {
-	auto& entities{ system.GetEntities() };
+	//auto& entities{ system.GetEntities() };
 
-	for (auto& entity : entities)
-	{
-		RigidBodyComponent* const rigidBody = system.GetComponent<RigidBodyComponent>(entity);
-		TransformComponent* const transform = system.GetComponent<TransformComponent>(entity);
-		const GravityComponent* const gravity = system.GetComponent<GravityComponent>(entity);
+	//for (auto& entity : entities)
+	//{
+	//	RigidBodyComponent* const rigidBody = system.GetComponent<RigidBodyComponent>(entity);
+	//	TransformComponent* const transform = system.GetComponent<TransformComponent>(entity);
+	//	const GravityComponent* const gravity = system.GetComponent<GravityComponent>(entity);
 
-		rigidBody->Velocity.y += gravity->Gravity * rigidBody->Mass;
+	//	rigidBody->Velocity.y += gravity->Gravity * rigidBody->Mass;
 
-		transform->Position.x += rigidBody->Velocity.x;
-		transform->Position.y += rigidBody->Velocity.y;
-	}
+	//	transform->Position.x += rigidBody->Velocity.x;
+	//	transform->Position.y += rigidBody->Velocity.y;
+	//}
 
 	auto view = system.CreateView<GravityComponent, RigidBodyComponent, TransformComponent>();
 

@@ -75,23 +75,26 @@ namespace ECS
 		__forceinline ComponentType GetComponentInfo() const noexcept { Components[Component::GetComponentID()].ComponentID; }
 #endif
 
-		template<typename ... Components>
-		__forceinline void SetComponentFlags(EntitySignature& flags) const noexcept { (flags.set(Components::GetComponentID()), ...); }
+		template<typename ... TComponents>
+		__forceinline void SetComponentFlags(EntitySignature& flags) const noexcept { (flags.set(TComponents::GetComponentID()), ...); }
 
-		template<typename ... Components, size_t ... Indices>
-		View<Components...> CreateView(const EntitySignature& flags, std::index_sequence<Indices...>) const noexcept
+		template<typename ... TComponents, size_t ... Indices>
+		View<TComponents&...> CreateView(const EntitySignature& flags, std::index_sequence<Indices...>) const noexcept
 		{
-			std::vector<std::tuple<Components&...>> components{};
-			const size_t componentsSize{ this->Components.size() };
+			std::vector<std::tuple<TComponents&...>> components{};
+			const size_t componentsSize{ Components.size() };
 
-			((Indices < componentsSize ? components.push_back(CreateTuple<Indices, Components&...>(std::make_index_sequence<sizeof ... (Components)>{})) : void()), ...);
-			return View<Components&...>{ components };
+			((Indices < componentsSize ? components.push_back(CreateTuple<Indices, TComponents&...>(std::make_index_sequence<sizeof ... (TComponents)>{})) : void()), ...);
+			return View<TComponents&...>{ components };
 		}
 
-		template<size_t Index, typename ... Components, size_t ... Indices>
-		std::tuple<Components& ...> CreateTuple(std::index_sequence<Indices...>) const noexcept
+		template<size_t Index, typename ... TComponents, size_t ... Indices>
+		std::tuple<TComponents& ...> CreateTuple(std::index_sequence<Indices...>) const noexcept
 		{
-			return std::tuple<Components&...>{ (*(this->Components[Index].Components[Indices], ...)) };
+			//return std::tuple<Components&...>{ (*(this->Components[Index].Components[Indices], ...)) };
+			//return std::make_tuple(static_cast<Components&>(*(this->Components[Index].Components[Indices]))...);
+			//return std::tuple<TComponents&...>{ static_cast<TComponents&>(*Components[Index].Components[Indices])... };
+			return std::make_tuple( static_cast<TComponents&>(*Components[Index].Components[Indices])... );
 		}
 
 		struct ComponentInfo final
@@ -153,4 +156,4 @@ namespace ECS
 		return Components[Component::GetComponentID()].ComponentID;
 	}
 #endif
-	}
+}
