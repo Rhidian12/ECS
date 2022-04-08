@@ -10,6 +10,9 @@
 #include <utility> /* std::move(), ... */
 #include <functional> /* std::function */
 
+
+#include <iostream>
+
 namespace ECS
 {
 	template<typename ... Components>
@@ -50,7 +53,7 @@ namespace ECS
 			std::bitset<MaxComponentTypes> componentFlags{};
 			SetComponentFlags<Components...>(componentFlags);
 
-			return CreateView<Components&...>(componentFlags, std::make_index_sequence<10>{});
+			return CreateView<Components&...>(componentFlags, std::make_index_sequence<MaxEntities>{});
 		}
 
 #ifdef DEBUG
@@ -82,19 +85,17 @@ namespace ECS
 		View<TComponents&...> CreateView(const EntitySignature& flags, std::index_sequence<Indices...>) const noexcept
 		{
 			std::vector<std::tuple<TComponents&...>> components{};
-			const size_t componentsSize{ Components.size() };
+			const size_t componentsSize{ Entities.size() };
 
-			((Indices < componentsSize ? components.push_back(CreateTuple<Indices, TComponents&...>(std::make_index_sequence<sizeof ... (TComponents)>{})) : void()), ...);
+			((Indices < componentsSize ? components.push_back(CreateTuple<Indices, TComponents&...>()) : void()), ...);
+
 			return View<TComponents&...>{ components };
 		}
 
-		template<size_t Index, typename ... TComponents, size_t ... Indices>
-		std::tuple<TComponents& ...> CreateTuple(std::index_sequence<Indices...>) const noexcept
+		template<size_t Index, typename ... TComponents>
+		std::tuple<TComponents& ...> CreateTuple() const noexcept
 		{
-			//return std::tuple<Components&...>{ (*(this->Components[Index].Components[Indices], ...)) };
-			//return std::make_tuple(static_cast<Components&>(*(this->Components[Index].Components[Indices]))...);
-			//return std::tuple<TComponents&...>{ static_cast<TComponents&>(*Components[Index].Components[Indices])... };
-			return std::make_tuple( static_cast<TComponents&>(*Components[Index].Components[Indices])... );
+			return std::tuple<TComponents&...>{ static_cast<TComponents&>(*Components[std::remove_reference_t<TComponents>::GetComponentID()].Components[Index])... };
 		}
 
 		struct ComponentInfo final
@@ -117,7 +118,7 @@ namespace ECS
 
 		if (static_cast<size_t>(componentID) >= Components.size())
 		{
-			Components.resize(Components.size() + componentID + 1);
+			Components.resize(Components.size() + (componentID - Components.size() + 1));
 		}
 
 		ComponentInfo& key{ Components[componentID] };
@@ -129,7 +130,7 @@ namespace ECS
 
 		if (static_cast<size_t>(entity) >= key.Components.size())
 		{
-			key.Components.resize(key.Components.size() + entity + 1);
+			key.Components.resize(key.Components.size() + (entity == 0 ? entity + 1 : entity));
 		}
 
 		key.Components[entity] = new Component{};
