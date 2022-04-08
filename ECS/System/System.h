@@ -19,8 +19,8 @@ namespace ECS
 	class View final
 	{
 	public:
-		View(const std::vector<std::tuple<Components&...>>& components)
-			: EntityComponents{ components }
+		View(std::vector<std::tuple<Components&...>>&& components)
+			: EntityComponents{ std::move(components) }
 			, ComponentsSize{ components.size() }
 		{}
 
@@ -53,7 +53,7 @@ namespace ECS
 			std::bitset<MaxComponentTypes> componentFlags{};
 			SetComponentFlags<TComponents...>(componentFlags);
 
-			return CreateView<TComponents&...>(componentFlags, std::make_index_sequence<MaxEntities>{});
+			return CreateView<TComponents&...>(componentFlags, std::make_index_sequence<sizeof ... (TComponents)>{});
 		}
 
 #ifdef DEBUG
@@ -87,15 +87,27 @@ namespace ECS
 			std::vector<std::tuple<TComponents&...>> components{};
 			const size_t componentsSize{ Entities.size() };
 
-			((Indices < componentsSize ? components.push_back(CreateTuple<Indices, TComponents&...>()) : void()), ...);
+			// ((Indices < componentsSize ? components.push_back(CreateTuple<Indices, TComponents&...>()) : void()), ...);
+			// return View<TComponents&...>{ components };
 
-			return View<TComponents&...>{ components };
+			for (size_t i{}; i < componentsSize; ++i)
+			{
+				components.push_back(CreateTuple<TComponents&...>(std::move(i)));
+			}
+
+			return View<TComponents&...>{ std::move(components) };
 		}
 
 		template<size_t Index, typename ... TComponents>
 		std::tuple<TComponents& ...> CreateTuple() const noexcept
 		{
 			return std::tuple<TComponents&...>{ static_cast<TComponents&>(*Components[std::remove_reference_t<TComponents>::GetComponentID()].Components[Index])... };
+		}
+
+		template<typename ... TComponents>
+		std::tuple<TComponents& ...> CreateTuple(size_t&& index) const noexcept
+		{
+			return std::tuple<TComponents&...>{ static_cast<TComponents&>(*Components[std::remove_reference_t<TComponents>::GetComponentID()].Components[index])... };
 		}
 
 		struct ComponentInfo final
@@ -155,6 +167,6 @@ namespace ECS
 		assert(Components[Component::GetComponentID()].ComponentID != InvalidComponentID);
 
 		return Components[Component::GetComponentID()].ComponentID;
-	}
+}
 #endif
 }
