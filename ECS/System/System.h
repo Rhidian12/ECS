@@ -47,13 +47,13 @@ namespace ECS
 		template<typename Component>
 		void AddComponent(const Entity& entity) noexcept;
 
-		template<typename ... Components>
-		View<Components&...> CreateView() const noexcept
+		template<typename ... TComponents>
+		View<TComponents&...> CreateView() const noexcept
 		{
 			std::bitset<MaxComponentTypes> componentFlags{};
-			SetComponentFlags<Components...>(componentFlags);
+			SetComponentFlags<TComponents...>(componentFlags);
 
-			return CreateView<Components&...>(componentFlags, std::make_index_sequence<MaxEntities>{});
+			return CreateView<TComponents&...>(componentFlags, std::make_index_sequence<MaxEntities>{});
 		}
 
 #ifdef DEBUG
@@ -64,8 +64,8 @@ namespace ECS
 		__forceinline Component* const GetComponent(const Entity& id) const noexcept { return static_cast<Component*>(Components[Component::GetComponentID()].Components[id]); }
 #endif
 
-		template<typename ... Components>
-		__forceinline std::array<ComponentType, sizeof...(Components)> GetComponents() const noexcept { return { (GetComponentInfo<Components>(), ...) }; }
+		template<typename ... TComponents>
+		__forceinline std::array<ComponentType, sizeof...(TComponents)> GetComponents() const noexcept { return { (GetComponentInfo<TComponents>(), ...) }; }
 		__forceinline const auto& GetEntities() const noexcept { return Entities; }
 		__forceinline auto& GetEntities() noexcept { return Entities; }
 
