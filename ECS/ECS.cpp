@@ -133,12 +133,12 @@ void GravityUpdate(ECS::System& system)
 {
 	auto view = system.CreateView<GravityComponent, RigidBodyComponent, TransformComponent>();
 
-	view.ForEach([](auto& gravity, auto& rigidBody, auto& transform)->void
+	view.ForEach([](auto* gravity, auto* rigidBody, auto* transform)->void
 		{
-			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+			rigidBody->Velocity.y += gravity->Gravity * rigidBody->Mass;
 	
-			transform.Position.x += rigidBody.Velocity.x;
-			transform.Position.y += rigidBody.Velocity.y;
+			transform->Position.x += rigidBody->Velocity.x;
+			transform->Position.y += rigidBody->Velocity.y;
 		});
 }
 

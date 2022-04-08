@@ -4,9 +4,9 @@ namespace ECS
 {
 	System::~System()
 	{
-		for (ComponentInfo& info : Components)
+		for (std::vector<IComponent*>& components : Components)
 		{
-			for (IComponent*& pC : info.Components)
+			for (IComponent*& pC : components)
 			{
 				delete pC;
 				pC = nullptr;
