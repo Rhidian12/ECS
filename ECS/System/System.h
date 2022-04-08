@@ -15,25 +15,25 @@
 
 namespace ECS
 {
-	template<typename ... Components>
+	template<typename ... TComponents>
 	class View final
 	{
 	public:
-		View(std::vector<std::tuple<Components&...>>&& components)
-			: EntityComponents{ std::move(components) }
+		View(std::vector<std::tuple<TComponents&...>>&& components)
+			: Components{ std::move(components) }
 			, ComponentsSize{ components.size() }
 		{}
 
-		void ForEach(const std::function<void(Components&...)>& function) noexcept
+		void ForEach(const std::function<void(TComponents&...)>& function) noexcept
 		{
 			for (size_t i{}; i < ComponentsSize; ++i)
 			{
-				std::apply(function, EntityComponents[i]);
+				std::apply(function, Components[i]);
 			}
 		}
 
 	private:
-		std::vector<std::tuple<Components&...>> EntityComponents;
+		std::vector<std::tuple<TComponents&...>> Components;
 		size_t ComponentsSize;
 	};
 
