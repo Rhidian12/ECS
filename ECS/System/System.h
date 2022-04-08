@@ -142,7 +142,7 @@ namespace ECS
 
 		if (static_cast<size_t>(entity) >= key.Components.size())
 		{
-			key.Components.resize(key.Components.size() + (entity == 0 ? entity + 1 : entity));
+			key.Components.resize(key.Components.size() + (entity - key.Components.size() + 1));
 		}
 
 		key.Components[entity] = new Component{};
