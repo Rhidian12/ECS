@@ -1,5 +1,7 @@
 # ECS
 
+**THIS IS CURRENTLY UNDERGOING MAJOR CHANGES AND WILL MOST LIKELY NOT WORK**
+
 ## Introduction
 An Entity-Component-System (ECS) is an alternative way of storing information regarding Components and Entities.
 The traditional approach is to have a `GameObject` that has a list of `Component`, in which the `GameObject` acts as a wrapper around the `Component` list and manages all of them. This is a very good approach, but has some drawbacks:
