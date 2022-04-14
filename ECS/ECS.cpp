@@ -232,9 +232,9 @@ int main(int*, char* [])
 		enttTimes.pop_front();
 	}
 
-	std::cout << "ECS Average:\t\t" << std::to_string(std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0)) << " nanoseconds\n";
-	std::cout << "GO Average:\t\t" << std::to_string(std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0)) << " nanoseconds\n";
-	std::cout << "ENTT Average:\t\t" << std::to_string(std::accumulate(enttTimes.cbegin(), enttTimes.cend(), (long long)0)) << " nanoseconds\n";
+	std::cout << "ECS Average:\t\t" << std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0) / ECSTimes.size()  << " nanoseconds\n";
+	std::cout << "GO Average:\t\t" << std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0) / GOTimes.size() << " nanoseconds\n";
+	std::cout << "ENTT Average:\t\t" << std::accumulate(enttTimes.cbegin(), enttTimes.cend(), (long long)0) / enttTimes.size() << " nanoseconds\n";
 
 	for (GameObject* pG : GameObjects)
 		delete pG;

@@ -19,27 +19,31 @@ namespace ECS
 	class View final
 	{
 	public:
-		View(std::array<std::tuple<TComponents...>, sizeof ... (TComponents)>&& components)
+		View(std::tuple<std::initializer_list<TComponents>...>&& components)
 			: Components{ std::move(components) }
-			, ComponentsSize{ components.size() }
+			, NrOfComponents{ std::get<0>(components).size() }
 		{}
 
-		void ForEach(const std::function<void(TComponents...)>& function) noexcept
+		void ForEach(const std::function<void(TComponents...)>& function) const
 		{
-			//for (size_t i{}; i < ComponentsSize; ++i)
-			//{
-			//	std::apply(function, Components[i]);
-			//}
-
-			return [this] <size_t ... Indices> (const std::function<void(TComponents...)>& function, std::index_sequence<Indices...>)
+			auto indexSequence{ std::make_index_sequence<sizeof ... (TComponents)>{} };
+			
+			for (int i{}; i < NrOfComponents; ++i)
 			{
-				(std::apply(function, Components[Indices]), ...);
-			} (function, std::make_index_sequence<sizeof ... (TComponents)>{});
+				ForEach(function, i, indexSequence);
+			}
 		}
 
 	private:
-		std::array<std::tuple<TComponents...>, sizeof ... (TComponents)> Components;
-		size_t ComponentsSize;
+		template<size_t ... Indices>
+		void ForEach(const std::function<void(TComponents...)>& function, size_t index, std::index_sequence<Indices...>) const
+		{
+			std::tuple<TComponents...> comps{ std::make_tuple(*((std::get<Indices>(Components)).begin() + index)...)};
+			std::apply(function, comps);
+		}
+
+		std::tuple<std::initializer_list<TComponents>...> Components;
+		size_t NrOfComponents;
 	};
 
 	class System final
@@ -58,7 +62,7 @@ namespace ECS
 			std::bitset<MaxComponentTypes> componentFlags{};
 			SetComponentFlags<TComponents...>(componentFlags);
 
-			return CreateView<TComponents...>(componentFlags, std::make_index_sequence<sizeof ... (TComponents)>{});
+			return CreateView<TComponents*...>(componentFlags, std::make_index_sequence<sizeof ... (TComponents)>{});
 		}
 
 #ifdef DEBUG
@@ -87,16 +91,9 @@ namespace ECS
 		__forceinline void SetComponentFlags(EntitySignature& flags) const noexcept { (flags.set(TComponents::GetComponentID()), ...); }
 
 		template<typename ... TComponents, size_t ... Indices>
-		View<TComponents*...> CreateView(const EntitySignature& flags, std::index_sequence<Indices...>) const noexcept
+		View<TComponents...> CreateView(const EntitySignature& flags, std::index_sequence<Indices...>) const noexcept
 		{
-			// return std::array<std::vector<TComponents*...>, sizeof ... (TComponents)> { { (CreateTuple<TComponents...>(Indices), ...) } };
-			return View<TComponents*...>{  };
-			//const size_t componentsSize{ Entities.size() };
-
-			// ((Indices < componentsSize ? components.push_back(CreateTuple<Indices, TComponents&...>()) : void()), ...);
-			// return View<TComponents&...>{ components };
-
-			// return View<TComponents*...>{ std::move(components) };
+			return View<TComponents...>(CreateViewData<TComponents...>(std::make_index_sequence<sizeof ... (TComponents)>{}));
 		}
 
 		template<size_t Index, typename ... TComponents>
@@ -112,9 +109,32 @@ namespace ECS
 		}
 
 		template<typename ... TComponents, size_t ... Indices>
-		std::array<std::vector<TComponents*...>, sizeof ... (TComponents)> CreateViewData(std::index_sequence<Indices...>) const noexcept
+		std::tuple<std::initializer_list<TComponents>...> CreateViewData(std::index_sequence<Indices...>) const
 		{
-			return std::array<std::vector<TComponents*...>, sizeof ... (TComponents)>{ std::vector<TComponents*>{ Components[Indices] } };
+			return std::make_tuple(ConvertVectorContents<TComponents>(Components[Indices])...);
+		}
+
+		template<typename To, typename From>
+		std::initializer_list<To> ConvertVectorContents(const std::vector<From> v) const
+		{
+			std::initializer_list<To> vTo();
+
+			if constexpr (std::is_convertible_v<From, To>)
+			{
+				for (From const pElement : v)
+				{
+					vTo.push_back(static_cast<To>(pElement));
+				}
+			}
+			else
+			{
+				for (From const pElement : v)
+				{
+					vTo.push_back(dynamic_cast<To>(pElement));
+				}
+			}
+
+			return vTo;
 		}
 
 		std::vector<EntitySignature> EntitySignatures;
@@ -141,7 +161,7 @@ namespace ECS
 			components.resize(components.size() + (entity - components.size() + 1));
 		}
 
-		components[entity] = new Component{};
+		components[entity] = new Component();
 
 		EntitySignatures[entity].set(componentID);
 	}
@@ -163,6 +183,6 @@ namespace ECS
 		assert(Components[Component::GetComponentID()].ComponentID != InvalidComponentID);
 
 		return Components[Component::GetComponentID()].ComponentID;
-}
+	}
 #endif
 }
