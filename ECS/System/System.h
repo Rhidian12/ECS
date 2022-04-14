@@ -4,14 +4,10 @@
 
 #include "../Component/Component.h"
 
-#include <array> /* std::array */
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
 #include <utility> /* std::move(), ... */
 #include <functional> /* std::function */
-
-
-#include <iostream>
 
 namespace ECS
 {
