@@ -21,7 +21,7 @@ namespace ECS
 	public:
 		View(std::tuple<std::vector<TComponents>...>&& components)
 			: Components{ std::move(components) }
-			, NrOfComponents{ std::get<0>(components).size() }
+			, NrOfComponents{ std::get<0>(Components).size() }
 		{}
 
 		void ForEach(const std::function<void(TComponents...)>& function) const
@@ -92,7 +92,7 @@ namespace ECS
 
 			for (size_t i{}; i < size; ++i)
 			{
-				vTo.push_back(static_cast<To>(v[i]));
+				vTo[i] = static_cast<To>(v[i]);
 			}
 
 			return vTo;
