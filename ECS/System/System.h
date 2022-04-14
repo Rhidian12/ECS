@@ -51,13 +51,13 @@ namespace ECS
 	public:
 		~System();
 
-		Entity CreateEntity() noexcept;
+		Entity CreateEntity();
 
 		template<typename Component>
-		void AddComponent(const Entity& entity) noexcept;
+		void AddComponent(const Entity& entity);
 
 		template<typename ... TComponents>
-		View<TComponents*...> CreateView() const noexcept
+		View<TComponents*...> CreateView() const
 		{
 			std::bitset<MaxComponentTypes> componentFlags{};
 			SetComponentFlags<TComponents...>(componentFlags);
@@ -65,33 +65,15 @@ namespace ECS
 			return CreateView<TComponents*...>(componentFlags, std::make_index_sequence<sizeof ... (TComponents)>{});
 		}
 
-#ifdef DEBUG
 		template<typename Component>
-		Component* const GetComponent(const Entity& id) const noexcept;
-#else
-		template<typename Component>
-		__forceinline Component* const GetComponent(const Entity& id) const noexcept { return static_cast<Component*>(Components[Component::GetComponentID()][id]); }
-#endif
-
-		template<typename ... TComponents>
-		__forceinline std::array<ComponentType, sizeof...(TComponents)> GetComponents() const noexcept { return { (GetComponentInfo<TComponents>(), ...) }; }
-		__forceinline const auto& GetEntities() const noexcept { return Entities; }
-		__forceinline auto& GetEntities() noexcept { return Entities; }
+		Component* const GetComponent(const Entity& id) const;
 
 	private:
-#ifdef DEBUG
-		template<typename Component>
-		ComponentType GetComponentInfo() const noexcept;
-#else
-		template<typename Component>
-		__forceinline ComponentType GetComponentInfo() const noexcept { Components[Component::GetComponentID()].ComponentID; }
-#endif
-
 		template<typename ... TComponents>
-		__forceinline void SetComponentFlags(EntitySignature& flags) const noexcept { (flags.set(TComponents::GetComponentID()), ...); }
+		void SetComponentFlags(EntitySignature& flags) const { (flags.set(TComponents::GetComponentID()), ...); }
 
 		template<typename ... TComponents, size_t ... Indices>
-		View<TComponents...> CreateView(const EntitySignature& flags, std::index_sequence<Indices...>) const noexcept
+		View<TComponents...> CreateView(const EntitySignature& flags, std::index_sequence<Indices...>) const
 		{
 			return View<TComponents...>(CreateViewData<TComponents...>(std::make_index_sequence<sizeof ... (TComponents)>{}));
 		}
@@ -131,7 +113,7 @@ namespace ECS
 	};
 
 	template<typename Component>
-	void System::AddComponent(const Entity& entity) noexcept
+	void System::AddComponent(const Entity& entity)
 	{
 		assert(entity != InvalidEntityID);
 
@@ -154,23 +136,13 @@ namespace ECS
 		EntitySignatures[entity].set(componentID);
 	}
 
-#ifdef DEBUG
 	template<typename Component>
-	Component* const System::GetComponent(const Entity& id) const noexcept
+	Component* const System::GetComponent(const Entity& id) const
 	{
 		assert(id != InvalidEntityID);
-		assert(Components[Component::GetComponentID()].ComponentID != InvalidComponentID);
-		assert(static_cast<size_t>(id) <= Components[Component::GetComponentID()].Components.size());
+		assert(Component::GetComponentID() < Components.size());
+		assert(static_cast<size_t>(id) < Entities.size());
 
-		return static_cast<Component*>(Components[Component::GetComponentID()].Components[id]);
+		return static_cast<Component*>(Components[Component::GetComponentID()][id]);
 	}
-
-	template<typename Component>
-	ComponentType System::GetComponentInfo() const noexcept
-	{
-		assert(Components[Component::GetComponentID()].ComponentID != InvalidComponentID);
-
-		return Components[Component::GetComponentID()].ComponentID;
-	}
-#endif
 }

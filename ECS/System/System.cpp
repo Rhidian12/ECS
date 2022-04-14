@@ -14,7 +14,7 @@ namespace ECS
 		}
 	}
 
-	Entity System::CreateEntity() noexcept
+	Entity System::CreateEntity()
 	{
 		assert(static_cast<Entity>(Entities.size()) < MaxEntities);
 
