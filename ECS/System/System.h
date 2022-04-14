@@ -27,7 +27,7 @@ namespace ECS
 		void ForEach(const std::function<void(TComponents...)>& function) const
 		{
 			auto indexSequence{ std::make_index_sequence<sizeof ... (TComponents)>{} };
-			
+
 			for (int i{}; i < NrOfComponents; ++i)
 			{
 				ForEach(function, i, indexSequence);
@@ -38,7 +38,7 @@ namespace ECS
 		template<size_t ... Indices>
 		void ForEach(const std::function<void(TComponents...)>& function, size_t index, std::index_sequence<Indices...>) const
 		{
-			std::tuple<TComponents...> comps{ std::make_tuple(std::get<Indices>(Components)[index]...)};
+			std::tuple<TComponents...> comps{ std::make_tuple(std::get<Indices>(Components)[index]...) };
 			std::apply(function, comps);
 		}
 
@@ -81,27 +81,18 @@ namespace ECS
 		template<typename ... TComponents, size_t ... Indices>
 		std::tuple<std::vector<TComponents>...> CreateViewData(std::index_sequence<Indices...>) const
 		{
-			return std::make_tuple(ConvertVectorContents<TComponents>(Components[Indices])...);
+			return std::make_tuple(ConvertVectorContents<IComponent*, TComponents>(Components[Indices])...);
 		}
 
-		template<typename To, typename From>
+		template<typename From, typename To>
 		std::vector<To> ConvertVectorContents(const std::vector<From>& v) const
 		{
-			std::vector<To> vTo(v.size());
+			const size_t size{ v.size() };
+			std::vector<To> vTo(size);
 
-			if constexpr (std::is_convertible_v<From, To>)
+			for (size_t i{}; i < size; ++i)
 			{
-				for (From const pElement : v)
-				{
-					vTo.push_back(static_cast<To>(pElement));
-				}
-			}
-			else
-			{
-				for (From const pElement : v)
-				{
-					vTo.push_back(dynamic_cast<To>(pElement));
-				}
+				vTo.push_back(static_cast<To>(v[i]));
 			}
 
 			return vTo;
