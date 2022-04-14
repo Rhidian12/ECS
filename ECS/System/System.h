@@ -19,7 +19,7 @@ namespace ECS
 	class View final
 	{
 	public:
-		View(std::tuple<std::initializer_list<TComponents>...>&& components)
+		View(std::tuple<std::vector<TComponents>...>&& components)
 			: Components{ std::move(components) }
 			, NrOfComponents{ std::get<0>(components).size() }
 		{}
@@ -38,11 +38,11 @@ namespace ECS
 		template<size_t ... Indices>
 		void ForEach(const std::function<void(TComponents...)>& function, size_t index, std::index_sequence<Indices...>) const
 		{
-			std::tuple<TComponents...> comps{ std::make_tuple(*((std::get<Indices>(Components)).begin() + index)...)};
+			std::tuple<TComponents...> comps{ std::make_tuple(std::get<Indices>(Components)[index]...)};
 			std::apply(function, comps);
 		}
 
-		std::tuple<std::initializer_list<TComponents>...> Components;
+		std::tuple<std::vector<TComponents>...> Components;
 		size_t NrOfComponents;
 	};
 
@@ -96,28 +96,16 @@ namespace ECS
 			return View<TComponents...>(CreateViewData<TComponents...>(std::make_index_sequence<sizeof ... (TComponents)>{}));
 		}
 
-		template<size_t Index, typename ... TComponents>
-		std::tuple<TComponents& ...> CreateTuple() const noexcept
-		{
-			return std::tuple<TComponents&...>{ static_cast<TComponents&>(*Components[std::remove_reference_t<TComponents>::GetComponentID()][Index])... };
-		}
-
-		template<typename ... TComponents>
-		std::tuple<TComponents*...> CreateTuple(size_t&& index) const noexcept
-		{
-			return std::make_tuple(static_cast<TComponents*>(Components[std::remove_reference_t<TComponents>::GetComponentID()][index])...);
-		}
-
 		template<typename ... TComponents, size_t ... Indices>
-		std::tuple<std::initializer_list<TComponents>...> CreateViewData(std::index_sequence<Indices...>) const
+		std::tuple<std::vector<TComponents>...> CreateViewData(std::index_sequence<Indices...>) const
 		{
 			return std::make_tuple(ConvertVectorContents<TComponents>(Components[Indices])...);
 		}
 
 		template<typename To, typename From>
-		std::initializer_list<To> ConvertVectorContents(const std::vector<From> v) const
+		std::vector<To> ConvertVectorContents(const std::vector<From>& v) const
 		{
-			std::initializer_list<To> vTo();
+			std::vector<To> vTo(v.size());
 
 			if constexpr (std::is_convertible_v<From, To>)
 			{
