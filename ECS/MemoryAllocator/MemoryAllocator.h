@@ -14,7 +14,10 @@ namespace ECS
 	class MemoryAllocator final
 	{
 	public:
+		~MemoryAllocator();
+
 		void* allocate(size_t size);
+		void deallocate(void* pBlock);
 
 	private:
 		BlockInformation* GetFreeBlock(size_t size) const;
