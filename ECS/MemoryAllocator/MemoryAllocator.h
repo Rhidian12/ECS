@@ -5,20 +5,23 @@
 
 namespace ECS
 {
-	template<typename Type>
+	/* Machine Word size. This is either 8 bytes or 4 bytes depending on architecture (x64 vs x86) */
+	using Word = intptr_t;
+	inline static constexpr Word WordSize{ sizeof(Word) };
+
 	struct MemoryBlock final
 	{
 		size_t BlockSize;
 		bool IsUsed;
 
-		Type Data[1];
+		Word Data[1];
 	};
 
 	template<typename Type>
 	class MemoryAllocator final
 	{
 	private:
-		inline static constexpr SizeOfType = sizeof(Type);
+		inline static constexpr size_t SizeOfType = sizeof(Type);
 
 	public:
 		using value_type = Type;
@@ -26,6 +29,9 @@ namespace ECS
 		[[nodiscard]] Type* allocate(size_t sizeToAllocate);
 
 		void deallocate(Type* pMemoryToFree);
+
+	private:
+		size_t AlignBlock(size_t blockSize);
 	};
 
 	template<typename Type>
@@ -33,6 +39,9 @@ namespace ECS
 	{
 		assert(sizeToAllocate <= (std::numeric_limits<size_t>::max() / SizeOfType));
 
+		/* Make sure that the block we're requesting is aligned to a Word */
+		sizeToAllocate = AlignBlock(sizeToAllocate);
+		
 		return static_cast<Type*>(malloc(sizeToAllocate * SizeOfType));
 	}
 
@@ -40,6 +49,13 @@ namespace ECS
 	void MemoryAllocator<Type>::deallocate(Type* pMemoryToFree)
 	{
 		free(pMemoryToFree);
+	}
+
+	template<typename Type>
+	size_t MemoryAllocator<Type>::AlignBlock(size_t blockSize)
+	{
+		/* Aligns everything to WordSize multiples */
+		return (blockSize + WordSize - 1) & ~(WordSize - 1);
 	}
 
 	template<typename Type, typename OtherType>
