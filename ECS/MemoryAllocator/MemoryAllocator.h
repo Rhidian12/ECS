@@ -19,6 +19,8 @@ namespace ECS
 	class MemoryAllocator final
 	{
 	public:
+		using value_type = Type;
+
 		~MemoryAllocator();
 
 		void* allocate(size_t size);
