@@ -69,7 +69,7 @@ namespace ECS
 		if (pBlockInfo)
 		{
 			pBlockInfo->IsFree = false;
-			return reinterpret_cast<Type*>(pBlockInfo + 1);
+			return reinterpret_cast<Type*>(pBlockInfo);
 		}
 
 		const size_t totalSize{ sizeof(BlockInformation) + size };
@@ -94,7 +94,7 @@ namespace ECS
 
 		Tail = pBlockInfo;
 
-		return reinterpret_cast<Type*>(pBlockInfo + 1);
+		return reinterpret_cast<Type*>(pBlockInfo);
 	}
 	
 	template<typename Type>
@@ -105,7 +105,7 @@ namespace ECS
 		BlockInformation* pBlockInfo{};
 		BlockInformation* pTemp{};
 
-		pBlockInfo = static_cast<BlockInformation*>(pBlock) - 1;
+		pBlockInfo = static_cast<BlockInformation*>(pBlock);
 
 		pBlockInfo->IsFree = true;
 	}
