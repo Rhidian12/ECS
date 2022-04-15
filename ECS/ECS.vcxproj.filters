@@ -30,6 +30,9 @@
     <ClCompile Include="System\System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MemoryAllocator\MemoryAllocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ECSConstants.h">
@@ -255,6 +258,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="entt\fwd.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator\MemoryAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
