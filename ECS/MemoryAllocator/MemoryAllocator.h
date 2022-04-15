@@ -6,6 +6,15 @@
 namespace ECS
 {
 	template<typename Type>
+	struct MemoryBlock final
+	{
+		size_t BlockSize;
+		bool IsUsed;
+
+		Type Data[1];
+	};
+
+	template<typename Type>
 	struct MemoryAllocator final
 	{
 		using value_type = Type;
