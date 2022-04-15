@@ -25,7 +25,7 @@ namespace ECS
 		~MemoryAllocator();
 
 		void* allocate(size_t size);
-		void deallocate(void* pBlock);
+		void deallocate(void* pBlock, size_t);
 
 	private:
 		BlockInformation* GetFreeBlock(size_t size) const;
@@ -94,7 +94,7 @@ namespace ECS
 	}
 	
 	template<typename Type>
-	void MemoryAllocator<Type>::deallocate(void* pBlock)
+	void MemoryAllocator<Type>::deallocate(void* pBlock, size_t)
 	{
 		assert(pBlock);
 
