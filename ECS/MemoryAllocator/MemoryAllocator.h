@@ -15,11 +15,13 @@ namespace ECS
 	};
 
 	template<typename Type>
-	struct MemoryAllocator final
+	class MemoryAllocator final
 	{
-		using value_type = Type;
-
+	private:
 		inline static constexpr SizeOfType = sizeof(Type);
+
+	public:
+		using value_type = Type;
 
 		[[nodiscard]] Type* allocate(size_t sizeToAllocate);
 
