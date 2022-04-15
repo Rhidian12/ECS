@@ -22,6 +22,10 @@ namespace ECS
 	public:
 		using value_type = Type;
 
+		MemoryAllocator() = default;
+		template<typename OtherType>
+		constexpr MemoryAllocator(const MemoryAllocator<OtherType>&) noexcept {}
+
 		~MemoryAllocator();
 
 		Type* allocate(size_t size);
@@ -30,8 +34,8 @@ namespace ECS
 	private:
 		BlockInformation* GetFreeBlock(size_t size) const;
 
-		BlockInformation* Head;
-		BlockInformation* Tail;
+		BlockInformation* Head{};
+		BlockInformation* Tail{};
 	};
 
 	template<typename Type, typename OtherType>
@@ -49,7 +53,7 @@ namespace ECS
 		{
 			BlockInformation* pNext{ pTemp->pNext };
 
-			free(pTemp);
+			//free(pTemp);
 
 			pTemp = pNext;
 		}
