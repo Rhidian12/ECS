@@ -1,5 +1,7 @@
 #pragma once
 
+/* https://arjunsreedharan.org/ */
+
 namespace ECS
 {
 	struct alignas(16) BlockInformation final
