@@ -29,6 +29,8 @@ namespace ECS
 		~MemoryAllocator();
 
 		Type* allocate(size_t size);
+
+		/* unreferenced size_t for STL */
 		void deallocate(void* pBlock, size_t) noexcept;
 
 	private:
@@ -72,7 +74,7 @@ namespace ECS
 			return reinterpret_cast<Type*>(pBlockInfo);
 		}
 
-		const size_t totalSize{ sizeof(BlockInformation) + size };
+		const size_t totalSize{ sizeof(BlockInformation) + size * sizeof(Type) };
 		void* const pBlock{ malloc(totalSize) };
 
 		assert(pBlock);
