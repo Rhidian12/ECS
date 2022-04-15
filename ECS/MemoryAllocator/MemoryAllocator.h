@@ -13,6 +13,8 @@ namespace ECS
 		inline static constexpr SizeOfType = sizeof(Type);
 
 		[[nodiscard]] Type* allocate(size_t sizeToAllocate);
+
+		void deallocate(Type* pMemoryToFree);
 	};
 
 	template<typename Type>
@@ -23,4 +25,26 @@ namespace ECS
 		return static_cast<Type*>(malloc(sizeToAllocate * SizeOfType));
 	}
 
+	template<typename Type>
+	void MemoryAllocator<Type>::deallocate(Type* pMemoryToFree)
+	{
+		free(pMemoryToFree);
+	}
+
+	template<typename Type, typename OtherType>
+	constexpr bool operator==(const MemoryAllocator<Type>&, const MemoryAllocator<OtherType>&)
+	{
+		if constexpr (std::is_same_v<Type, OtherType>)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	template<typename Type, typename OtherType>
+	constexpr bool operator!=(const MemoryAllocator<Type>& a, const MemoryAllocator<OtherType>& b)
+	{
+		return !(a == b);
+	}
 }
