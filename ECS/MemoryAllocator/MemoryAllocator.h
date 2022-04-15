@@ -24,7 +24,7 @@ namespace ECS
 
 		~MemoryAllocator();
 
-		void* allocate(size_t size);
+		Type* allocate(size_t size);
 		void deallocate(void* pBlock, size_t);
 
 	private:
@@ -56,7 +56,7 @@ namespace ECS
 	}
 
 	template<typename Type>
-	void* MemoryAllocator<Type>::allocate(size_t size)
+	Type* MemoryAllocator<Type>::allocate(size_t size)
 	{
 		assert(size != 0);
 
@@ -65,7 +65,7 @@ namespace ECS
 		if (pBlockInfo)
 		{
 			pBlockInfo->IsFree = false;
-			return static_cast<void*>(pBlockInfo + 1);
+			return reinterpret_cast<Type*>(pBlockInfo + 1);
 		}
 
 		const size_t totalSize{ sizeof(BlockInformation) + size };
@@ -90,7 +90,7 @@ namespace ECS
 
 		Tail = pBlockInfo;
 
-		return static_cast<void*>(pBlockInfo + 1);
+		return reinterpret_cast<Type*>(pBlockInfo + 1);
 	}
 	
 	template<typename Type>
