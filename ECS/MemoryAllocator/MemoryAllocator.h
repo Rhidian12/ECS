@@ -45,12 +45,6 @@ namespace ECS
 		BlockInformation* Tail{};
 	};
 
-	template<typename Type, typename OtherType>
-	bool operator==(const Type&, const OtherType&) { return std::is_same_v<Type, OtherType>; }
-
-	template<typename Type, typename OtherType>
-	bool operator!=(const Type& a, const OtherType& b) { return !(a == b); }
-
 	template<typename Type>
 	MemoryAllocator<Type>::~MemoryAllocator()
 	{
