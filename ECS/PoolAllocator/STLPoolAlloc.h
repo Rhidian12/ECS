@@ -34,6 +34,9 @@ namespace ECS
 
 		pointer allocate(size_type elementsToAllocate);
 
+		/* unreferenced size_type for STL and noexcept for STL */
+		void deallocate(pointer p, size_type = 0) noexcept;
+
 	private:
 		STLPoolAlloc* CopiedAllocator;
 	};
@@ -52,5 +55,16 @@ namespace ECS
 		}
 
 		return PoolAllocator<Type>::allocate(elementsToAllocate);
+	}
+
+	template<typename Type>
+	void STLPoolAlloc<Type>::deallocate(pointer p, size_type) noexcept
+	{
+		if (CopiedAllocator)
+		{
+			return CopiedAllocator->deallocate(p);
+		}
+
+		return PoolAllocator<Type>::deallocate(p);
 	}
 }
