@@ -32,6 +32,8 @@ namespace ECS
 		template<typename OtherType>
 		STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept {}
 
+		pointer allocate(size_type elementsToAllocate);
+
 	private:
 		STLPoolAlloc* CopiedAllocator;
 	};
@@ -40,4 +42,15 @@ namespace ECS
 	STLPoolAlloc<Type>::STLPoolAlloc(STLPoolAlloc& alloc) noexcept
 		: CopiedAllocator{ &alloc }
 	{}
+
+	template<typename Type>
+	STLPoolAlloc<Type>::pointer STLPoolAlloc<Type>::allocate(size_type elementsToAllocate)
+	{
+		if (CopiedAllocator)
+		{
+			return CopiedAllocator->allocate(elementsToAllocate);
+		}
+
+		return PoolAllocator<Type>::allocate(elementsToAllocate);
+	}
 }
