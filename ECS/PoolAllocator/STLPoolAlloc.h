@@ -38,6 +38,7 @@ namespace ECS
 		void deallocate(pointer p, size_type = 0) noexcept;
 
 		void construct(pointer p, const_reference value);
+		void destroy(pointer p);
 
 	private:
 		STLPoolAlloc* CopiedAllocator;
@@ -74,5 +75,11 @@ namespace ECS
 	void STLPoolAlloc<Type>::construct(pointer p, const_reference value)
 	{
 		new (p) Type(value);
+	}
+
+	template<typename Type>
+	void STLPoolAlloc<Type>::destroy(pointer p)
+	{
+		p->~Type();
 	}
 }
