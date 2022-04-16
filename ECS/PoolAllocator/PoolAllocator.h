@@ -21,17 +21,17 @@ namespace ECS
 	};
 
 	template<typename Type>
-	class MemoryAllocator final
+	class PoolAllocator final
 	{
 	public:
-		MemoryAllocator() = default;
+		PoolAllocator() = default;
 
-		MemoryAllocator(const MemoryAllocator&) = delete;
-		MemoryAllocator(MemoryAllocator&&) = delete;
-		MemoryAllocator& operator=(const MemoryAllocator&) = delete;
-		MemoryAllocator& operator=(MemoryAllocator&&) = delete;
+		PoolAllocator(const PoolAllocator&) = delete;
+		PoolAllocator(PoolAllocator&&) = delete;
+		PoolAllocator& operator=(const PoolAllocator&) = delete;
+		PoolAllocator& operator=(PoolAllocator&&) = delete;
 
-		~MemoryAllocator();
+		~PoolAllocator();
 
 		Type* allocate(size_t nrOfElementsToAllocate);
 
@@ -46,7 +46,7 @@ namespace ECS
 	};
 
 	template<typename Type>
-	MemoryAllocator<Type>::~MemoryAllocator()
+	PoolAllocator<Type>::~PoolAllocator()
 	{
 		BlockInformation* pTemp{ Head };
 
@@ -62,7 +62,7 @@ namespace ECS
 	}
 
 	template<typename Type>
-	Type* MemoryAllocator<Type>::allocate(size_t nrOfElementsToAllocate)
+	Type* PoolAllocator<Type>::allocate(size_t nrOfElementsToAllocate)
 	{
 		assert(nrOfElementsToAllocate != 0);
 
@@ -101,7 +101,7 @@ namespace ECS
 	}
 
 	template<typename Type>
-	void MemoryAllocator<Type>::deallocate(void* pBlock)
+	void PoolAllocator<Type>::deallocate(void* pBlock)
 	{
 		assert(pBlock);
 
@@ -114,7 +114,7 @@ namespace ECS
 	}
 
 	template<typename Type>
-	BlockInformation* MemoryAllocator<Type>::GetFreeBlock(size_t size) const
+	BlockInformation* PoolAllocator<Type>::GetFreeBlock(size_t size) const
 	{
 		BlockInformation* pCurrent{ Head };
 

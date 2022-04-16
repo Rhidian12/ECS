@@ -147,7 +147,7 @@
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GOComponent\GOComponent.cpp" />
-    <ClCompile Include="MemoryAllocator\MemoryAllocator.cpp" />
+    <ClCompile Include="PoolAllocator\PoolAllocator.cpp" />
     <ClCompile Include="System\System.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -220,8 +220,8 @@
     <ClInclude Include="entt\signal\emitter.hpp" />
     <ClInclude Include="entt\signal\fwd.hpp" />
     <ClInclude Include="entt\signal\sigh.hpp" />
-    <ClInclude Include="MemoryAllocator\MemoryAllocator.h" />
-    <ClInclude Include="MemoryAllocator\STLPoolAlloc.h" />
+    <ClInclude Include="PoolAllocator\PoolAllocator.h" />
+    <ClInclude Include="PoolAllocator\STLPoolAlloc.h" />
     <ClInclude Include="TypeCounter\TypeCounter.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="ECSConstants.h" />

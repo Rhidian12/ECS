@@ -30,7 +30,7 @@
     <ClCompile Include="System\System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MemoryAllocator\MemoryAllocator.cpp">
+    <ClCompile Include="PoolAllocator\PoolAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -260,10 +260,10 @@
     <ClInclude Include="entt\fwd.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MemoryAllocator\MemoryAllocator.h">
+    <ClInclude Include="PoolAllocator\PoolAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MemoryAllocator\STLPoolAlloc.h">
+    <ClInclude Include="PoolAllocator\STLPoolAlloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
