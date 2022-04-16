@@ -9,22 +9,27 @@
 
 namespace ECS
 {
-	struct alignas(16) BlockInformation final
+	inline static constexpr size_t AlignSize{ 16 };
+
+	struct alignas(AlignSize) BlockInformation final
 	{
 		size_t BlockSize;
 		bool IsFree;
+
 		BlockInformation* pNext;
+		void* Data;
 	};
 
 	template<typename Type>
 	class MemoryAllocator final
 	{
 	public:
-		using value_type = Type;
-
 		MemoryAllocator() = default;
-		template<typename OtherType>
-		constexpr MemoryAllocator(const MemoryAllocator<OtherType>&) noexcept {}
+
+		MemoryAllocator(const MemoryAllocator&) = delete;
+		MemoryAllocator(MemoryAllocator&&) = delete;
+		MemoryAllocator& operator=(const MemoryAllocator&) = delete;
+		MemoryAllocator& operator=(MemoryAllocator&&) = delete;
 
 		~MemoryAllocator();
 
@@ -32,6 +37,10 @@ namespace ECS
 
 		/* unreferenced size_t for STL */
 		void deallocate(void* pBlock, size_t) noexcept;
+
+		void construct(Type* p, const Type& value);
+
+		void destroy(Type* p);
 
 	private:
 		BlockInformation* GetFreeBlock(size_t size) const;
@@ -55,7 +64,8 @@ namespace ECS
 		{
 			BlockInformation* pNext{ pTemp->pNext };
 
-			//free(pTemp);
+			free(pTemp->Data);
+			free(pTemp);
 
 			pTemp = pNext;
 		}
@@ -71,7 +81,7 @@ namespace ECS
 		if (pBlockInfo)
 		{
 			pBlockInfo->IsFree = false;
-			return reinterpret_cast<Type*>(pBlockInfo);
+			return reinterpret_cast<Type*>(pBlockInfo->Data);
 		}
 
 		const size_t totalSize{ sizeof(BlockInformation) + nrOfElementsToAllocate * sizeof(Type) };
@@ -83,6 +93,7 @@ namespace ECS
 		pBlockInfo->BlockSize = nrOfElementsToAllocate * sizeof(Type);
 		pBlockInfo->IsFree = false;
 		pBlockInfo->pNext = nullptr;
+		pBlockInfo->Data = malloc(nrOfElementsToAllocate * sizeof(Type));
 
 		if (!Head)
 		{
@@ -96,9 +107,9 @@ namespace ECS
 
 		Tail = pBlockInfo;
 
-		return reinterpret_cast<Type*>(pBlockInfo);
+		return reinterpret_cast<Type*>(pBlockInfo->Data);
 	}
-	
+
 	template<typename Type>
 	void MemoryAllocator<Type>::deallocate(void* pBlock, size_t) noexcept
 	{
@@ -113,13 +124,25 @@ namespace ECS
 	}
 
 	template<typename Type>
+	void MemoryAllocator<Type>::construct(Type* p, const Type& value)
+	{
+		::new (static_cast<void*>(p)) Type(value);
+	}
+
+	template<typename Type>
+	void MemoryAllocator<Type>::destroy(Type* p)
+	{
+		p->~Type();
+	}
+
+	template<typename Type>
 	BlockInformation* MemoryAllocator<Type>::GetFreeBlock(size_t size) const
 	{
 		BlockInformation* pCurrent{ Head };
 
 		while (pCurrent)
 		{
-			if (pCurrent->IsFree && pCurrent->BlockSize >= size)
+			if (pCurrent->IsFree && pCurrent->BlockSize >= size * sizeof(Type))
 			{
 				return pCurrent;
 			}
