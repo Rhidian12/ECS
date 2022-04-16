@@ -36,11 +36,7 @@ namespace ECS
 		Type* allocate(size_t nrOfElementsToAllocate);
 
 		/* unreferenced size_t for STL */
-		void deallocate(void* pBlock, size_t) noexcept;
-
-		void construct(Type* p, const Type& value);
-
-		void destroy(Type* p);
+		void deallocate(void* pBlock);
 
 	private:
 		BlockInformation* GetFreeBlock(size_t size) const;
@@ -111,7 +107,7 @@ namespace ECS
 	}
 
 	template<typename Type>
-	void MemoryAllocator<Type>::deallocate(void* pBlock, size_t) noexcept
+	void MemoryAllocator<Type>::deallocate(void* pBlock)
 	{
 		assert(pBlock);
 
@@ -121,18 +117,6 @@ namespace ECS
 		pBlockInfo = static_cast<BlockInformation*>(pBlock);
 
 		pBlockInfo->IsFree = true;
-	}
-
-	template<typename Type>
-	void MemoryAllocator<Type>::construct(Type* p, const Type& value)
-	{
-		::new (static_cast<void*>(p)) Type(value);
-	}
-
-	template<typename Type>
-	void MemoryAllocator<Type>::destroy(Type* p)
-	{
-		p->~Type();
 	}
 
 	template<typename Type>
