@@ -28,7 +28,7 @@ namespace ECS
 
 		~MemoryAllocator();
 
-		Type* allocate(size_t size);
+		Type* allocate(size_t nrOfElementsToAllocate);
 
 		/* unreferenced size_t for STL */
 		void deallocate(void* pBlock, size_t) noexcept;
@@ -62,11 +62,11 @@ namespace ECS
 	}
 
 	template<typename Type>
-	Type* MemoryAllocator<Type>::allocate(size_t size)
+	Type* MemoryAllocator<Type>::allocate(size_t nrOfElementsToAllocate)
 	{
-		assert(size != 0);
+		assert(nrOfElementsToAllocate != 0);
 
-		BlockInformation* pBlockInfo{ GetFreeBlock(size) };
+		BlockInformation* pBlockInfo{ GetFreeBlock(nrOfElementsToAllocate) };
 
 		if (pBlockInfo)
 		{
@@ -74,13 +74,13 @@ namespace ECS
 			return reinterpret_cast<Type*>(pBlockInfo);
 		}
 
-		const size_t totalSize{ sizeof(BlockInformation) + size * sizeof(Type) };
+		const size_t totalSize{ sizeof(BlockInformation) + nrOfElementsToAllocate * sizeof(Type) };
 		void* const pBlock{ malloc(totalSize) };
 
 		assert(pBlock);
 
 		pBlockInfo = static_cast<BlockInformation*>(pBlock);
-		pBlockInfo->BlockSize = size;
+		pBlockInfo->BlockSize = nrOfElementsToAllocate * sizeof(Type);
 		pBlockInfo->IsFree = false;
 		pBlockInfo->pNext = nullptr;
 
