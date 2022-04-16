@@ -263,5 +263,8 @@
     <ClInclude Include="MemoryAllocator\MemoryAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MemoryAllocator\STLPoolAlloc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

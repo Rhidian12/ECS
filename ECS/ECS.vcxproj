@@ -221,6 +221,7 @@
     <ClInclude Include="entt\signal\fwd.hpp" />
     <ClInclude Include="entt\signal\sigh.hpp" />
     <ClInclude Include="MemoryAllocator\MemoryAllocator.h" />
+    <ClInclude Include="MemoryAllocator\STLPoolAlloc.h" />
     <ClInclude Include="TypeCounter\TypeCounter.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="ECSConstants.h" />
