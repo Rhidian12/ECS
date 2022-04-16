@@ -21,7 +21,7 @@ namespace ECS
 	};
 
 	template<typename Type>
-	class PoolAllocator final
+	class PoolAllocator
 	{
 	public:
 		PoolAllocator() = default;
@@ -31,7 +31,7 @@ namespace ECS
 		PoolAllocator& operator=(const PoolAllocator&) = delete;
 		PoolAllocator& operator=(PoolAllocator&&) = delete;
 
-		~PoolAllocator();
+		virtual ~PoolAllocator();
 
 		Type* allocate(size_t nrOfElementsToAllocate);
 
