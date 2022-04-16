@@ -37,6 +37,8 @@ namespace ECS
 		/* unreferenced size_type for STL and noexcept for STL */
 		void deallocate(pointer p, size_type = 0) noexcept;
 
+		void construct(pointer p, const_reference value);
+
 	private:
 		STLPoolAlloc* CopiedAllocator;
 	};
@@ -66,5 +68,11 @@ namespace ECS
 		}
 
 		return PoolAllocator<Type>::deallocate(p);
+	}
+
+	template<typename Type>
+	void STLPoolAlloc<Type>::construct(pointer p, const_reference value)
+	{
+		new (p) Type(value);
 	}
 }
