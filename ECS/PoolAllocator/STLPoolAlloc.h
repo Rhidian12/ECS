@@ -24,9 +24,20 @@ namespace ECS
 			using other = STLPoolAlloc<OtherType>;
 		};
 
+		STLPoolAlloc() = default;
 
+		STLPoolAlloc(STLPoolAlloc& alloc) noexcept;
+
+		/* STL required copy constructor */
+		template<typename OtherType>
+		STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept {}
 
 	private:
 		STLPoolAlloc* CopiedAllocator;
 	};
+
+	template<typename Type>
+	STLPoolAlloc<Type>::STLPoolAlloc(STLPoolAlloc& alloc) noexcept
+		: CopiedAllocator{ &alloc }
+	{}
 }
