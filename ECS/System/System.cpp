@@ -4,7 +4,7 @@ namespace ECS
 {
 	System::~System()
 	{
-		for (std::vector<IComponent*, MemoryAllocator<IComponent*>>& components : Components)
+		for (std::vector<IComponent*, STLPoolAlloc<IComponent*>>& components : Components)
 		{
 			for (IComponent*& pC : components)
 			{

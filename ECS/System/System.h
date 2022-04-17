@@ -3,7 +3,7 @@
 #include "../TypeCounter/TypeCounter.h"
 
 #include "../Component/Component.h"
-#include "../MemoryAllocator/MemoryAllocator.h"
+#include "../PoolAllocator/STLPoolAlloc.h"
 
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
@@ -16,7 +16,7 @@ namespace ECS
 	class View final
 	{
 	public:
-		View(std::tuple<std::vector<TComponents, MemoryAllocator<TComponents>>...>&& components)
+		View(std::tuple<std::vector<TComponents, STLPoolAlloc<TComponents>>...>&& components)
 			: Components{ std::move(components) }
 			, NrOfComponents{ std::get<0>(Components).size() }
 		{}
@@ -39,7 +39,7 @@ namespace ECS
 			std::apply(function, comps);
 		}
 
-		std::tuple<std::vector<TComponents, MemoryAllocator<TComponents>>...> Components;
+		std::tuple<std::vector<TComponents, STLPoolAlloc<TComponents>>...> Components;
 		size_t NrOfComponents;
 	};
 
@@ -76,16 +76,16 @@ namespace ECS
 		}
 
 		template<typename ... TComponents, size_t ... Indices>
-		std::tuple<std::vector<TComponents, MemoryAllocator<TComponents>>...> CreateViewData(std::index_sequence<Indices...>) const
+		std::tuple<std::vector<TComponents, STLPoolAlloc<TComponents>>...> CreateViewData(std::index_sequence<Indices...>) const
 		{
 			return std::make_tuple(ConvertVectorContents<IComponent*, TComponents>(Components[Indices])...);
 		}
 
 		template<typename From, typename To>
-		std::vector<To, MemoryAllocator<To>> ConvertVectorContents(const std::vector<From, MemoryAllocator<From>>& v) const
+		std::vector<To, STLPoolAlloc<To>> ConvertVectorContents(const std::vector<From, STLPoolAlloc<From>>& v) const
 		{
 			const size_t size{ v.size() };
-			std::vector<To, MemoryAllocator<To>> vTo(size);
+			std::vector<To, STLPoolAlloc<To>> vTo(size);
 
 			for (size_t i{}; i < size; ++i)
 			{
@@ -97,7 +97,7 @@ namespace ECS
 
 		std::vector<EntitySignature> EntitySignatures;
 		std::vector<Entity> Entities;
-		std::vector<std::vector<IComponent*, MemoryAllocator<IComponent*>>, MemoryAllocator<std::vector<IComponent*, MemoryAllocator<IComponent*>>>> Components;
+		std::vector<std::vector<IComponent*, STLPoolAlloc<IComponent*>>, STLPoolAlloc<std::vector<IComponent*, STLPoolAlloc<IComponent*>>>> Components;
 	};
 
 	template<typename Component>
@@ -112,7 +112,7 @@ namespace ECS
 			Components.resize(Components.size() + (componentID - Components.size() + 1));
 		}
 
-		std::vector<IComponent*, MemoryAllocator<IComponent*>>& components{ Components[componentID] };
+		std::vector<IComponent*, STLPoolAlloc<IComponent*>>& components{ Components[componentID] };
 
 		if (static_cast<size_t>(entity) >= components.size())
 		{
