@@ -106,14 +106,12 @@ namespace ECS
 	{
 		assert(pBlock);
 
-		BlockInformation* pBlockInfo{};
-
 		/* THIS IS EXTREMELY HARDCODED, BUT THIS COULD ONLY BE SOLVED VIA REFLECTION */
 
 		/* Move back 3 addresses for the start of the BlockInformation */
-		pBlockInfo = static_cast<BlockInformation*>(pBlock) - 3;
+		BlockInformation** pBlockInfo = reinterpret_cast<BlockInformation**>(&pBlock - 3);
 
-		pBlockInfo->IsFree = true;
+		(*pBlockInfo)->IsFree = true;
 	}
 
 	template<typename Type>
