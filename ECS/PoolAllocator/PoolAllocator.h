@@ -9,8 +9,9 @@
 
 namespace ECS
 {
-	inline static constexpr size_t AlignSize{ 16 };
+	inline static constexpr size_t AlignSize{ 8 };
 
+	/* MOVING THE VARIABLES INSIDE THIS STRUCT WILL BREAK THE ALLOCATOR, SEE PoolAllocator::deallocate() !!! */
 	struct alignas(AlignSize) BlockInformation final
 	{
 		size_t BlockSize;
@@ -106,9 +107,11 @@ namespace ECS
 		assert(pBlock);
 
 		BlockInformation* pBlockInfo{};
-		BlockInformation* pTemp{};
 
-		pBlockInfo = static_cast<BlockInformation*>(pBlock);
+		/* THIS IS EXTREMELY HARDCODED, BUT THIS COULD ONLY BE SOLVED VIA REFLECTION */
+
+		/* Move back 3 addresses for the start of the BlockInformation */
+		pBlockInfo = static_cast<BlockInformation*>(pBlock) - 3;
 
 		pBlockInfo->IsFree = true;
 	}
