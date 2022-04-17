@@ -114,6 +114,9 @@ namespace ECS
 	template<typename Type>
 	void STLPoolAlloc<Type>::destroy(pointer p)
 	{
-		p->~Type();
+		if constexpr (!std::is_trivially_destructible_v<Type>)
+		{
+			p->~Type();
+		}
 	}
 }
