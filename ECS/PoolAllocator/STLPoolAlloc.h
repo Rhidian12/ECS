@@ -4,6 +4,9 @@
 
 namespace ECS
 {
+	/* Based on: */
+	/* https://github.com/moya-lang/Allocator/blob/master/Allocator.h */
+
 	template<typename Type>
 	class STLPoolAlloc final : private PoolAllocator<Type>
 	{
@@ -25,12 +28,13 @@ namespace ECS
 		};
 
 		STLPoolAlloc() = default;
+		~STLPoolAlloc();
 
 		STLPoolAlloc(STLPoolAlloc& alloc) noexcept;
 
 		/* STL required copy constructor */
 		template<typename OtherType>
-		STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept {}
+		STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept;
 
 		pointer allocate(size_type elementsToAllocate);
 
@@ -41,8 +45,18 @@ namespace ECS
 		void destroy(pointer p);
 
 	private:
-		STLPoolAlloc* CopiedAllocator;
+		STLPoolAlloc* CopiedAllocator{};
+		std::allocator<Type>* RebindAllocator{};
 	};
+
+	template<typename Type>
+	STLPoolAlloc<Type>::~STLPoolAlloc()
+	{
+		if (RebindAllocator)
+		{
+			delete RebindAllocator;
+		}
+	}
 
 	template<typename Type>
 	STLPoolAlloc<Type>::STLPoolAlloc(STLPoolAlloc& alloc) noexcept
@@ -50,22 +64,42 @@ namespace ECS
 	{}
 
 	template<typename Type>
-	STLPoolAlloc<Type>::pointer STLPoolAlloc<Type>::allocate(size_type elementsToAllocate)
+	template<typename OtherType>
+	STLPoolAlloc<Type>::STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept
+	{
+		if (!std::is_same_v<Type, OtherType>)
+		{
+			RebindAllocator = new std::allocator<Type>();
+		}
+	}
+
+	template<typename Type>
+	typename STLPoolAlloc<Type>::pointer STLPoolAlloc<Type>::allocate(size_type elementsToAllocate)
 	{
 		if (CopiedAllocator)
 		{
 			return CopiedAllocator->allocate(elementsToAllocate);
 		}
 
+		if (RebindAllocator)
+		{
+			return RebindAllocator->allocate(elementsToAllocate);
+		}
+
 		return PoolAllocator<Type>::allocate(elementsToAllocate);
 	}
 
 	template<typename Type>
-	void STLPoolAlloc<Type>::deallocate(pointer p, size_type) noexcept
+	void STLPoolAlloc<Type>::deallocate(pointer p, size_type c) noexcept
 	{
 		if (CopiedAllocator)
 		{
 			return CopiedAllocator->deallocate(p);
+		}
+
+		if (RebindAllocator)
+		{
+			return RebindAllocator->deallocate(p, c);
 		}
 
 		return PoolAllocator<Type>::deallocate(p);
