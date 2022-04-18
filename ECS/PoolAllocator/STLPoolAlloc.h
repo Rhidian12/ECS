@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "PoolAllocator.h"
 
 namespace ECS
@@ -28,13 +29,14 @@ namespace ECS
 		};
 
 		STLPoolAlloc() = default;
-		~STLPoolAlloc();
+		virtual ~STLPoolAlloc() = default;
 
-		STLPoolAlloc(STLPoolAlloc& alloc) noexcept;
+		STLPoolAlloc(const STLPoolAlloc& other) noexcept = default;
+		STLPoolAlloc& operator=(const STLPoolAlloc& other) = default;
 
 		/* STL required copy constructor */
 		template<typename OtherType>
-		STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept;
+		STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept {}
 
 		pointer allocate(size_type elementsToAllocate);
 
@@ -46,65 +48,17 @@ namespace ECS
 
 		pointer address(reference r) const;
 		const_pointer address(const_reference r) const;
-
-	private:
-		STLPoolAlloc* CopiedAllocator{};
-		std::allocator<Type>* RebindAllocator{};
 	};
-
-	template<typename Type>
-	STLPoolAlloc<Type>::~STLPoolAlloc()
-	{
-		if (RebindAllocator)
-		{
-			delete RebindAllocator;
-		}
-	}
-
-	template<typename Type>
-	STLPoolAlloc<Type>::STLPoolAlloc(STLPoolAlloc& alloc) noexcept
-		: CopiedAllocator{ &alloc }
-	{}
-
-	template<typename Type>
-	template<typename OtherType>
-	STLPoolAlloc<Type>::STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept
-	{
-		if constexpr (!std::is_same_v<Type, OtherType>)
-		{
-			RebindAllocator = new std::allocator<Type>();
-		}
-	}
 
 	template<typename Type>
 	typename STLPoolAlloc<Type>::pointer STLPoolAlloc<Type>::allocate(size_type elementsToAllocate)
 	{
-		if (CopiedAllocator)
-		{
-			return CopiedAllocator->allocate(elementsToAllocate);
-		}
-
-		if (RebindAllocator)
-		{
-			return RebindAllocator->allocate(elementsToAllocate);
-		}
-
 		return PoolAllocator<Type>::allocate(elementsToAllocate);
 	}
 
 	template<typename Type>
 	void STLPoolAlloc<Type>::deallocate(pointer p, size_type c) noexcept
 	{
-		if (CopiedAllocator)
-		{
-			return CopiedAllocator->deallocate(p);
-		}
-
-		if (RebindAllocator)
-		{
-			return RebindAllocator->deallocate(p, c);
-		}
-
 		return PoolAllocator<Type>::deallocate(p);
 	}
 
@@ -136,8 +90,8 @@ namespace ECS
 	}
 
 	template<typename Type, typename OtherType>
-	bool operator==(const STLPoolAlloc<Type>&, const STLPoolAlloc<Type>&) { return true; }
+	bool operator==(const STLPoolAlloc<Type>&, const STLPoolAlloc<OtherType>&) { return true; }
 
 	template<typename Type, typename OtherType>
-	bool operator!=(const STLPoolAlloc<Type>&, const STLPoolAlloc<Type>&) { return false; }
+	bool operator!=(const STLPoolAlloc<Type>&, const STLPoolAlloc<OtherType>&) { return false; }
 }

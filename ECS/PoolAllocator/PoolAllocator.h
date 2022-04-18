@@ -25,12 +25,10 @@ namespace ECS
 	class PoolAllocator
 	{
 	public:
-		PoolAllocator() = default;
+		PoolAllocator();
 
-		PoolAllocator(const PoolAllocator&) = delete;
-		PoolAllocator(PoolAllocator&&) = delete;
+		PoolAllocator(const PoolAllocator&) noexcept = delete;
 		PoolAllocator& operator=(const PoolAllocator&) = delete;
-		PoolAllocator& operator=(PoolAllocator&&) = delete;
 
 		virtual ~PoolAllocator();
 
@@ -42,9 +40,15 @@ namespace ECS
 	private:
 		BlockInformation* GetFreeBlock(size_t size) const;
 
-		BlockInformation* Head{};
-		BlockInformation* Tail{};
+		BlockInformation* Head;
+		BlockInformation* Tail;
 	};
+
+	template<typename Type>
+	PoolAllocator<Type>::PoolAllocator()
+		: Head{}
+		, Tail{}
+	{}
 
 	template<typename Type>
 	PoolAllocator<Type>::~PoolAllocator()
