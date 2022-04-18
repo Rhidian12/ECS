@@ -44,6 +44,9 @@ namespace ECS
 		void construct(pointer p, const_reference value);
 		void destroy(pointer p);
 
+		pointer address(reference r) const;
+		const_pointer address(const_reference r) const;
+
 	private:
 		STLPoolAlloc* CopiedAllocator{};
 		std::allocator<Type>* RebindAllocator{};
@@ -67,7 +70,7 @@ namespace ECS
 	template<typename OtherType>
 	STLPoolAlloc<Type>::STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept
 	{
-		if (!std::is_same_v<Type, OtherType>)
+		if constexpr (!std::is_same_v<Type, OtherType>)
 		{
 			RebindAllocator = new std::allocator<Type>();
 		}
@@ -119,4 +122,22 @@ namespace ECS
 			p->~Type();
 		}
 	}
+	
+	template<typename Type>
+	STLPoolAlloc<Type>::pointer STLPoolAlloc<Type>::address(reference r) const
+	{
+		return &r;
+	}
+
+	template<typename Type>
+	STLPoolAlloc<Type>::const_pointer STLPoolAlloc<Type>::address(const_reference r) const
+	{
+		return &r;
+	}
+
+	template<typename Type, typename OtherType>
+	bool operator==(const STLPoolAlloc<Type>&, const STLPoolAlloc<Type>&) { return true; }
+
+	template<typename Type, typename OtherType>
+	bool operator!=(const STLPoolAlloc<Type>&, const STLPoolAlloc<Type>&) { return false; }
 }
