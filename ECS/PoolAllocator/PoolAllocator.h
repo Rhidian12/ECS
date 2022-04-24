@@ -21,113 +21,35 @@ namespace ECS
 		void* Data;
 	};
 
-	template<typename Type>
-	class PoolAllocator
+	class PoolAllocator final
 	{
 	public:
-		PoolAllocator();
+		PoolAllocator(const PoolAllocator& other) noexcept = delete;
+		PoolAllocator(PoolAllocator&& other) noexcept = delete;
+		PoolAllocator& operator=(const PoolAllocator& other) noexcept = delete;
+		PoolAllocator& operator=(PoolAllocator&& other) noexcept = delete;
 
-		PoolAllocator(const PoolAllocator& other) noexcept;
-		PoolAllocator(PoolAllocator&& other) noexcept;
-		PoolAllocator& operator=(const PoolAllocator& other) noexcept;
-		PoolAllocator& operator=(PoolAllocator&& other) noexcept;
+		template<typename Type>
+		static Type* allocate(size_t nrOfElementsToAllocate);
 
-		virtual ~PoolAllocator();
+		static void deallocate(void* pBlock);
 
-		Type* allocate(size_t nrOfElementsToAllocate);
-
-		/* unreferenced size_t for STL */
-		void deallocate(void* pBlock);
+		static void ReleaseAllMemory() noexcept;
 
 	private:
-		BlockInformation* GetFreeBlock(size_t size) const;
+		template<typename Type>
+		static BlockInformation* GetFreeBlock(size_t size);
 
-		BlockInformation* Head;
-		BlockInformation* Tail;
+		inline static BlockInformation* Head{ nullptr };
+		inline static BlockInformation* Tail{ nullptr };
 	};
 
 	template<typename Type>
-	PoolAllocator<Type>::PoolAllocator()
-		: Head{}
-		, Tail{}
-	{}
-
-	template<typename Type>
-	PoolAllocator<Type>::PoolAllocator(const PoolAllocator& other) noexcept
-		: Head{}
-		, Tail{}
-	{
-		BlockInformation* pTemp{ other.Head };
-
-		while (pTemp)
-		{
-			allocate(pTemp->BlockSize / sizeof(Type));
-
-			pTemp = pTemp->pNext;
-		}
-	}
-
-	template<typename Type>
-	PoolAllocator<Type>::PoolAllocator(PoolAllocator&& other) noexcept
-		: Head{ std::move(other.Head) }
-		, Tail{ std::move(other.Tail) }
-	{
-		other.Head = nullptr;
-		other.Tail = nullptr;
-	}
-
-	template<typename Type>
-	PoolAllocator<Type>& ECS::PoolAllocator<Type>::operator=(PoolAllocator&& other) noexcept
-	{
-		Head = std::move(other.Head);
-		Tail = std::move(other.Tail);
-
-		other.Head = nullptr;
-		other.Tail = nullptr;
-
-		return *this;
-	}
-
-	template<typename Type>
-	PoolAllocator<Type>& PoolAllocator<Type>::operator=(const PoolAllocator& other) noexcept
-	{
-		Head = nullptr;
-		Tail = nullptr;
-
-		BlockInformation* pTemp{ other.Head };
-
-		while (pTemp)
-		{
-			allocate(pTemp->BlockSize / sizeof(Type));
-
-			pTemp = pTemp->pNext;
-		}
-
-		return *this;
-	}
-
-	template<typename Type>
-	PoolAllocator<Type>::~PoolAllocator()
-	{
-		BlockInformation* pTemp{ Head };
-
-		while (pTemp)
-		{
-			BlockInformation* pNext{ pTemp->pNext };
-
-			free(pTemp->Data);
-			free(pTemp);
-
-			pTemp = pNext;
-		}
-	}
-
-	template<typename Type>
-	Type* PoolAllocator<Type>::allocate(size_t nrOfElementsToAllocate)
+	Type* PoolAllocator::allocate(size_t nrOfElementsToAllocate)
 	{
 		assert(nrOfElementsToAllocate != 0);
 
-		BlockInformation* pBlockInfo{ GetFreeBlock(nrOfElementsToAllocate) };
+		BlockInformation* pBlockInfo{ GetFreeBlock<Type>(nrOfElementsToAllocate) };
 
 		if (pBlockInfo)
 		{
@@ -162,20 +84,7 @@ namespace ECS
 	}
 
 	template<typename Type>
-	void PoolAllocator<Type>::deallocate(void* pBlock)
-	{
-		assert(pBlock);
-
-		/* THIS IS EXTREMELY HARDCODED, BUT THIS COULD ONLY BE SOLVED VIA REFLECTION */
-
-		/* Move back 3 addresses for the start of the BlockInformation */
-		BlockInformation** pBlockInfo = reinterpret_cast<BlockInformation**>(&pBlock - 3);
-
-		(*pBlockInfo)->IsFree = true;
-	}
-
-	template<typename Type>
-	BlockInformation* PoolAllocator<Type>::GetFreeBlock(size_t size) const
+	BlockInformation* PoolAllocator::GetFreeBlock(size_t size)
 	{
 		BlockInformation* pCurrent{ Head };
 

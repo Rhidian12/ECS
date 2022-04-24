@@ -9,7 +9,7 @@ namespace ECS
 	/* https://github.com/moya-lang/Allocator/blob/master/Allocator.h */
 
 	template<typename Type>
-	class STLPoolAlloc final : private PoolAllocator<Type>
+	class STLPoolAlloc final
 	{
 	public:
 		/* STL using directives */
@@ -29,7 +29,7 @@ namespace ECS
 		};
 
 		STLPoolAlloc() = default;
-		virtual ~STLPoolAlloc() = default;
+		virtual ~STLPoolAlloc() noexcept = default;
 
 		STLPoolAlloc(const STLPoolAlloc&) noexcept = default;
 		STLPoolAlloc(STLPoolAlloc&&) noexcept = default;
@@ -41,7 +41,6 @@ namespace ECS
 		STLPoolAlloc(const STLPoolAlloc<OtherType>&) noexcept {}
 		template<typename OtherType>
 		STLPoolAlloc& operator=(const STLPoolAlloc<OtherType>&) noexcept { return *this; }
-
 
 		pointer allocate(size_type elementsToAllocate);
 
@@ -58,13 +57,15 @@ namespace ECS
 	template<typename Type>
 	typename STLPoolAlloc<Type>::pointer STLPoolAlloc<Type>::allocate(size_type elementsToAllocate)
 	{
-		return PoolAllocator<Type>::allocate(elementsToAllocate);
+		// return PoolAllocator<Type>::allocate(elementsToAllocate);
+		return PoolAllocator::allocate<Type>(elementsToAllocate);
 	}
 
 	template<typename Type>
 	void STLPoolAlloc<Type>::deallocate(pointer p, size_type c) noexcept
 	{
-		return PoolAllocator<Type>::deallocate(p);
+		// return PoolAllocator<Type>::deallocate(p);
+		return PoolAllocator::deallocate(p);
 	}
 
 	template<typename Type>

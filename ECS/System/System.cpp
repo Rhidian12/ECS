@@ -4,14 +4,14 @@ namespace ECS
 {
 	System::~System()
 	{
-		for (std::vector<IComponent*, STLPoolAlloc<IComponent*>>& components : Components)
-		{
-			for (IComponent*& pC : components)
-			{
-				delete pC;
-				pC = nullptr;
-			}
-		}
+		//for (std::vector<IComponent*, STLPoolAlloc<IComponent*>>& components : Components)
+		//{
+		//	for (IComponent*& pC : components)
+		//	{
+				//delete pC;
+				//pC = nullptr;
+		//	}
+		//}
 	}
 
 	Entity System::CreateEntity()

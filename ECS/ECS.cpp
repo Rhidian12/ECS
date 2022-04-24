@@ -148,7 +148,7 @@ int main(int*, char* [])
 	using namespace GO;
 
 	constexpr Entity AmountOfEntities{ MaxEntities };
-	constexpr int Iterations{ 100 };
+	constexpr int Iterations{ 1 };
 
 	System gravitySystem{};
 
@@ -176,10 +176,10 @@ int main(int*, char* [])
 
 		GameObjects.push_back(pG);
 
-		const auto enttEntity{ registry.create() };
-		registry.emplace<ENTTGravity>(enttEntity);
-		registry.emplace<ENTTTransformComponent>(enttEntity);
-		registry.emplace<ENTTRigidBodyComponent>(enttEntity);
+		//const auto enttEntity{ registry.create() };
+		//registry.emplace<ENTTGravity>(enttEntity);
+		//registry.emplace<ENTTTransformComponent>(enttEntity);
+		//registry.emplace<ENTTRigidBodyComponent>(enttEntity);
 	}
 
 	std::chrono::steady_clock::time_point t1{};
@@ -238,6 +238,8 @@ int main(int*, char* [])
 
 	for (GameObject* pG : GameObjects)
 		delete pG;
+
+	PoolAllocator::ReleaseAllMemory();
 
 	return 0;
 }
