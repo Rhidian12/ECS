@@ -27,8 +27,10 @@ namespace ECS
 	public:
 		PoolAllocator();
 
-		PoolAllocator(const PoolAllocator&) noexcept = delete;
-		PoolAllocator& operator=(const PoolAllocator&) = delete;
+		PoolAllocator(const PoolAllocator& other) noexcept;
+		PoolAllocator(PoolAllocator&& other) noexcept;
+		PoolAllocator& operator=(const PoolAllocator& other) noexcept;
+		PoolAllocator& operator=(PoolAllocator&& other) noexcept;
 
 		virtual ~PoolAllocator();
 
@@ -49,6 +51,60 @@ namespace ECS
 		: Head{}
 		, Tail{}
 	{}
+
+	template<typename Type>
+	PoolAllocator<Type>::PoolAllocator(const PoolAllocator& other) noexcept
+		: Head{}
+		, Tail{}
+	{
+		BlockInformation* pTemp{ other.Head };
+
+		while (pTemp)
+		{
+			allocate(pTemp->BlockSize / sizeof(Type));
+
+			pTemp = pTemp->pNext;
+		}
+	}
+
+	template<typename Type>
+	PoolAllocator<Type>::PoolAllocator(PoolAllocator&& other) noexcept
+		: Head{ std::move(other.Head) }
+		, Tail{ std::move(other.Tail) }
+	{
+		other.Head = nullptr;
+		other.Tail = nullptr;
+	}
+
+	template<typename Type>
+	PoolAllocator<Type>& ECS::PoolAllocator<Type>::operator=(PoolAllocator&& other) noexcept
+	{
+		Head = std::move(other.Head);
+		Tail = std::move(other.Tail);
+
+		other.Head = nullptr;
+		other.Tail = nullptr;
+
+		return *this;
+	}
+
+	template<typename Type>
+	PoolAllocator<Type>& PoolAllocator<Type>::operator=(const PoolAllocator& other) noexcept
+	{
+		Head = nullptr;
+		Tail = nullptr;
+
+		BlockInformation* pTemp{ other.Head };
+
+		while (pTemp)
+		{
+			allocate(pTemp->BlockSize / sizeof(Type));
+
+			pTemp = pTemp->pNext;
+		}
+
+		return *this;
+	}
 
 	template<typename Type>
 	PoolAllocator<Type>::~PoolAllocator()

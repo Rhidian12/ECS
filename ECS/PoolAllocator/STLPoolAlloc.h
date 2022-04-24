@@ -31,8 +31,10 @@ namespace ECS
 		STLPoolAlloc() = default;
 		virtual ~STLPoolAlloc() = default;
 
-		STLPoolAlloc(const STLPoolAlloc& other) noexcept = default;
-		STLPoolAlloc& operator=(const STLPoolAlloc& other) = default;
+		STLPoolAlloc(const STLPoolAlloc&) noexcept = default;
+		STLPoolAlloc(STLPoolAlloc&& ) noexcept = default;
+		STLPoolAlloc& operator=(const STLPoolAlloc&) noexcept = default;
+		STLPoolAlloc& operator=(STLPoolAlloc&&) noexcept = default;
 
 		/* STL required copy constructor */
 		template<typename OtherType>
