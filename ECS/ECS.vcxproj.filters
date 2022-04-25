@@ -266,5 +266,8 @@
     <ClInclude Include="PoolAllocator\STLPoolAlloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CustomContainer\DynamicArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

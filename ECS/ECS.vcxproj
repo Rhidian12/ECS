@@ -151,6 +151,7 @@
     <ClCompile Include="System\System.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CustomContainer\DynamicArray.h" />
     <ClInclude Include="entt\config\config.h" />
     <ClInclude Include="entt\config\macro.h" />
     <ClInclude Include="entt\config\version.h" />
