@@ -67,7 +67,7 @@ namespace ECS
 		}
 
 		template<typename Type>
-		static void deallocate(Type*& pBlock)
+		static void deallocate(Type* pBlock)
 		{
 			assert(pBlock);
 
