@@ -47,6 +47,12 @@ namespace ECS
 	{
 	public:
 		System() = default;
+
+		System(const System&) noexcept = delete;
+		System(System&&) noexcept = delete;
+		System& operator=(const System&) noexcept = delete;
+		System& operator=(System&&) noexcept = delete;
+
 		~System();
 
 		Entity CreateEntity();
