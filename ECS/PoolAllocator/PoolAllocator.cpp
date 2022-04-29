@@ -2,22 +2,23 @@
 
 namespace ECS
 {
-	void PoolAllocator::ReleaseAllMemory() noexcept
+	PoolAllocator* const PoolAllocator::GetInstance()
+	{
+		if (!Instance)
+		{
+			Instance = new PoolAllocator();
+		}
+
+		return Instance;
+	}
+
+	PoolAllocator::~PoolAllocator()
 	{
 		for (const auto& list : BlockLists)
 		{
 			for (void* const pBlock : list)
 			{
 				free(pBlock);
-			}
-		}
-
-		for (auto& list : FreeBlockLists)
-		{
-			while (!list.empty())
-			{
-				free(list.front());
-				list.pop();
 			}
 		}
 	}

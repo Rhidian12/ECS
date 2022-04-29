@@ -137,7 +137,7 @@ void GravityUpdate(ECS::System& system)
 	view.ForEach([](auto* gravity, auto* rigidBody, auto* transform)->void
 		{
 			rigidBody->Velocity.y += gravity->Gravity * rigidBody->Mass;
-	
+
 			transform->Position.x += rigidBody->Velocity.x;
 			transform->Position.y += rigidBody->Velocity.y;
 		});
@@ -148,8 +148,8 @@ int main(int*, char* [])
 	using namespace ECS;
 	using namespace GO;
 
-	constexpr Entity AmountOfEntities{ 500 };
-	constexpr int Iterations{ 100 };
+	constexpr Entity AmountOfEntities{ 1 };
+	constexpr int Iterations{ 1 };
 
 	System gravitySystem{};
 
@@ -219,16 +219,19 @@ int main(int*, char* [])
 	std::sort(ECSTimes.begin(), ECSTimes.end());
 	std::sort(GOTimes.begin(), GOTimes.end());
 
-	for (int i{}; i < Iterations / 10; ++i)
+	if (Iterations / 10 > 0)
 	{
-		ECSTimes.pop_back();
-		ECSTimes.pop_front();
+		for (int i{}; i < Iterations / 10; ++i)
+		{
+			ECSTimes.pop_back();
+			ECSTimes.pop_front();
 
-		GOTimes.pop_back();
-		GOTimes.pop_front();
+			GOTimes.pop_back();
+			GOTimes.pop_front();
 
-		enttTimes.pop_back();
-		enttTimes.pop_front();
+			enttTimes.pop_back();
+			enttTimes.pop_front();
+		}
 	}
 
 	std::cout << "ECS Average:\t\t" << std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0) /* / ECSTimes.size()  */ << " nanoseconds\n";
@@ -237,8 +240,6 @@ int main(int*, char* [])
 
 	for (GameObject* pG : GameObjects)
 		delete pG;
-
-	PoolAllocator::ReleaseAllMemory();
 
 	return 0;
 }

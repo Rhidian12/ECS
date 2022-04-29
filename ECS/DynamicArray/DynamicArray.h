@@ -366,10 +366,9 @@ namespace ECS
 		{
 			if constexpr (!std::is_trivially_destructible_v<Type>) // if this is a struct / class with a custom destructor, call it
 			{
-				while (pHead < pTail)
+				for (size_t i{}; i < Size(); ++i)
 				{
 					PoolAllocator::destroy(pHead);
-					//pHead->~Type();
 					++pHead;
 				}
 			}
@@ -382,7 +381,6 @@ namespace ECS
 			Type* pOldHead{ Head };
 			Type* const pOldTail{ Tail };
 
-			// Head = static_cast<Type*>(malloc(SizeOfType * newCapacity));
 			Head = PoolAllocator::allocate<Type>(newCapacity);
 			Tail = Head + newCapacity;
 

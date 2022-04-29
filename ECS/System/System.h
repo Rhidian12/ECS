@@ -128,7 +128,6 @@ namespace ECS
 		}
 
 		components[entity] = PoolAllocator::allocate<Component>(1);
-		// components[entity] = new Component();
 
 		EntitySignatures[entity].set(componentID);
 	}

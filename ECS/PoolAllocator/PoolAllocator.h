@@ -23,6 +23,10 @@ namespace ECS
 	class PoolAllocator final
 	{
 	public:
+		PoolAllocator* const GetInstance();
+
+		~PoolAllocator();
+
 		PoolAllocator(const PoolAllocator& other) noexcept = delete;
 		PoolAllocator(PoolAllocator&& other) noexcept = delete;
 		PoolAllocator& operator=(const PoolAllocator& other) noexcept = delete;
@@ -104,10 +108,11 @@ namespace ECS
 			}
 		}
 
-		static void ReleaseAllMemory() noexcept;
-
 	private:
+		PoolAllocator() = default;
 		static BlockInformation* GetFreeBlock(size_t bucket);
+
+		inline static PoolAllocator* Instance{ nullptr };
 
 		inline static std::vector<std::vector<void*>> BlockLists =
 		{
