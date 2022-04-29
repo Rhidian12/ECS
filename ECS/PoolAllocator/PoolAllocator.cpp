@@ -2,16 +2,6 @@
 
 namespace ECS
 {
-	PoolAllocator* const PoolAllocator::GetInstance()
-	{
-		if (!Instance)
-		{
-			Instance = new PoolAllocator();
-		}
-
-		return Instance;
-	}
-
 	PoolAllocator::~PoolAllocator()
 	{
 		for (const auto& list : BlockLists)

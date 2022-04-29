@@ -148,8 +148,10 @@ int main(int*, char* [])
 	using namespace ECS;
 	using namespace GO;
 
+	PoolAllocator instance{};
+
 	constexpr Entity AmountOfEntities{ 1 };
-	constexpr int Iterations{ 1 };
+	constexpr int Iterations{ 3 };
 
 	System gravitySystem{};
 
@@ -177,10 +179,10 @@ int main(int*, char* [])
 
 		//GameObjects.push_back(pG);
 
-		//const auto enttEntity{ registry.create() };
-		//registry.emplace<ENTTGravity>(enttEntity);
-		//registry.emplace<ENTTTransformComponent>(enttEntity);
-		//registry.emplace<ENTTRigidBodyComponent>(enttEntity);
+		const auto enttEntity{ registry.create() };
+		registry.emplace<ENTTGravity>(enttEntity);
+		registry.emplace<ENTTTransformComponent>(enttEntity);
+		registry.emplace<ENTTRigidBodyComponent>(enttEntity);
 	}
 
 	std::chrono::steady_clock::time_point t1{};
