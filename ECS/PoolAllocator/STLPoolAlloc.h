@@ -84,13 +84,13 @@ namespace ECS
 	}
 	
 	template<typename Type>
-	STLPoolAlloc<Type>::pointer STLPoolAlloc<Type>::address(reference r) const
+	typename STLPoolAlloc<Type>::pointer STLPoolAlloc<Type>::address(reference r) const
 	{
 		return &r;
 	}
 
 	template<typename Type>
-	STLPoolAlloc<Type>::const_pointer STLPoolAlloc<Type>::address(const_reference r) const
+	typename STLPoolAlloc<Type>::const_pointer STLPoolAlloc<Type>::address(const_reference r) const
 	{
 		return &r;
 	}

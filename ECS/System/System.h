@@ -3,7 +3,7 @@
 #include "../TypeCounter/TypeCounter.h"
 
 #include "../Component/Component.h"
-#include "../PoolAllocator/STLPoolAlloc.h"
+#include "../DynamicArray/DynamicArray.h"
 
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
@@ -16,9 +16,9 @@ namespace ECS
 	class View final
 	{
 	public:
-		View(std::tuple<std::vector<TComponents, STLPoolAlloc<TComponents>>...>&& components)
+		View(std::tuple<CustomContainer<TComponents>...>&& components)
 			: Components{ std::move(components) }
-			, NrOfComponents{ std::get<0>(Components).size() }
+			, NrOfComponents{ std::get<0>(Components).Size() }
 		{}
 
 		void ForEach(const std::function<void(TComponents...)>& function) const
@@ -39,13 +39,14 @@ namespace ECS
 			std::apply(function, comps);
 		}
 
-		std::tuple<std::vector<TComponents, STLPoolAlloc<TComponents>>...> Components;
+		std::tuple<CustomContainer<TComponents>...> Components;
 		size_t NrOfComponents;
 	};
 
 	class System final
 	{
 	public:
+		System() = default;
 		~System();
 
 		Entity CreateEntity();
@@ -76,16 +77,17 @@ namespace ECS
 		}
 
 		template<typename ... TComponents, size_t ... Indices>
-		std::tuple<std::vector<TComponents, STLPoolAlloc<TComponents>>...> CreateViewData(std::index_sequence<Indices...>) const
+		std::tuple<CustomContainer<TComponents>...> CreateViewData(std::index_sequence<Indices...>) const
 		{
 			return std::make_tuple(ConvertVectorContents<IComponent*, TComponents>(Components[Indices])...);
 		}
 
 		template<typename From, typename To>
-		std::vector<To, STLPoolAlloc<To>> ConvertVectorContents(const std::vector<From, STLPoolAlloc<From>>& v) const
+		CustomContainer<To> ConvertVectorContents(const CustomContainer<From>& v) const
 		{
-			const size_t size{ v.size() };
-			std::vector<To, STLPoolAlloc<To>> vTo(size);
+			const size_t size{ v.Size() };
+			CustomContainer<To> vTo{};
+			vTo.Resize(size);
 
 			for (size_t i{}; i < size; ++i)
 			{
@@ -95,9 +97,9 @@ namespace ECS
 			return vTo;
 		}
 
-		std::vector<EntitySignature> EntitySignatures;
-		std::vector<Entity> Entities;
-		std::vector<std::vector<IComponent*, STLPoolAlloc<IComponent*>>, STLPoolAlloc<std::vector<IComponent*, STLPoolAlloc<IComponent*>>>> Components;
+		CustomContainer<EntitySignature> EntitySignatures;
+		CustomContainer<Entity> Entities;
+		CustomContainer<CustomContainer<IComponent*>> Components;
 	};
 
 	template<typename Component>
@@ -107,19 +109,20 @@ namespace ECS
 
 		const ComponentType componentID{ Component::GetComponentID() };
 
-		if (static_cast<size_t>(componentID) >= Components.size())
+		if (static_cast<size_t>(componentID) >= Components.Size())
 		{
-			Components.resize(Components.size() + (componentID - Components.size() + 1));
+			Components.Resize(Components.Size() + (componentID - Components.Size() + 1));
 		}
 
-		std::vector<IComponent*, STLPoolAlloc<IComponent*>>& components{ Components[componentID] };
+		CustomContainer<IComponent*>& components{ Components[componentID] };
 
-		if (static_cast<size_t>(entity) >= components.size())
+		if (static_cast<size_t>(entity) >= components.Size())
 		{
-			components.resize(components.size() + (entity - components.size() + 1));
+			components.Resize(components.Size() + (entity - components.Size() + 1));
 		}
 
-		components[entity] = new Component();
+		components[entity] = PoolAllocator::allocate<Component>(1);
+		// components[entity] = new Component();
 
 		EntitySignatures[entity].set(componentID);
 	}
@@ -128,8 +131,8 @@ namespace ECS
 	Component* const System::GetComponent(const Entity& id) const
 	{
 		assert(id != InvalidEntityID);
-		assert(Component::GetComponentID() < Components.size());
-		assert(static_cast<size_t>(id) < Entities.size());
+		assert(Component::GetComponentID() < Components.Size());
+		assert(static_cast<size_t>(id) < Entities.Size());
 
 		return static_cast<Component*>(Components[Component::GetComponentID()][id]);
 	}

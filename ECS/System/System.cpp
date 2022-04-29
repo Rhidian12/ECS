@@ -4,21 +4,21 @@ namespace ECS
 {
 	System::~System()
 	{
-		//for (std::vector<IComponent*, STLPoolAlloc<IComponent*>>& components : Components)
+		//for (size_t i{}; i < Components.Size(); ++i)
 		//{
-		//	for (IComponent*& pC : components)
+		//	for (size_t j{}; j < Components[j].Size(); ++j)
 		//	{
-				//delete pC;
-				//pC = nullptr;
+		//		delete Components[i][j];
 		//	}
 		//}
 	}
 
 	Entity System::CreateEntity()
 	{
-		assert(static_cast<Entity>(Entities.size()) < MaxEntities);
+		assert(static_cast<Entity>(Entities.Size()) < MaxEntities);
 
-		EntitySignatures.emplace_back(EntitySignature{});
-		return Entities.emplace_back(static_cast<Entity>(Entities.size()));
+		EntitySignatures.Emplace(EntitySignature{});
+		Entities.Emplace(static_cast<Entity>(Entities.Size()));
+		return Entities.Back();
 	}
 }

@@ -16,6 +16,7 @@
 #include <numeric>
 #include <vector>
 #include <string>
+#include <vld.h>
 
 #include "entt/entt.hpp"
 
@@ -147,8 +148,8 @@ int main(int*, char* [])
 	using namespace ECS;
 	using namespace GO;
 
-	constexpr Entity AmountOfEntities{ MaxEntities };
-	constexpr int Iterations{ 1 };
+	constexpr Entity AmountOfEntities{ 500 };
+	constexpr int Iterations{ 100 };
 
 	System gravitySystem{};
 
@@ -232,9 +233,9 @@ int main(int*, char* [])
 		enttTimes.pop_front();
 	}
 
-	std::cout << "ECS Average:\t\t" << std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0) / ECSTimes.size()  << " nanoseconds\n";
-	std::cout << "GO Average:\t\t" << std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0) / GOTimes.size() << " nanoseconds\n";
-	std::cout << "ENTT Average:\t\t" << std::accumulate(enttTimes.cbegin(), enttTimes.cend(), (long long)0) / enttTimes.size() << " nanoseconds\n";
+	std::cout << "ECS Average:\t\t" << std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0) /* / ECSTimes.size()  */ << " nanoseconds\n";
+	std::cout << "GO Average:\t\t" << std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0) /* / GOTimes.size() */ << " nanoseconds\n";
+	std::cout << "ENTT Average:\t\t" << std::accumulate(enttTimes.cbegin(), enttTimes.cend(), (long long)0) /* / enttTimes.size() */ << " nanoseconds\n";
 
 	for (GameObject* pG : GameObjects)
 		delete pG;
