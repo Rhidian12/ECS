@@ -169,13 +169,13 @@ int main(int*, char* [])
 		gravitySystem.AddComponent<RigidBodyComponent>(entity);
 		gravitySystem.AddComponent<GravityComponent>(entity);
 
-		GameObject* pG{ new GameObject{} };
+		//GameObject* pG{ new GameObject{} };
 
-		pG->AddComponent(new GOGravityComponent{});
-		pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
-		pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
+		//pG->AddComponent(new GOGravityComponent{});
+		//pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
+		//pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
 
-		GameObjects.push_back(pG);
+		//GameObjects.push_back(pG);
 
 		//const auto enttEntity{ registry.create() };
 		//registry.emplace<ENTTGravity>(enttEntity);
@@ -215,8 +215,6 @@ int main(int*, char* [])
 
 		enttTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 	}
-
-	auto comp = gravitySystem.GetComponent<RigidBodyComponent>(10);
 
 	std::sort(ECSTimes.begin(), ECSTimes.end());
 	std::sort(GOTimes.begin(), GOTimes.end());
