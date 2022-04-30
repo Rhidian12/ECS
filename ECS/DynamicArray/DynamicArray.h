@@ -123,7 +123,7 @@ namespace ECS
 		CustomContainer() = default;
 		~CustomContainer()
 		{
-			DeleteData(Head, Tail);
+			DeleteData(Head);
 			ReleaseMemory(Head);
 		}
 
@@ -132,13 +132,11 @@ namespace ECS
 		{
 			const size_t capacity{ other.Capacity() };
 
-			// Head = new Type[capacity]();
 			Head = PoolAllocator::allocate<Type>(capacity);
 			Tail = Head + capacity;
 
 			for (size_t index{}; index < other.Size(); ++index)
 			{
-				// new (LastElement) Type(*(other.Head + index));
 				LastElement = Head + index;
 				PoolAllocator::construct(LastElement, *(other.Head + index));
 			}
@@ -158,14 +156,12 @@ namespace ECS
 		{
 			const size_t capacity{ other.Capacity() };
 
-			//Head = new Type[capacity]();
 			Head = PoolAllocator::allocate<Type>(capacity);
 			Tail = Head + capacity;
 
 			for (size_t index{}; index < other.Size(); ++index)
 			{
 				LastElement = Head + index;
-				// new (LastElement) Type(*(other.Head + index));
 				PoolAllocator::construct(LastElement, *(other.Head + index));
 			}
 
@@ -206,13 +202,7 @@ namespace ECS
 			}
 			else
 			{
-				/* [TODO]: AN ALLOCATOR SHOULD DO THIS */
-				// CurrentElement = new Type(std::forward<Values>(val)...);
-
-				// new (pNextBlock) Type(std::forward<Values>(val)...);
-				PoolAllocator::construct(pNextBlock, std::forward<Values>(val)...);
-
-				LastElement = pNextBlock;
+				PoolAllocator::construct(LastElement, std::forward<Values>(val)...);
 			}
 		}
 
@@ -233,7 +223,7 @@ namespace ECS
 
 		void Clear()
 		{
-			DeleteData(Head, Tail);
+			DeleteData(Head);
 
 			LastElement = nullptr;
 		}
@@ -348,28 +338,21 @@ namespace ECS
 		RandomConstIterator<Type> cend() const noexcept { return RandomConstIterator(LastElement + 1); }
 
 	private:
-		void ReleaseMemory(Type*& pOldHead)
+		void ReleaseMemory(Type* pOldHead)
 		{
-			//if (pOldHead)
-			//{
-			//	delete[] pOldHead;
-			//	pOldHead = nullptr;
-			//}
-
 			if (pOldHead)
 			{
 				PoolAllocator::deallocate(pOldHead);
 			}
 		}
 
-		void DeleteData(Type* pHead, Type* const pTail)
+		void DeleteData(Type* pHead)
 		{
 			if constexpr (!std::is_trivially_destructible_v<Type>) // if this is a struct / class with a custom destructor, call it
 			{
 				for (size_t i{}; i < Size(); ++i)
 				{
-					PoolAllocator::destroy(pHead);
-					++pHead;
+					PoolAllocator::destroy(pHead + i);
 				}
 			}
 		}
@@ -379,7 +362,6 @@ namespace ECS
 			const size_t size{ Size() };
 
 			Type* pOldHead{ Head };
-			Type* const pOldTail{ Tail };
 
 			Head = PoolAllocator::allocate<Type>(newCapacity);
 			Tail = Head + newCapacity;
@@ -390,7 +372,7 @@ namespace ECS
 				*LastElement = std::move(*(pOldHead + index)); // move element from old memory over
 			}
 
-			DeleteData(pOldHead, pOldTail);
+			DeleteData(pOldHead);
 			ReleaseMemory(pOldHead);
 		}
 
@@ -408,10 +390,6 @@ namespace ECS
 				++LastElement;
 			}
 
-			/* [TODO]: AN ALLOCATOR SHOULD DO THIS */
-			// CurrentElement = new Type(std::forward<Values>(val)...);
-
-			// new (LastElement) Type(std::forward<Values>(values)...);
 			PoolAllocator::construct(LastElement, std::forward<Values>(values)...);
 		}
 
