@@ -270,13 +270,13 @@ namespace ECS
 		{
 			ASSERT((Head != nullptr), "Container::Front() > Out of range!");
 
-			return *(Head);
+			return *Head;
 		}
 		const Type& Front() const
 		{
 			ASSERT((Head != nullptr), "Container::Front() > Out of range!");
 
-			return *(Head);
+			return *Head;
 		}
 
 		Type& Back()
