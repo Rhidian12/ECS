@@ -36,8 +36,10 @@ namespace ECS
 		{
 			assert(nrOfElementsToAllocate != 0);
 
-			const size_t nrOfBytes{ nrOfElementsToAllocate * sizeof(Type) };
+			const size_t nrOfBytes{ ((nrOfElementsToAllocate * sizeof(Type) + AlignSize - 1) & ~(AlignSize - 1)) };
 			size_t bucket{ nrOfBytes / sizeof(void*) - 1 };
+
+			assert(nrOfBytes % AlignSize == 0);
 
 			/* Anything bigger than 128 bytes gets stored in the final list */
 			if (bucket >= AmountOfLists)
