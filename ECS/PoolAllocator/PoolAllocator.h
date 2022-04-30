@@ -26,10 +26,10 @@ namespace ECS
 		PoolAllocator() = default;
 		~PoolAllocator();
 
-		PoolAllocator(const PoolAllocator& other) noexcept = delete;
-		PoolAllocator(PoolAllocator&& other) noexcept = delete;
-		PoolAllocator& operator=(const PoolAllocator& other) noexcept = delete;
-		PoolAllocator& operator=(PoolAllocator&& other) noexcept = delete;
+		PoolAllocator(const PoolAllocator&) noexcept = delete;
+		PoolAllocator(PoolAllocator&&) noexcept = delete;
+		PoolAllocator& operator=(const PoolAllocator&) noexcept = delete;
+		PoolAllocator& operator=(PoolAllocator&&) noexcept = delete;
 
 		template<typename Type>
 		static Type* allocate(const size_t nrOfElementsToAllocate)
