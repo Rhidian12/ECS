@@ -4,7 +4,7 @@ namespace ECS
 {
 	PoolAllocator::~PoolAllocator()
 	{
-		for (const auto& list : BlockLists)
+		for (const auto list : BlockLists)
 		{
 			for (void* const pBlock : list)
 			{

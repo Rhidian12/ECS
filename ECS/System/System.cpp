@@ -4,13 +4,13 @@ namespace ECS
 {
 	System::~System()
 	{
-		for (const auto& container : Components)
-		{
-			for (IComponent* pC : container)
-			{
-				PoolAllocator::deallocate(pC);
-			}
-		}
+		//for (const auto& container : Components)
+		//{
+		//	for (IComponent* pC : container)
+		//	{
+		//		PoolAllocator::deallocate(pC);
+		//	}
+		//}
 	}
 
 	Entity System::CreateEntity()
