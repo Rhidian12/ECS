@@ -148,10 +148,8 @@ int main(int*, char* [])
 	using namespace ECS;
 	using namespace GO;
 
-	PoolAllocator instance{};
-
-	constexpr Entity AmountOfEntities{ 1 };
-	constexpr int Iterations{ 3 };
+	constexpr Entity AmountOfEntities{ MaxEntities };
+	constexpr int Iterations{ 100 };
 
 	System gravitySystem{};
 
@@ -171,13 +169,13 @@ int main(int*, char* [])
 		gravitySystem.AddComponent<RigidBodyComponent>(entity);
 		gravitySystem.AddComponent<GravityComponent>(entity);
 
-		//GameObject* pG{ new GameObject{} };
+		GameObject* pG{ new GameObject{} };
 
-		//pG->AddComponent(new GOGravityComponent{});
-		//pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
-		//pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
+		pG->AddComponent(new GOGravityComponent{});
+		pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
+		pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
 
-		//GameObjects.push_back(pG);
+		GameObjects.push_back(pG);
 
 		const auto enttEntity{ registry.create() };
 		registry.emplace<ENTTGravity>(enttEntity);

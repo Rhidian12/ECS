@@ -1,7 +1,6 @@
 #pragma once
-#include <iostream>
 
-#include "../PoolAllocator/PoolAllocator.h"
+#include <iostream>
 
 namespace ECS
 {
@@ -123,7 +122,7 @@ namespace ECS
 		CustomContainer() = default;
 		~CustomContainer()
 		{
-			DeleteData(Head);
+			DeleteData(Head, Tail);
 			ReleaseMemory(Head);
 		}
 
@@ -132,13 +131,15 @@ namespace ECS
 		{
 			const size_t capacity{ other.Capacity() };
 
-			Head = PoolAllocator::allocate<Type>(capacity);
+			Head = new Type[capacity]();
+			// Head = PoolAllocator::allocate<Type>(capacity);
 			Tail = Head + capacity;
 
 			for (size_t index{}; index < other.Size(); ++index)
 			{
+				new (LastElement) Type(*(other.Head + index));
 				LastElement = Head + index;
-				PoolAllocator::construct(LastElement, *(other.Head + index));
+				// PoolAllocator::construct(LastElement, *(other.Head + index));
 			}
 		}
 		CustomContainer(CustomContainer&& other) noexcept
@@ -156,13 +157,15 @@ namespace ECS
 		{
 			const size_t capacity{ other.Capacity() };
 
-			Head = PoolAllocator::allocate<Type>(capacity);
+			Head = new Type[capacity]();
+			// Head = PoolAllocator::allocate<Type>(capacity);
 			Tail = Head + capacity;
 
 			for (size_t index{}; index < other.Size(); ++index)
 			{
 				LastElement = Head + index;
-				PoolAllocator::construct(LastElement, *(other.Head + index));
+				new (LastElement) Type(*(other.Head + index));
+				// PoolAllocator::construct(LastElement, *(other.Head + index));
 			}
 
 			return *this;
@@ -202,7 +205,13 @@ namespace ECS
 			}
 			else
 			{
-				PoolAllocator::construct(LastElement, std::forward<Values>(val)...);
+				/* [TODO]: AN ALLOCATOR SHOULD DO THIS */
+				// CurrentElement = new Type(std::forward<Values>(val)...);
+
+				new (pNextBlock) Type(std::forward<Values>(val)...);
+				// PoolAllocator::construct(pNextBlock, std::forward<Values>(val)...);
+
+				LastElement = pNextBlock;
 			}
 		}
 
@@ -223,7 +232,7 @@ namespace ECS
 
 		void Clear()
 		{
-			DeleteData(Head);
+			DeleteData(Head, Tail);
 
 			LastElement = nullptr;
 		}
@@ -270,13 +279,13 @@ namespace ECS
 		{
 			ASSERT((Head != nullptr), "Container::Front() > Out of range!");
 
-			return *Head;
+			return *(Head);
 		}
 		const Type& Front() const
 		{
 			ASSERT((Head != nullptr), "Container::Front() > Out of range!");
 
-			return *Head;
+			return *(Head);
 		}
 
 		Type& Back()
@@ -338,21 +347,29 @@ namespace ECS
 		RandomConstIterator<Type> cend() const noexcept { return RandomConstIterator(LastElement + 1); }
 
 	private:
-		void ReleaseMemory(Type* pOldHead)
+		void ReleaseMemory(Type*& pOldHead)
 		{
 			if (pOldHead)
 			{
-				PoolAllocator::deallocate(pOldHead);
+				delete[] pOldHead;
+				pOldHead = nullptr;
 			}
+
+			//if (pOldHead)
+			//{
+			//	PoolAllocator::deallocate(pOldHead);
+			//}
 		}
 
-		void DeleteData(Type* pHead)
+		void DeleteData(Type* pHead, Type* const pTail)
 		{
 			if constexpr (!std::is_trivially_destructible_v<Type>) // if this is a struct / class with a custom destructor, call it
 			{
-				for (size_t i{}; i < Size(); ++i)
+				while (pHead <= pTail)
 				{
-					PoolAllocator::destroy(pHead + i);
+					// PoolAllocator::destroy(pHead);
+					pHead->~Type();
+					++pHead;
 				}
 			}
 		}
@@ -362,8 +379,10 @@ namespace ECS
 			const size_t size{ Size() };
 
 			Type* pOldHead{ Head };
+			Type* const pOldTail{ Tail };
 
-			Head = PoolAllocator::allocate<Type>(newCapacity);
+			Head = static_cast<Type*>(malloc(SizeOfType * newCapacity));
+			// Head = PoolAllocator::allocate<Type>(newCapacity);
 			Tail = Head + newCapacity;
 
 			for (size_t index{}; index < size; ++index)
@@ -372,7 +391,7 @@ namespace ECS
 				*LastElement = std::move(*(pOldHead + index)); // move element from old memory over
 			}
 
-			DeleteData(pOldHead);
+			DeleteData(pOldHead, pOldTail);
 			ReleaseMemory(pOldHead);
 		}
 
@@ -390,7 +409,11 @@ namespace ECS
 				++LastElement;
 			}
 
-			PoolAllocator::construct(LastElement, std::forward<Values>(values)...);
+			/* [TODO]: AN ALLOCATOR SHOULD DO THIS */
+			// CurrentElement = new Type(std::forward<Values>(val)...);
+
+			new (LastElement) Type(std::forward<Values>(values)...);
+			// PoolAllocator::construct(LastElement, std::forward<Values>(values)...);
 		}
 
 		void ResizeToBigger(size_t newSize)
@@ -401,7 +424,7 @@ namespace ECS
 
 			for (size_t i{}; i < sizeDifference; ++i)
 			{
-				Emplace(std::move(Type{}));
+				Emplace(Type{});
 			}
 		}
 		void ResizeToSmaller(size_t newSize)

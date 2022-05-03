@@ -33,6 +33,9 @@
     <ClCompile Include="PoolAllocator\PoolAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StackAllocator\StackAllocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ECSConstants.h">
@@ -267,6 +270,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DynamicArray\DynamicArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StackAllocator\StackAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
