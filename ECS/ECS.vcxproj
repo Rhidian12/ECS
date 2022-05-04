@@ -229,6 +229,7 @@
     <ClInclude Include="GameObject\GameObject.h" />
     <ClInclude Include="GOComponent\GOComponent.h" />
     <ClInclude Include="System\System.h" />
+    <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
