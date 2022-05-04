@@ -8,11 +8,10 @@ namespace ECS
 	class ComponentCounter final
 	{
 	public:
-		/* Since it's ++Counter, the Component Counter will always start at 1, can be easily changed, but who cares */
 		template <typename SecondaryType>
-		__forceinline constexpr static ComponentType Get() { return Counter++; }
+		constexpr static ComponentType Get() { return Counter++; }
 
-		__forceinline constexpr static ComponentType Get() { return Counter; }
+		constexpr static ComponentType Get() { return Counter; }
 
 	private:
 		inline static ComponentType Counter{};
