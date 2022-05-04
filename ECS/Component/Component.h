@@ -10,7 +10,7 @@ namespace ECS
 	public:
 		virtual ~IComponent() = default;
 
-		static ComponentType GetComponentID() noexcept { return ComponentID; }
+		static ComponentType GetComponentID() { return ComponentID; }
 
 	protected:
 		inline static constexpr ComponentType ComponentID{ GenerateID<DerivedComponent>() };
