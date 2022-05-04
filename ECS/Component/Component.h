@@ -4,21 +4,15 @@
 
 namespace ECS
 {
+	template<typename DerivedComponent>
 	class IComponent
 	{
 	public:
 		virtual ~IComponent() = default;
-	};
 
-	template<typename DerivedComponent>
-	class Component : public IComponent
-	{
-	public:
-		virtual ~Component() = default;
-
-		static __forceinline auto GetComponentID() noexcept { return ComponentID; }
+		static ComponentType GetComponentID() noexcept { return ComponentID; }
 
 	protected:
-		inline static const ComponentType ComponentID{ ComponentCounter<IComponent>::Get<DerivedComponent>() };
+		inline static constexpr ComponentType ComponentID{ GenerateID<DerivedComponent>() };
 	};
 }
