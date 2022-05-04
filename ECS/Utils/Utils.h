@@ -24,7 +24,7 @@ namespace ECS
 			}
 
 			/* Reference for compile-time string hashing: https://stackoverflow.com/questions/2111667/compile-time-string-hashing */
-			constexpr uint32_t CRC32Table[256] = {
+			constexpr size_t CRC32Table[256] = {
 				0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
 				0xe963a535, 0x9e6495a3,	0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
 				0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
@@ -71,14 +71,14 @@ namespace ECS
 			};
 
 			template<size_t Index>
-			constexpr uint32_t CRC32(const char* str)
+			constexpr size_t CRC32(const char* str)
 			{
 				return (CRC32<Index - 1>(str) >> 8) ^ CRC32Table[(CRC32<Index - 1>(str) ^ str[Index]) & 0x000000FF];
 			}
 
 			// This is the stop-recursion function
 			template<>
-			constexpr uint32_t CRC32<size_t(-1)>(const char* str)
+			constexpr size_t CRC32<size_t(-1)>(const char* str)
 			{
 				return 0xFFFFFFFF;
 			}
