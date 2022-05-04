@@ -53,6 +53,8 @@ namespace ECS
 	class ComponentManager final
 	{
 	public:
+		static ComponentManager* GetInstance();
+
 		ComponentManager(const ComponentManager&) noexcept = delete;
 		ComponentManager(ComponentManager&&) noexcept = delete;
 		ComponentManager& operator=(const ComponentManager&) noexcept = delete;
@@ -106,6 +108,12 @@ namespace ECS
 		const std::vector<TComponent>& GetComponents() const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponents(); }
 
 	private:
+		ComponentManager() = default;
+
+		friend std::unique_ptr<ComponentManager> std::make_unique<ComponentManager>();
+
+		inline static std::unique_ptr<ComponentManager> Instance{};
+
 		std::vector<std::unique_ptr<IComponentArray>> ComponentArrays;
 	};
 }
