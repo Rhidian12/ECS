@@ -11,15 +11,7 @@ namespace ECS
 	class EntityManager final
 	{
 	public:
-		static EntityManager* GetInstance()
-		{
-			if (!Instance)
-			{
-				Instance = std::make_unique<EntityManager>();
-			}
-
-			return Instance.get();
-		}
+		static EntityManager* GetInstance();
 
 		EntityManager(const EntityManager&) noexcept = delete;
 		EntityManager(EntityManager&&) noexcept = delete;

@@ -2,6 +2,16 @@
 
 namespace ECS
 {
+	EntityManager* EntityManager::GetInstance()
+	{
+		if (!Instance)
+		{
+			Instance = std::make_unique<EntityManager>();
+		}
+
+		return Instance.get();
+	}
+
 	Entity EntityManager::CreateEntity()
 	{
 		assert(static_cast<Entity>(Entities.size()) < MaxEntities);
