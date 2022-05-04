@@ -9,10 +9,10 @@ namespace ECS
 		/* Reference for TypeName: https://stackoverflow.com/questions/35941045/can-i-obtain-c-type-names-in-a-constexpr-way */
 
 		template<typename Type>
-		constexpr std::string_view TypeName();
+		constexpr std::string_view ConstexprTypeName();
 
 		template<>
-		constexpr std::string_view TypeName<void>() { return "void"; }
+		constexpr std::string_view ConstexprTypeName<void>() { return "void"; }
 
 		/* Should have internal linkage and therefore be unavailable to other files */
 		namespace
@@ -25,11 +25,11 @@ namespace ECS
 		}
 
 		template <typename Type>
-		constexpr std::string_view TypeName()
+		constexpr std::string_view ConstexprTypeName()
 		{
 			constexpr std::string_view wrappedName(WrappedTypeName<Type>());
 			constexpr std::string_view wrappedVoidName(WrappedTypeName<void>());
-			constexpr std::string_view voidName(TypeName<void>());
+			constexpr std::string_view voidName(ConstexprTypeName<void>());
 
 			constexpr size_t prefixLength(wrappedVoidName.find(voidName));
 			constexpr size_t suffixLength(wrappedVoidName.length() - prefixLength - voidName.length());
