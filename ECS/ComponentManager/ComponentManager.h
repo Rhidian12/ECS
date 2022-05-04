@@ -22,7 +22,7 @@ namespace ECS
 		{
 			static_assert(std::is_default_constructible_v<TComponent>, "ComponentArray must be default constructible");
 
-			if (entity > Components.size())
+			if (entity >= Components.size())
 			{
 				Components.resize(entity + 1);
 			}
@@ -32,7 +32,7 @@ namespace ECS
 		template<typename ... Values>
 		void AddComponent(Entity entity, Values&&... values)
 		{
-			if (entity > Components.size())
+			if (entity >= Components.size())
 			{
 				Components.resize(entity + 1);
 			}
@@ -47,7 +47,7 @@ namespace ECS
 		const std::vector<TComponent>& GetComponents() const { return Components; }
 
 	private:
-		std::vector<std::reference_wrapper<TComponent>> Components;
+		std::vector<TComponent> Components;
 	};
 
 	class ComponentManager final
@@ -65,7 +65,7 @@ namespace ECS
 		{
 			const ComponentType componentID{ TComponent::GetComponentID() };
 
-			if (componentID > ComponentArrays.size())
+			if (componentID >= ComponentArrays.size())
 			{
 				ComponentArrays.resize(componentID + 1);
 			}
@@ -83,7 +83,7 @@ namespace ECS
 		{
 			const ComponentType componentID{ TComponent::GetComponentID() };
 
-			if (componentID > ComponentArrays.size())
+			if (componentID >= ComponentArrays.size())
 			{
 				ComponentArrays.resize(componentID + 1);
 			}
