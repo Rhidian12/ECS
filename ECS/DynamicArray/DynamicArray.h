@@ -132,14 +132,12 @@ namespace ECS
 			const size_t capacity{ other.Capacity() };
 
 			Head = new Type[capacity]();
-			// Head = PoolAllocator::allocate<Type>(capacity);
 			Tail = Head + capacity;
 
 			for (size_t index{}; index < other.Size(); ++index)
 			{
 				new (LastElement) Type(*(other.Head + index));
 				LastElement = Head + index;
-				// PoolAllocator::construct(LastElement, *(other.Head + index));
 			}
 		}
 		CustomContainer(CustomContainer&& other) noexcept
@@ -158,14 +156,12 @@ namespace ECS
 			const size_t capacity{ other.Capacity() };
 
 			Head = new Type[capacity]();
-			// Head = PoolAllocator::allocate<Type>(capacity);
 			Tail = Head + capacity;
 
 			for (size_t index{}; index < other.Size(); ++index)
 			{
 				LastElement = Head + index;
 				new (LastElement) Type(*(other.Head + index));
-				// PoolAllocator::construct(LastElement, *(other.Head + index));
 			}
 
 			return *this;
@@ -209,7 +205,6 @@ namespace ECS
 				// CurrentElement = new Type(std::forward<Values>(val)...);
 
 				new (pNextBlock) Type(std::forward<Values>(val)...);
-				// PoolAllocator::construct(pNextBlock, std::forward<Values>(val)...);
 
 				LastElement = pNextBlock;
 			}
@@ -354,11 +349,6 @@ namespace ECS
 				delete[] pOldHead;
 				pOldHead = nullptr;
 			}
-
-			//if (pOldHead)
-			//{
-			//	PoolAllocator::deallocate(pOldHead);
-			//}
 		}
 
 		void DeleteData(Type* pHead, Type* const pTail)
@@ -367,7 +357,6 @@ namespace ECS
 			{
 				while (pHead <= pTail)
 				{
-					// PoolAllocator::destroy(pHead);
 					pHead->~Type();
 					++pHead;
 				}
@@ -382,7 +371,6 @@ namespace ECS
 			Type* const pOldTail{ Tail };
 
 			Head = static_cast<Type*>(malloc(SizeOfType * newCapacity));
-			// Head = PoolAllocator::allocate<Type>(newCapacity);
 			Tail = Head + newCapacity;
 
 			for (size_t index{}; index < size; ++index)
@@ -413,7 +401,6 @@ namespace ECS
 			// CurrentElement = new Type(std::forward<Values>(val)...);
 
 			new (LastElement) Type(std::forward<Values>(values)...);
-			// PoolAllocator::construct(LastElement, std::forward<Values>(values)...);
 		}
 
 		void ResizeToBigger(size_t newSize)
