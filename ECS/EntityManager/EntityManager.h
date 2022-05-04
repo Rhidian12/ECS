@@ -2,9 +2,9 @@
 
 #include "../ECSConstants.h"
 
-#include <vector>
-#include <assert.h>
-#include <memory>
+#include <vector> /* std::vector */
+#include <assert.h> /* assert() */
+#include <memory> /* std::unique_ptr */
 
 namespace ECS
 {
