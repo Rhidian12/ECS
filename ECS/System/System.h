@@ -23,7 +23,7 @@ namespace ECS
 			, NrOfComponents{ std::get<0>(Components).size() }
 		{}
 
-		void ForEach(const std::function<void(TComponents...)>& function) const
+		void ForEach(const std::function<void(TComponents&...)>& function) const
 		{
 			auto indexSequence{ std::make_index_sequence<sizeof ... (TComponents)>{} };
 
@@ -35,9 +35,9 @@ namespace ECS
 
 	private:
 		template<size_t ... Indices>
-		void ForEach(const std::function<void(TComponents...)>& function, size_t index, std::index_sequence<Indices...>) const
+		void ForEach(const std::function<void(TComponents&...)>& function, size_t index, std::index_sequence<Indices...>) const
 		{
-			std::tuple<TComponents...> comps{ std::make_tuple(std::get<Indices>(Components)[index]...) };
+			std::tuple<TComponents&...> comps{ std::tuple<TComponents&...>(std::get<Indices>(Components)[index]...) };
 			std::apply(function, comps);
 		}
 
