@@ -19,6 +19,6 @@ namespace ECS
 		static __forceinline auto GetComponentID() noexcept { return ComponentID; }
 
 	protected:
-		inline static const ComponentType ComponentID{ TypeCounter<IComponent>::Get<DerivedComponent>() };
+		inline static const ComponentType ComponentID{ ComponentCounter<IComponent>::Get<DerivedComponent>() };
 	};
 }
