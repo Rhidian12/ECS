@@ -43,6 +43,9 @@ namespace ECS
 		TComponent& GetComponent(Entity entity) { assert(entity < Components.size()); return Components[entity]; }
 		const TComponent& GetComponent(Entity entity) const { assert(entity < Components.size()); return Components[entity]; }
 
+		std::vector<TComponent>& GetComponents() { return Components; }
+		const std::vector<TComponent>& GetComponents() const { return Components; }
+
 	private:
 		std::vector<TComponent> Components;
 	};
@@ -96,6 +99,11 @@ namespace ECS
 		TComponent& GetComponent(Entity entity) { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponent(entity); }
 		template<typename TComponent>
 		const TComponent& GetComponent(Entity entity) const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponent(entity); }
+
+		template<typename TComponent>
+		std::vector<TComponent>& GetComponents() { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponents(); }
+		template<typename TComponent>
+		const std::vector<TComponent>& GetComponents() const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponents(); }
 
 	private:
 		std::vector<std::unique_ptr<IComponentArray>> ComponentArrays;
