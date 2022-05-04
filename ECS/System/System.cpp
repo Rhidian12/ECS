@@ -2,7 +2,7 @@
 
 namespace ECS
 {
-	Entity System::CreateEntity()
+	Entity System::CreateEntity() const
 	{
 		return EntityManager::GetInstance()->CreateEntity();
 	}

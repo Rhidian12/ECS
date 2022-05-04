@@ -54,10 +54,10 @@ namespace ECS
 		System& operator=(const System&) noexcept = delete;
 		System& operator=(System&&) noexcept = delete;
 
-		Entity CreateEntity();
+		Entity CreateEntity() const;
 
 		template<typename TComponent>
-		void AddComponent(Entity entity)
+		void AddComponent(Entity entity) const
 		{
 			assert(entity != InvalidEntityID);
 
@@ -75,7 +75,5 @@ namespace ECS
 		TComponent& GetComponent(Entity id) { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
 		template<typename TComponent>
 		const TComponent& GetComponent(Entity id) const { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
-
-	private:
 	};
 }
