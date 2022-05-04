@@ -9,48 +9,32 @@ namespace ECS
 		/* Reference for TypeName: https://stackoverflow.com/questions/35941045/can-i-obtain-c-type-names-in-a-constexpr-way */
 
 		template<typename Type>
-		constexpr std::string_view ConstexprTypeName();
+		constexpr std::string_view TypeName();
 
 		template<>
-		constexpr std::string_view ConstexprTypeName<void>() { return "void"; }
+		constexpr std::string_view TypeName<void>() { return "void"; }
 
 		/* Should have internal linkage and therefore be unavailable to other files */
 		namespace
 		{
-			using TypeNameProber = void;
-
 			template<typename Type>
 			constexpr std::string_view WrappedTypeName()
 			{
-#if defined(__clang__) || defined(__GNUC__)
-				return __PRETTY_FUNCTION__;
-#elif defined(_MSC_VER)
 				return __FUNCSIG__;
-#else
-#error "Unsupported Compiler!"
-#endif
-			}
-
-			constexpr size_t WrappedTypeNamePrefixLength()
-			{
-				return WrappedTypeName<TypeNameProber>().find(ConstexprTypeName<TypeNameProber>());
-			}
-
-			constexpr size_t WrappedTypeNameSuffixLength()
-			{
-				return WrappedTypeName<TypeNameProber>().length() -
-					WrappedTypeNamePrefixLength() -
-					ConstexprTypeName<TypeNameProber>().length();
 			}
 		}
 
 		template <typename Type>
-		constexpr std::string_view ConstexprTypeName()
+		constexpr std::string_view TypeName()
 		{
 			constexpr std::string_view wrappedName(WrappedTypeName<Type>());
-			constexpr size_t prefixLength(WrappedTypeNamePrefixLength());
-			constexpr size_t suffixLength(WrappedTypeNameSuffixLength());
-			constexpr size_t typeNameLength(wrappedName.length() - prefixLength - suffixLength);
+			constexpr std::string_view wrappedVoidName(WrappedTypeName<void>());
+			constexpr std::string_view voidName(TypeName<void>());
+
+			constexpr size_t prefixLength(wrappedVoidName.find(voidName));
+			constexpr size_t suffixLength(wrappedVoidName.length() - prefixLength - voidName.length());
+
+			constexpr size_t typeNameLength(wrappedVoidName.length() - prefixLength - suffixLength);
 			return wrappedName.substr(prefixLength, typeNameLength);
 		}
 	}
