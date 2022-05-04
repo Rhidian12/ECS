@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ComponentManager\ComponentManager.cpp" />
     <ClCompile Include="Component\Component.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="System\System.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ComponentManager\ComponentManager.h" />
     <ClInclude Include="DynamicArray\DynamicArray.h" />
     <ClInclude Include="entt\config\config.h" />
     <ClInclude Include="entt\config\macro.h" />
