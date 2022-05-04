@@ -47,7 +47,7 @@ namespace ECS
 		const std::vector<TComponent>& GetComponents() const { return Components; }
 
 	private:
-		std::vector<TComponent> Components;
+		std::vector<std::reference_wrapper<TComponent>> Components;
 	};
 
 	class ComponentManager final
@@ -76,7 +76,7 @@ namespace ECS
 				pArray = std::make_unique<ComponentArray<TComponent>>();
 			}
 
-			std::static_pointer_cast<ComponentArray<TComponent>>(pArray)->AddComponent(entity);
+			static_cast<ComponentArray<TComponent>*>(pArray.get())->AddComponent(entity);
 		}
 		template<typename TComponent, typename ... Values>
 		void AddComponent(Entity entity, Values&&... values)
@@ -94,18 +94,18 @@ namespace ECS
 				pArray = std::make_unique<ComponentArray<TComponent>>();
 			}
 
-			std::static_pointer_cast<ComponentArray<TComponent>>(pArray)->AddComponent(entity, values...);
+			static_cast<ComponentArray<TComponent>*>(pArray.get())->AddComponent(entity, values...);
 		}
 
 		template<typename TComponent>
-		TComponent& GetComponent(Entity entity) { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponent(entity); }
+		TComponent& GetComponent(Entity entity) { assert(TComponent::GetComponentID() < ComponentArrays.size()); return static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->GetComponent(entity); }
 		template<typename TComponent>
-		const TComponent& GetComponent(Entity entity) const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponent(entity); }
+		const TComponent& GetComponent(Entity entity) const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->GetComponent(entity); }
 
 		template<typename TComponent>
-		std::vector<TComponent>& GetComponents() { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponents(); }
+		std::vector<TComponent>& GetComponents() { assert(TComponent::GetComponentID() < ComponentArrays.size()); return static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->GetComponents(); }
 		template<typename TComponent>
-		const std::vector<TComponent>& GetComponents() const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return std::static_pointer_cast<ComponentArray<TComponent>>(ComponentArrays[TComponent::GetComponentID()])->GetComponents(); }
+		const std::vector<TComponent>& GetComponents() const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->GetComponents(); }
 
 	private:
 		ComponentManager() = default;
