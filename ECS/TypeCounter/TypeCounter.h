@@ -1,19 +1,18 @@
 #pragma once
 #include "../ECSConstants.h"
+#include "../Utils/Utils.h"
 
 namespace ECS
 {
-	/* This class is heavily based on a class made by the absolute genius Arne Van Kerschaver */
-	template <typename Type>
-	class ComponentCounter final
+	template<typename Type>
+	constexpr ComponentType GenerateID()
 	{
-	public:
-		template <typename SecondaryType>
-		constexpr static ComponentType Get() { return Counter++; }
+		using namespace Utils;
 
-		constexpr static ComponentType Get() { return Counter; }
+		constexpr const char* typeName(ConstexprTypeName<Type>());
 
-	private:
-		inline static ComponentType Counter{};
-	};
+		constexpr ComponentType hash(static_cast<ComponentType>(CONSTEXPRSTRINGHASH(typeName)));
+
+		return hash;
+	}
 }
