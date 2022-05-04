@@ -37,8 +37,7 @@ namespace ECS
 		template<size_t ... Indices>
 		void ForEach(const std::function<void(TComponents&...)>& function, size_t index, std::index_sequence<Indices...>) const
 		{
-			std::tuple<TComponents&...> comps{ std::tuple<TComponents&...>(std::get<Indices>(Components)[index]...) };
-			std::apply(function, comps);
+			std::apply(function, std::tuple<TComponents&...>(std::get<Indices>(Components)[index]...));
 		}
 
 		ViewContainerType Components;
