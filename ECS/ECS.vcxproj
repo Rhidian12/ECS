@@ -149,13 +149,10 @@
     <ClCompile Include="EntityManager\EntityManager.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GOComponent\GOComponent.cpp" />
-    <ClCompile Include="PoolAllocator\PoolAllocator.cpp" />
-    <ClCompile Include="StackAllocator\StackAllocator.cpp" />
     <ClCompile Include="System\System.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ComponentManager\ComponentManager.h" />
-    <ClInclude Include="DynamicArray\DynamicArray.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
     <ClInclude Include="entt\config\config.h" />
     <ClInclude Include="entt\config\macro.h" />
@@ -226,9 +223,6 @@
     <ClInclude Include="entt\signal\emitter.hpp" />
     <ClInclude Include="entt\signal\fwd.hpp" />
     <ClInclude Include="entt\signal\sigh.hpp" />
-    <ClInclude Include="PoolAllocator\PoolAllocator.h" />
-    <ClInclude Include="PoolAllocator\STLPoolAlloc.h" />
-    <ClInclude Include="StackAllocator\StackAllocator.h" />
     <ClInclude Include="TypeCounter\TypeCounter.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="ECSConstants.h" />
