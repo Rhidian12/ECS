@@ -5,7 +5,7 @@
 namespace ECS
 {
 	template<typename Type>
-	constexpr ComponentType GenerateID()
+	constexpr ComponentType GenerateComponentID()
 	{
 		using namespace Utils;
 

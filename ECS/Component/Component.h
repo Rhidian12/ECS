@@ -1,6 +1,6 @@
 #pragma once
 #include "../ECSConstants.h"
-#include "../TypeCounter/TypeCounter.h"
+#include "../ComponentIDGenerator/ComponentIDGenerator.h"
 
 namespace ECS
 {
@@ -13,6 +13,6 @@ namespace ECS
 		static ComponentType GetComponentID() { return ComponentID; }
 
 	protected:
-		inline static constexpr ComponentType ComponentID{ GenerateID<DerivedComponent>() };
+		inline static constexpr ComponentType ComponentID{ GenerateComponentID<DerivedComponent>() };
 	};
 }

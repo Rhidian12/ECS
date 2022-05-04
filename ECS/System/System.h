@@ -1,6 +1,5 @@
 #pragma once
 #include "../ECSConstants.h"
-#include "../TypeCounter/TypeCounter.h"
 
 #include "../ComponentManager/ComponentManager.h"
 #include "../EntityManager/EntityManager.h"

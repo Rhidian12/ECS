@@ -223,7 +223,7 @@
     <ClInclude Include="entt\signal\emitter.hpp" />
     <ClInclude Include="entt\signal\fwd.hpp" />
     <ClInclude Include="entt\signal\sigh.hpp" />
-    <ClInclude Include="TypeCounter\TypeCounter.h" />
+    <ClInclude Include="ComponentIDGenerator\ComponentIDGenerator.h" />
     <ClInclude Include="Component\Component.h" />
     <ClInclude Include="ECSConstants.h" />
     <ClInclude Include="GameObject\GameObject.h" />
