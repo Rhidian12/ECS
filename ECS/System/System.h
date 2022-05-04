@@ -27,7 +27,7 @@ namespace ECS
 		{
 			auto indexSequence{ std::make_index_sequence<sizeof ... (TComponents)>{} };
 
-			for (int i{}; i < NrOfComponents; ++i)
+			for (size_t i{}; i < NrOfComponents; ++i)
 			{
 				ForEach(function, i, indexSequence);
 			}
