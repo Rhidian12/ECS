@@ -143,50 +143,26 @@ void GravityUpdate(ECS::System& system)
 		});
 }
 
-int main(int*, char* [])
+void TestECS(const ECS::Entity amount, const int iterations)
 {
 	using namespace ECS;
-	using namespace GO;
-
-	constexpr Entity AmountOfEntities{ MaxEntities };
-	constexpr int Iterations{ 100 };
 
 	System gravitySystem{};
 
-	std::vector<GameObject*> GameObjects;
-
-	entt::registry registry;
-
-	std::deque<long long> ECSTimes{};
-	std::deque<long long> GOTimes{};
-	std::deque<long long> enttTimes{};
-
-	for (int i{}; i < AmountOfEntities; ++i)
+	for (int i{}; i < amount; ++i)
 	{
 		Entity entity{ gravitySystem.CreateEntity() };
 
 		gravitySystem.AddComponent<TransformComponent>(entity);
 		gravitySystem.AddComponent<RigidBodyComponent>(entity);
 		gravitySystem.AddComponent<GravityComponent>(entity);
-
-		GameObject* pG{ new GameObject{} };
-
-		pG->AddComponent(new GOGravityComponent{});
-		pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
-		pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
-
-		GameObjects.push_back(pG);
-
-		const auto enttEntity{ registry.create() };
-		registry.emplace<ENTTGravity>(enttEntity);
-		registry.emplace<ENTTTransformComponent>(enttEntity);
-		registry.emplace<ENTTRigidBodyComponent>(enttEntity);
 	}
 
+	std::deque<long long> ECSTimes{};
 	std::chrono::steady_clock::time_point t1{};
 	std::chrono::steady_clock::time_point t2{};
 
-	for (int i{}; i < Iterations; ++i)
+	for (int i{}; i < iterations; ++i)
 	{
 		t1 = std::chrono::steady_clock::now();
 
@@ -195,7 +171,44 @@ int main(int*, char* [])
 		t2 = std::chrono::steady_clock::now();
 
 		ECSTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
+	}
 
+	std::sort(ECSTimes.begin(), ECSTimes.end());
+
+	if (iterations / 10 > 0)
+	{
+		for (int i{}; i < iterations / 10; ++i)
+		{
+			ECSTimes.pop_back();
+			ECSTimes.pop_front();
+		}
+	}
+
+	std::cout << "ECS Average:\t\t" << std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0) / ECSTimes.size() << " nanoseconds\n";
+}
+void TestGO(const ECS::Entity amount, const int iterations)
+{
+	using namespace GO;
+
+	std::vector<GameObject*> GameObjects;
+	std::deque<long long> GOTimes{};
+
+	for (int i{}; i < amount; ++i)
+	{
+		GameObject* pG{ new GameObject{} };
+
+		pG->AddComponent(new GOGravityComponent{});
+		pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
+		pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
+
+		GameObjects.push_back(pG);
+	}
+
+	std::chrono::steady_clock::time_point t1{};
+	std::chrono::steady_clock::time_point t2{};
+
+	for (int i{}; i < iterations; ++i)
+	{
 		t1 = std::chrono::steady_clock::now();
 
 		for (GameObject* const pG : GameObjects)
@@ -206,7 +219,43 @@ int main(int*, char* [])
 		t2 = std::chrono::steady_clock::now();
 
 		GOTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
+	}
 
+	std::sort(GOTimes.begin(), GOTimes.end());
+
+	if (iterations / 10 > 0)
+	{
+		for (int i{}; i < iterations / 10; ++i)
+		{
+			GOTimes.pop_back();
+			GOTimes.pop_front();
+		}
+	}
+
+	std::cout << "GO Average:\t\t" << std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0) / GOTimes.size() << " nanoseconds\n";
+
+	for (GameObject* pG : GameObjects)
+		delete pG;
+}
+void TestENTT(const ECS::Entity amount, const int iterations)
+{
+	entt::registry registry;
+
+	std::deque<long long> enttTimes{};
+
+	for (int i{}; i < amount; ++i)
+	{
+		const auto enttEntity{ registry.create() };
+		registry.emplace<ENTTGravity>(enttEntity);
+		registry.emplace<ENTTTransformComponent>(enttEntity);
+		registry.emplace<ENTTRigidBodyComponent>(enttEntity);
+	}
+
+	std::chrono::steady_clock::time_point t1{};
+	std::chrono::steady_clock::time_point t2{};
+
+	for (int i{}; i < iterations; ++i)
+	{
 		t1 = std::chrono::steady_clock::now();
 
 		ENTTUpdate(registry);
@@ -216,30 +265,31 @@ int main(int*, char* [])
 		enttTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 	}
 
-	std::sort(ECSTimes.begin(), ECSTimes.end());
-	std::sort(GOTimes.begin(), GOTimes.end());
+	std::sort(enttTimes.begin(), enttTimes.end());
 
-	if (Iterations / 10 > 0)
+	if (iterations / 10 > 0)
 	{
-		for (int i{}; i < Iterations / 10; ++i)
+		for (int i{}; i < iterations / 10; ++i)
 		{
-			ECSTimes.pop_back();
-			ECSTimes.pop_front();
-
-			GOTimes.pop_back();
-			GOTimes.pop_front();
-
 			enttTimes.pop_back();
 			enttTimes.pop_front();
 		}
 	}
 
-	std::cout << "ECS Average:\t\t" << std::accumulate(ECSTimes.cbegin(), ECSTimes.cend(), (long long)0) / ECSTimes.size() << " nanoseconds\n";
-	std::cout << "GO Average:\t\t" << std::accumulate(GOTimes.cbegin(), GOTimes.cend(), (long long)0) / GOTimes.size() << " nanoseconds\n";
 	std::cout << "ENTT Average:\t\t" << std::accumulate(enttTimes.cbegin(), enttTimes.cend(), (long long)0) / enttTimes.size() << " nanoseconds\n";
+}
 
-	for (GameObject* pG : GameObjects)
-		delete pG;
+int main(int*, char* [])
+{
+	using namespace ECS;
+	using namespace GO;
+
+	constexpr Entity AmountOfEntities{ MaxEntities };
+	constexpr int Iterations{ 100 };
+
+	TestECS(AmountOfEntities, Iterations);
+	TestGO(AmountOfEntities, Iterations);
+	TestENTT(AmountOfEntities, Iterations);
 
 	return 0;
 }
