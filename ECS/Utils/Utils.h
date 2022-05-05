@@ -100,5 +100,10 @@ namespace ECS
 
 		/* const char* or std::string_view cannot be passed as template parameters, but macros can bypass this */
 #define CONSTEXPRSTRINGHASH(x) (CRC32<sizeof(x) - 2>(x) ^ 0xFFFFFFFF)
+
+		float RandomFloat(float min, float max)
+		{
+			return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+		}
 	}
 }
