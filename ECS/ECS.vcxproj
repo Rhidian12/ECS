@@ -155,6 +155,7 @@
     <ClInclude Include="ComponentManager\ComponentManager.h" />
     <ClInclude Include="ECSComponents\ECSComponents.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
+    <ClInclude Include="ENTTComponents\ENTTComponents.h" />
     <ClInclude Include="entt\config\config.h" />
     <ClInclude Include="entt\config\macro.h" />
     <ClInclude Include="entt\config\version.h" />
