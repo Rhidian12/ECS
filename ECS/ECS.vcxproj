@@ -153,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ComponentManager\ComponentManager.h" />
+    <ClInclude Include="ECSComponents\ECSComponents.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
     <ClInclude Include="entt\config\config.h" />
     <ClInclude Include="entt\config\macro.h" />
@@ -228,6 +229,7 @@
     <ClInclude Include="ECSConstants.h" />
     <ClInclude Include="GameObject\GameObject.h" />
     <ClInclude Include="GOComponent\GOComponent.h" />
+    <ClInclude Include="Point2f\Point2f.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
