@@ -5,6 +5,7 @@
 #include <vector> /* std::vector */
 #include <memory> /* std::unique_ptr */
 #include <assert.h> /* assert() */
+#include <algorithm> /* std::find, std::find_if, ... */
 
 namespace ECS
 {
@@ -18,29 +19,21 @@ namespace ECS
 	class ComponentArray final : public IComponentArray
 	{
 	public:
-		void AddComponent(Entity entity)
+		void AddComponent(const Entity entity)
 		{
-			static_assert(std::is_default_constructible_v<TComponent>, "ComponentArray must be default constructible");
+			static_assert(std::is_default_constructible_v<TComponent>, "Component must be default constructible");
 
-			if (entity >= Components.size())
-			{
-				Components.resize(entity + 1);
-			}
-
-			Components[entity] = TComponent();
+			Components.push_back(TComponent());
 		}
 		template<typename ... Values>
-		void AddComponent(Entity entity, Values&&... values)
+		void AddComponent(const Entity entity, Values&&... values)
 		{
-			if (entity >= Components.size())
-			{
-				Components.resize(entity + 1);
-			}
-
-			Components[entity] = TComponent(std::forward<Values>(values)...);
+			Components.push_back(TComponent(std::forward<Values>(values)...));
 		}
 
-		TComponent& GetComponent(Entity entity) { assert(entity < Components.size()); return Components[entity]; }
+		TComponent& GetComponent(const Entity entity)
+		{
+		}
 		const TComponent& GetComponent(Entity entity) const { assert(entity < Components.size()); return Components[entity]; }
 
 		std::vector<TComponent>& GetComponents() { return Components; }
