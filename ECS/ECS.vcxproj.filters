@@ -278,5 +278,8 @@
     <ClInclude Include="Point2f\Point2f.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GOComponents\GOComponents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
