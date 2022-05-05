@@ -145,9 +145,9 @@ void GravityUpdate(ECS::System& system)
 }
 
 /* Defines! */
-// #define GAMEOBJECT
+#define GAMEOBJECT
 #define CUSTOMECS
-// #define ENTT
+#define ENTT
 
 // #define WRITE_TO_FILE
 // #define APPEND_TO_FILE
@@ -156,17 +156,21 @@ void GravityUpdate(ECS::System& system)
 /* Things to test */
 #ifdef CUSTOMECS
 ECS::System g_GravitySystem;
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 std::vector<GO::GameObject*> g_GameObjects;
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 entt::registry g_Registry;
 #endif
 
 #ifdef CUSTOMECS
 std::deque<long long> g_ECSTimes{};
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 std::deque<long long> g_GOTimes{};
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 std::deque<long long> g_enttTimes{};
 #endif
 
@@ -186,7 +190,8 @@ void TestECS()
 
 	g_ECSTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 }
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 void TestGO()
 {
 	using namespace GO;
@@ -205,7 +210,8 @@ void TestGO()
 
 	g_GOTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 }
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 void TestENTT()
 {
 	std::chrono::steady_clock::time_point t1{};
@@ -239,8 +245,8 @@ int main(int*, char* [])
 		g_GravitySystem.AddComponent<TransformComponent>(entity);
 		g_GravitySystem.AddComponent<RigidBodyComponent>(entity);
 		g_GravitySystem.AddComponent<GravityComponent>(entity);
-
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 		GameObject* pG{ new GameObject{} };
 
 		pG->AddComponent(new GOGravityComponent{});
@@ -248,8 +254,8 @@ int main(int*, char* [])
 		pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
 
 		g_GameObjects.push_back(pG);
-
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 		const auto enttEntity{ g_Registry.create() };
 		g_Registry.emplace<ENTTGravity>(enttEntity);
 		g_Registry.emplace<ENTTTransformComponent>(enttEntity);
@@ -262,9 +268,11 @@ int main(int*, char* [])
 	{
 #ifdef CUSTOMECS
 		TestECS();
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 		TestGO();
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 		TestENTT();
 #endif
 	}
@@ -272,9 +280,11 @@ int main(int*, char* [])
 	/* Cleanup results */
 #ifdef CUSTOMECS
 	std::sort(g_ECSTimes.begin(), g_ECSTimes.end());
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 	std::sort(g_GOTimes.begin(), g_GOTimes.end());
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 	std::sort(g_enttTimes.begin(), g_enttTimes.end());
 #endif
 	if (Iterations / 10 > 0)
@@ -284,12 +294,12 @@ int main(int*, char* [])
 #ifdef CUSTOMECS
 			g_ECSTimes.pop_back();
 			g_ECSTimes.pop_front();
-
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 			g_GOTimes.pop_back();
 			g_GOTimes.pop_front();
-
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 			g_enttTimes.pop_back();
 			g_enttTimes.pop_front();
 #endif
@@ -299,9 +309,11 @@ int main(int*, char* [])
 	/* Print results */
 #ifdef CUSTOMECS
 	std::cout << "ECS Average:\t\t" << std::accumulate(g_ECSTimes.cbegin(), g_ECSTimes.cend(), (long long)0) / g_ECSTimes.size() << " nanoseconds\n";
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 	std::cout << "GO Average:\t\t" << std::accumulate(g_GOTimes.cbegin(), g_GOTimes.cend(), (long long)0) / g_GOTimes.size() << " nanoseconds\n";
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 	std::cout << "ENTT Average:\t\t" << std::accumulate(g_enttTimes.cbegin(), g_enttTimes.cend(), (long long)0) / g_enttTimes.size() << " nanoseconds\n";
 #endif
 
@@ -322,9 +334,11 @@ int main(int*, char* [])
 
 #ifdef CUSTOMECS
 		file << "ECS Average: " << std::accumulate(g_ECSTimes.cbegin(), g_ECSTimes.cend(), (long long)0) / g_ECSTimes.size() << " nanoseconds\n\n";
-#elif defined(GAMEOBJECT)
+#endif
+#ifdef GAMEOBJECT
 		file << "GO Average: " << std::accumulate(g_GOTimes.cbegin(), g_GOTimes.cend(), (long long)0) / g_GOTimes.size() << " nanoseconds\n\n";
-#elif defined(ENTT)
+#endif
+#ifdef ENTT
 		file << "ENTT Average: " << std::accumulate(g_enttTimes.cbegin(), g_enttTimes.cend(), (long long)0) / g_enttTimes.size() << " nanoseconds\n\n";
 #endif
 	}
