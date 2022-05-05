@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../Component/Component.h"
+#include "../Point2f/Point2f.h"
+#include "../Utils/Utils.h"
 
 class GravityComponent final : public ECS::IComponent<GravityComponent>
 {
@@ -19,6 +21,6 @@ public:
 class RigidBodyComponent final : public ECS::IComponent<RigidBodyComponent>
 {
 public:
-	float Mass{ RandomFloat(0.f, 100.f) };
+	float Mass{ ECS::Utils::RandomFloat(0.f, 100.f) };
 	Point2f Velocity{};
 };
