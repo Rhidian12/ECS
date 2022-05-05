@@ -23,24 +23,47 @@ namespace ECS
 		{
 			static_assert(std::is_default_constructible_v<TComponent>, "Component must be default constructible");
 
+			Entities.push_back(entity);
 			Components.push_back(TComponent());
 		}
 		template<typename ... Values>
 		void AddComponent(const Entity entity, Values&&... values)
 		{
+			Entities.push_back(entity);
 			Components.push_back(TComponent(std::forward<Values>(values)...));
 		}
 
 		TComponent& GetComponent(const Entity entity)
 		{
+			const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
+
+			assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
+
+			const size_t index(std::distance(Entities.cbegin(), cIt));
+
+			assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
+
+			return Components[index];
 		}
-		const TComponent& GetComponent(Entity entity) const { assert(entity < Components.size()); return Components[entity]; }
+		const TComponent& GetComponent(const Entity entity) const
+		{
+			const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
+
+			assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
+
+			const size_t index(std::distance(Entities.cbegin(), cIt));
+
+			assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
+
+			return Components[index];
+		}
 
 		std::vector<TComponent>& GetComponents() { return Components; }
 		const std::vector<TComponent>& GetComponents() const { return Components; }
 
 	private:
 		std::vector<TComponent> Components;
+		std::vector<Entity> Entities;
 	};
 
 	class ComponentManager final
