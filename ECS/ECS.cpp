@@ -146,10 +146,11 @@ void GravityUpdate(ECS::System& system)
 
 /* Defines! */
 // #define GAMEOBJECT
-// #define CUSTOMECS
-#define ENTT
+#define CUSTOMECS
+// #define ENTT
 
-#define APPEND_TO_FILE
+// #define WRITE_TO_FILE
+// #define APPEND_TO_FILE
 // #define OVERWRITE_TO_FILE
 
 /* Things to test */
@@ -304,6 +305,7 @@ int main(int*, char* [])
 	std::cout << "ENTT Average:\t\t" << std::accumulate(g_enttTimes.cbegin(), g_enttTimes.cend(), (long long)0) / g_enttTimes.size() << " nanoseconds\n";
 #endif
 
+#ifdef WRITE_TO_FILE
 	/* Write results to file: */
 	std::fstream file{};
 
@@ -326,6 +328,7 @@ int main(int*, char* [])
 		file << "ENTT Average: " << std::accumulate(g_enttTimes.cbegin(), g_enttTimes.cend(), (long long)0) / g_enttTimes.size() << " nanoseconds\n\n";
 #endif
 	}
+#endif
 
 	/* Cleanup systems */
 #ifdef GAMEOBJECT
