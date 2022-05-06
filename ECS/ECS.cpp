@@ -72,13 +72,13 @@ entt::registry g_Registry;
 #endif
 
 #ifdef CUSTOMECS
-std::deque<long long> g_ECSTimes{};
+std::deque<long long> g_ECSUpdateTimes{};
 #endif
 #ifdef GAMEOBJECT
-std::deque<long long> g_GOTimes{};
+std::deque<long long> g_GOUpdateTimes{};
 #endif
 #ifdef ENTT
-std::deque<long long> g_enttTimes{};
+std::deque<long long> g_enttUpdateTimes{};
 #endif
 
 #ifdef CUSTOMECS
@@ -95,7 +95,7 @@ void TestECS()
 
 	t2 = std::chrono::steady_clock::now();
 
-	g_ECSTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
+	g_ECSUpdateTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 }
 #endif
 #ifdef GAMEOBJECT
@@ -115,7 +115,7 @@ void TestGO()
 
 	t2 = std::chrono::steady_clock::now();
 
-	g_GOTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
+	g_GOUpdateTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 }
 #endif
 #ifdef ENTT
@@ -130,7 +130,7 @@ void TestENTT()
 
 	t2 = std::chrono::steady_clock::now();
 
-	g_enttTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
+	g_enttUpdateTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 }
 #endif
 
@@ -186,42 +186,42 @@ int main(int*, char* [])
 
 	/* Cleanup results */
 #ifdef CUSTOMECS
-	std::sort(g_ECSTimes.begin(), g_ECSTimes.end());
+	std::sort(g_ECSUpdateTimes.begin(), g_ECSUpdateTimes.end());
 #endif
 #ifdef GAMEOBJECT
-	std::sort(g_GOTimes.begin(), g_GOTimes.end());
+	std::sort(g_GOUpdateTimes.begin(), g_GOUpdateTimes.end());
 #endif
 #ifdef ENTT
-	std::sort(g_enttTimes.begin(), g_enttTimes.end());
+	std::sort(g_enttUpdateTimes.begin(), g_enttUpdateTimes.end());
 #endif
 	if (Iterations / 10 > 0)
 	{
 		for (int i{}; i < Iterations / 10; ++i)
 		{
 #ifdef CUSTOMECS
-			g_ECSTimes.pop_back();
-			g_ECSTimes.pop_front();
+			g_ECSUpdateTimes.pop_back();
+			g_ECSUpdateTimes.pop_front();
 #endif
 #ifdef GAMEOBJECT
-			g_GOTimes.pop_back();
-			g_GOTimes.pop_front();
+			g_GOUpdateTimes.pop_back();
+			g_GOUpdateTimes.pop_front();
 #endif
 #ifdef ENTT
-			g_enttTimes.pop_back();
-			g_enttTimes.pop_front();
+			g_enttUpdateTimes.pop_back();
+			g_enttUpdateTimes.pop_front();
 #endif
 		}
 	}
 
 	/* Print results */
 #ifdef CUSTOMECS
-	std::cout << "ECS Average:\t\t" << std::accumulate(g_ECSTimes.cbegin(), g_ECSTimes.cend(), (long long)0) / g_ECSTimes.size() << " nanoseconds\n";
+	std::cout << "ECS Average:\t\t" << std::accumulate(g_ECSUpdateTimes.cbegin(), g_ECSUpdateTimes.cend(), (long long)0) / g_ECSUpdateTimes.size() << " nanoseconds\n";
 #endif
 #ifdef GAMEOBJECT
-	std::cout << "GO Average:\t\t" << std::accumulate(g_GOTimes.cbegin(), g_GOTimes.cend(), (long long)0) / g_GOTimes.size() << " nanoseconds\n";
+	std::cout << "GO Average:\t\t" << std::accumulate(g_GOUpdateTimes.cbegin(), g_GOUpdateTimes.cend(), (long long)0) / g_GOUpdateTimes.size() << " nanoseconds\n";
 #endif
 #ifdef ENTT
-	std::cout << "ENTT Average:\t\t" << std::accumulate(g_enttTimes.cbegin(), g_enttTimes.cend(), (long long)0) / g_enttTimes.size() << " nanoseconds\n";
+	std::cout << "ENTT Average:\t\t" << std::accumulate(g_enttUpdateTimes.cbegin(), g_enttUpdateTimes.cend(), (long long)0) / g_enttUpdateTimes.size() << " nanoseconds\n";
 #endif
 
 #ifdef WRITE_TO_FILE
