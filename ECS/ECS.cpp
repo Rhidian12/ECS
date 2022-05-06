@@ -56,7 +56,7 @@ void GravityUpdate(ECS::System& system)
 #define CUSTOMECS
 #define ENTT
 
-// #define WRITE_TO_FILE
+#define WRITE_TO_FILE
 // #define APPEND_TO_FILE
 // #define OVERWRITE_TO_FILE
 
@@ -215,13 +215,13 @@ int main(int*, char* [])
 
 	/* Print results */
 #ifdef CUSTOMECS
-	std::cout << "ECS Average:\t\t" << std::accumulate(g_ECSUpdateTimes.cbegin(), g_ECSUpdateTimes.cend(), (long long)0) / g_ECSUpdateTimes.size() << " nanoseconds\n";
+	std::cout << "ECS Update Average:\t\t" << std::accumulate(g_ECSUpdateTimes.cbegin(), g_ECSUpdateTimes.cend(), (long long)0) / g_ECSUpdateTimes.size() << " nanoseconds\n";
 #endif
 #ifdef GAMEOBJECT
-	std::cout << "GO Average:\t\t" << std::accumulate(g_GOUpdateTimes.cbegin(), g_GOUpdateTimes.cend(), (long long)0) / g_GOUpdateTimes.size() << " nanoseconds\n";
+	std::cout << "GO Update Average:\t\t" << std::accumulate(g_GOUpdateTimes.cbegin(), g_GOUpdateTimes.cend(), (long long)0) / g_GOUpdateTimes.size() << " nanoseconds\n";
 #endif
 #ifdef ENTT
-	std::cout << "ENTT Average:\t\t" << std::accumulate(g_enttUpdateTimes.cbegin(), g_enttUpdateTimes.cend(), (long long)0) / g_enttUpdateTimes.size() << " nanoseconds\n";
+	std::cout << "ENTT Update Average:\t\t" << std::accumulate(g_enttUpdateTimes.cbegin(), g_enttUpdateTimes.cend(), (long long)0) / g_enttUpdateTimes.size() << " nanoseconds\n";
 #endif
 
 #ifdef WRITE_TO_FILE
@@ -240,13 +240,13 @@ int main(int*, char* [])
 		file << "Program ran update code " << Iterations << " amount of times\n";
 
 #ifdef CUSTOMECS
-		file << "ECS Average: " << std::accumulate(g_ECSTimes.cbegin(), g_ECSTimes.cend(), (long long)0) / g_ECSTimes.size() << " nanoseconds\n\n";
+		file << "ECS Update Average: " << std::accumulate(g_ECSUpdateTimes.cbegin(), g_ECSUpdateTimes.cend(), (long long)0) / g_ECSUpdateTimes.size() << " nanoseconds\n\n";
 #endif
 #ifdef GAMEOBJECT
-		file << "GO Average: " << std::accumulate(g_GOTimes.cbegin(), g_GOTimes.cend(), (long long)0) / g_GOTimes.size() << " nanoseconds\n\n";
+		file << "GO Update Average: " << std::accumulate(g_GOUpdateTimes.cbegin(), g_GOUpdateTimes.cend(), (long long)0) / g_GOUpdateTimes.size() << " nanoseconds\n\n";
 #endif
 #ifdef ENTT
-		file << "ENTT Average: " << std::accumulate(g_enttTimes.cbegin(), g_enttTimes.cend(), (long long)0) / g_enttTimes.size() << " nanoseconds\n\n";
+		file << "ENTT Update Average: " << std::accumulate(g_enttUpdateTimes.cbegin(), g_enttUpdateTimes.cend(), (long long)0) / g_enttUpdateTimes.size() << " nanoseconds\n\n";
 #endif
 	}
 #endif
