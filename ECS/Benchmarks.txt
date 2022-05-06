@@ -1,12 +1,16 @@
 Program Created 65534 Entities
 Program ran update code 100 amount of times
-GO Average: 1669272 nanoseconds
+GO Init Average: 21844411 nanoseconds
+GO Update Average: 167370317 nanoseconds
 
 Program Created 65534 Entities
 Program ran update code 100 amount of times
-ECS Average: 239872 nanoseconds
+ENTT Init Average: 9275767 nanoseconds
+
+ENTT Update Average: 31126960 nanoseconds
 
 Program Created 65534 Entities
 Program ran update code 100 amount of times
-ENTT Average: 516421 nanoseconds
+ECS Init Average: 8017726 nanoseconds
+ECS Update Average: 30895665 nanoseconds
 

@@ -52,12 +52,12 @@ void GravityUpdate(ECS::System& system)
 }
 
 /* Defines! */
-#define GAMEOBJECT
+// #define GAMEOBJECT
+// #define ENTT
 #define CUSTOMECS
-#define ENTT
 
 #define WRITE_TO_FILE
-// #define APPEND_TO_FILE
+#define APPEND_TO_FILE
 // #define OVERWRITE_TO_FILE
 
 /* Things to test */
@@ -318,13 +318,13 @@ int main(int*, char* [])
 		file << "Program ran update code " << Iterations << " amount of times\n";
 
 #ifdef CUSTOMECS
-		file << "ECS Init Average:\t\t" << std::accumulate(g_ECSInitTimes.cbegin(), g_ECSInitTimes.cend(), (long long)0) / g_ECSInitTimes.size() << " nanoseconds\n";
+		file << "ECS Init Average: " << std::accumulate(g_ECSInitTimes.cbegin(), g_ECSInitTimes.cend(), (long long)0) / g_ECSInitTimes.size() << " nanoseconds\n";
 #endif
 #ifdef GAMEOBJECT
-		file << "GO Init Average:\t\t" << std::accumulate(g_GOInitTimes.cbegin(), g_GOInitTimes.cend(), (long long)0) / g_GOInitTimes.size() << " nanoseconds\n";
+		file << "GO Init Average: " << std::accumulate(g_GOInitTimes.cbegin(), g_GOInitTimes.cend(), (long long)0) / g_GOInitTimes.size() << " nanoseconds\n";
 #endif
 #ifdef ENTT
-		file << "ENTT Init Average:\t\t" << std::accumulate(g_enttInitTimes.cbegin(), g_enttInitTimes.cend(), (long long)0) / g_enttInitTimes.size() << " nanoseconds\n\n";
+		file << "ENTT Init Average: " << std::accumulate(g_enttInitTimes.cbegin(), g_enttInitTimes.cend(), (long long)0) / g_enttInitTimes.size() << " nanoseconds\n\n";
 #endif
 #ifdef CUSTOMECS
 		file << "ECS Update Average: " << std::accumulate(g_ECSUpdateTimes.cbegin(), g_ECSUpdateTimes.cend(), (long long)0) / g_ECSUpdateTimes.size() << " nanoseconds\n\n";
