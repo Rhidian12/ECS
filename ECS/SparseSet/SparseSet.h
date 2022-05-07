@@ -146,7 +146,7 @@ namespace ECS
 		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
 		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
 
-		const SparseValue& Size() const { return _Size; }
+		size_t Size() const { return _Size; }
 		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
 
 		RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
@@ -161,6 +161,6 @@ namespace ECS
 	private:
 		std::vector<std::pair<SparseValue, bool>> SparseSet;
 		std::vector<std::pair<SparseValue, bool>> PackedSet;
-		SparseValue _Size;
+		size_t _Size;
 	};
 }
