@@ -42,6 +42,8 @@ namespace ECS
 		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
 		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
 
+		void Clear() { SparseSet.clear(); PackedSet.clear(); }
+
 	private:
 		std::vector<std::pair<SparseValue, bool>> SparseSet;
 		std::vector<std::pair<SparseValue, bool>> PackedSet;
