@@ -33,8 +33,10 @@ namespace ECS
 			SparseSet[addedValue] = std::make_pair(Size++, true);
 		}
 
-		SparseValue& Find(const SparseValue& value) { assert(value < PackedSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first]; }
-		const SparseValue& Find(const SparseValue& value) const { assert(value < PackedSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first]; }
+		bool Contains(const SparseValue& value) const { assert(value < this->SparseSet.size()); return SparseSet[value].second; }
+
+		SparseValue& Find(const SparseValue& value) { assert(value < this->SparseSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first].first; }
+		const SparseValue& Find(const SparseValue& value) const { assert(value < this->SparseSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first].first; }
 
 		SparseValue& Front() { assert(PackedSet.size() > 0); return PackedSet[0].first; }
 		const SparseValue& Front() const { assert(PackedSet.size() > 0); return PackedSet[0].first; }
