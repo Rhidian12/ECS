@@ -143,8 +143,8 @@ namespace ECS
 		SparseValue& Front() { assert(PackedSet.size() > 0); return PackedSet[0].first; }
 		const SparseValue& Front() const { assert(PackedSet.size() > 0); return PackedSet[0].first; }
 
-		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[_Size].first; }
-		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[_Size].first; }
+		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
+		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
 
 		const SparseValue& Size() const { return _Size; }
 		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
