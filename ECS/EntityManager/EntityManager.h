@@ -1,10 +1,12 @@
 #pragma once
 
 #include "../ECSConstants.h"
+#include "../SparseSet/SparseSet.h"
 
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
 #include <memory> /* std::unique_ptr */
+#include <queue> /* std::queue */
 
 namespace ECS
 {
@@ -19,19 +21,18 @@ namespace ECS
 		EntityManager& operator=(EntityManager&&) noexcept = delete;
 
 		Entity CreateEntity();
+		void ReleaseEntity(Entity entity);
 
-		void SetEntitySignature(Entity entity, ComponentType sig) { assert(entity < EntitySignatures.size()); EntitySignatures[entity].set(sig); }
-		
-		const EntitySignature& GetEntitySignature(Entity entity) const { assert(entity < EntitySignatures.size()); return EntitySignatures[entity]; }
+		EntitySignature GetEntitySignature(Entity entity) const;
 
 	private:
-		EntityManager() = default;
+		EntityManager();
 
 		friend std::unique_ptr<EntityManager> std::make_unique();
 
 		inline static std::unique_ptr<EntityManager> Instance;
 
-		std::vector<EntitySignature> EntitySignatures;
-		std::vector<Entity> Entities;
+		SparseSet<EntitySignature> EntitySignatures;
+		std::queue<Entity> Entities;
 	};
 }

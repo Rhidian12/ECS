@@ -2,6 +2,14 @@
 
 namespace ECS
 {
+	EntityManager::EntityManager()
+	{
+		for (Entity i{}; i < MaxEntities; ++i)
+		{
+			Entities.push(i);
+		}
+	}
+
 	EntityManager* EntityManager::GetInstance()
 	{
 		if (!Instance)
@@ -14,10 +22,22 @@ namespace ECS
 
 	Entity EntityManager::CreateEntity()
 	{
-		assert(static_cast<Entity>(Entities.size()) < MaxEntities);
+		assert(Entities.size() > 0);
 
-		EntitySignatures.push_back(EntitySignature{});
-		Entities.push_back(static_cast<Entity>(Entities.size()));
-		return Entities.back();
+		const Entity entity(Entities.front());
+		Entities.pop();
+
+		EntitySignatures.Add(entity);
+		
+		return entity;
+	}
+
+	void EntityManager::ReleaseEntity(Entity entity)
+	{
+	}
+
+	EntitySignature EntityManager::GetEntitySignature(Entity entity) const
+	{
+		EntitySignatures.Find(entity);
 	}
 }

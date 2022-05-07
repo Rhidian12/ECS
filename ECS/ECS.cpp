@@ -49,7 +49,7 @@ void GravityUpdate(const ECS::System& system)
 {
 	auto view = system.CreateView<GravityComponent, RigidBodyComponent>();
 
-	view.ForEach([](const auto& gravity, auto& rigidBody)->void
+	view.ForEach([](auto& gravity, auto& rigidBody)->void
 		{
 			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
 		});
@@ -58,7 +58,7 @@ void PhysicsUpdate(const ECS::System& system)
 {
 	auto view = system.CreateView<RigidBodyComponent, TransformComponent>();
 
-	view.ForEach([](const auto& rigidBody, auto& transform)->void
+	view.ForEach([](auto& rigidBody, auto& transform)->void
 		{
 			transform.Position.x += rigidBody.Velocity.x;
 			transform.Position.y += rigidBody.Velocity.y;
@@ -108,6 +108,9 @@ void TestInitECS(const ECS::Entity amount)
 	std::chrono::steady_clock::time_point t1{};
 	std::chrono::steady_clock::time_point t2{};
 
+	g_GravitySystem.ClearEntities();
+	g_PhysicsSystem.ClearEntities();
+
 	t1 = std::chrono::steady_clock::now();
 
 	for (int i{}; i < amount; ++i)
@@ -118,6 +121,7 @@ void TestInitECS(const ECS::Entity amount)
 		g_GravitySystem.AddComponent<RigidBodyComponent>(entity);
 		g_GravitySystem.AddComponent<GravityComponent>(entity);
 
+		g_PhysicsSystem.AddEntity(entity);
 		g_PhysicsSystem.AddComponent<RigidBodyComponent>(entity);
 		g_PhysicsSystem.AddComponent<TransformComponent>(entity);
 	}
@@ -195,15 +199,19 @@ void TestInitENTT(const ECS::Entity amount)
 	std::chrono::steady_clock::time_point t1{};
 	std::chrono::steady_clock::time_point t2{};
 
+	g_GravityRegistry.destroy(g_GravityRegistry.data(), g_GravityRegistry.data() + g_GravityRegistry.size());
+	g_PhysicsRegistry.destroy(g_PhysicsRegistry.data(), g_PhysicsRegistry.data() + g_PhysicsRegistry.size());
+
 	t1 = std::chrono::steady_clock::now();
 
 	for (int i{}; i < amount; ++i)
 	{
-		const auto enttEntity{ g_GravityRegistry.create() };
+		auto enttEntity{ g_GravityRegistry.create() };
 		g_GravityRegistry.emplace<ENTTGravity>(enttEntity);
 		g_GravityRegistry.emplace<ENTTTransformComponent>(enttEntity);
 		g_GravityRegistry.emplace<ENTTRigidBodyComponent>(enttEntity);
 
+		enttEntity = g_PhysicsRegistry.create();
 		g_PhysicsRegistry.emplace<ENTTTransformComponent>(enttEntity);
 		g_PhysicsRegistry.emplace<ENTTRigidBodyComponent>(enttEntity);
 	}
