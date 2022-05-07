@@ -12,28 +12,28 @@ namespace ECS
 	public:
 		void Add(const SparseValue& value)
 		{
-			const SparseValue& addedValue(PackedSet.emplace_back(value));
+			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(value, true)).first);
 
-			if (addedValue >= SparseSet.size())
+			if (addedValue >= this->SparseSet.size())
 			{
-				SparseSet.resize(addedValue + 1);
+				this->SparseSet.resize(addedValue + 1);
 			}
 
-			SparseSet[addedValue] = Size++;
+			this->SparseSet[addedValue] = Size++;
 		}
 		void Add(SparseValue&& value)
 		{
-			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(std::move(value), true)));
+			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(std::move(value), true)).first);
 
-			if (addedValue >= SparseSet.size())
+			if (addedValue >= this->SparseSet.size())
 			{
-				SparseSet.resize(addedValue + 1);
+				this->SparseSet.resize(addedValue + 1);
 			}
 
-			SparseSet[addedValue] = std::make_pair(Size++, true);
+			this->SparseSet[addedValue] = std::make_pair(Size++, true);
 		}
 
-		bool Contains(const SparseValue& value) const { assert(value < this->SparseSet.size()); return SparseSet[value].second; }
+		bool Contains(const SparseValue& value) const { assert(value < this->SparseSet.size()); return this->SparseSet[value].second; }
 
 		SparseValue& Find(const SparseValue& value) { assert(value < this->SparseSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first].first; }
 		const SparseValue& Find(const SparseValue& value) const { assert(value < this->SparseSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first].first; }
@@ -44,11 +44,11 @@ namespace ECS
 		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
 		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
 
-		void Clear() { SparseSet.clear(); PackedSet.clear(); }
+		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
 
 	private:
 		std::vector<std::pair<SparseValue, bool>> SparseSet;
 		std::vector<std::pair<SparseValue, bool>> PackedSet;
-		size_t Size;
+		SparseValue Size;
 	};
 }
