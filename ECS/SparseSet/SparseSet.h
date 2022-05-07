@@ -121,7 +121,7 @@ namespace ECS
 				this->SparseSet.resize(addedValue + 1);
 			}
 
-			this->SparseSet[addedValue] = Size++;
+			this->SparseSet[addedValue] = std::make_pair(_Size++, true);
 		}
 		void Add(SparseValue&& value)
 		{
@@ -132,7 +132,7 @@ namespace ECS
 				this->SparseSet.resize(addedValue + 1);
 			}
 
-			this->SparseSet[addedValue] = std::make_pair(Size++, true);
+			this->SparseSet[addedValue] = std::make_pair(_Size++, true);
 		}
 
 		bool Contains(const SparseValue& value) const { assert(value < this->SparseSet.size()); return this->SparseSet[value].second; }
@@ -143,10 +143,10 @@ namespace ECS
 		SparseValue& Front() { assert(PackedSet.size() > 0); return PackedSet[0].first; }
 		const SparseValue& Front() const { assert(PackedSet.size() > 0); return PackedSet[0].first; }
 
-		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
-		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
+		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[_Size].first; }
+		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[_Size].first; }
 
-		const SparseValue& Size() const { return this->Size; }
+		const SparseValue& Size() const { return _Size; }
 		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
 
 		RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
@@ -161,6 +161,6 @@ namespace ECS
 	private:
 		std::vector<std::pair<SparseValue, bool>> SparseSet;
 		std::vector<std::pair<SparseValue, bool>> PackedSet;
-		SparseValue Size;
+		SparseValue _Size;
 	};
 }
