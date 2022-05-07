@@ -146,6 +146,7 @@ namespace ECS
 		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
 		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
 
+		const SparseValue& Size() const { return this->Size; }
 		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
 
 		RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
