@@ -36,8 +36,11 @@ namespace ECS
 		SparseValue& Find(const SparseValue& value) { assert(value < PackedSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first]; }
 		const SparseValue& Find(const SparseValue& value) const { assert(value < PackedSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first]; }
 
-		SparseValue& Back() { return PackedSet[Size].first; }
-		const SparseValue& Back() const { return PackedSet[Size].first; }
+		SparseValue& Front() { assert(PackedSet.size() > 0); return PackedSet[0].first; }
+		const SparseValue& Front() const { assert(PackedSet.size() > 0); return PackedSet[0].first; }
+
+		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
+		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[Size].first; }
 
 	private:
 		std::vector<std::pair<SparseValue, bool>> SparseSet;
