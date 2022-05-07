@@ -2,6 +2,7 @@
 
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
+#include <utility> /* std::pair */
 
 namespace ECS
 {
@@ -11,37 +12,36 @@ namespace ECS
 	public:
 		void Add(const SparseValue& value)
 		{
-			PackedSet.push_back(value);
+			const SparseValue& addedValue(PackedSet.emplace_back(value));
 
-			if (value >= SparseSet.size())
+			if (addedValue >= SparseSet.size())
 			{
-				SparseSet.resize(value + 1);
+				SparseSet.resize(addedValue + 1);
 			}
 
-			SparseSet[value] = Size++;
+			SparseSet[addedValue] = Size++;
 		}
 		void Add(SparseValue&& value)
 		{
-			PackedSet.push_back(value);
+			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(std::move(value), true)));
 
-			if (value >= SparseSet.size())
+			if (addedValue >= SparseSet.size())
 			{
-				SparseSet.resize(value + 1);
+				SparseSet.resize(addedValue + 1);
 			}
 
-			SparseSet[value] = Size++;
+			SparseSet[addedValue] = std::make_pair(Size++, true);
 		}
 
-		SparseValue& Find(const SparseValue& value)
-		{
-			assert(value < PackedSet.size());
+		SparseValue& Find(const SparseValue& value) { assert(value < PackedSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first]; }
+		const SparseValue& Find(const SparseValue& value) const { assert(value < PackedSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first]; }
 
-			// if ()
-		}
+		SparseValue& Back() { return PackedSet[Size].first; }
+		const SparseValue& Back() const { return PackedSet[Size].first; }
 
 	private:
-		std::vector<SparseValue> SparseSet;
-		std::vector<SparseValue> PackedSet;
+		std::vector<std::pair<SparseValue, bool>> SparseSet;
+		std::vector<std::pair<SparseValue, bool>> PackedSet;
 		size_t Size;
 	};
 }
