@@ -25,27 +25,41 @@
 #include "ECSComponents/ECSComponents.h"
 #include "GOComponents/GOComponents.h"
 
-void ENTTUpdate(entt::registry& registry)
+void ENTTGravityUpdate(entt::registry& registry)
 {
-	auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent, ENTTTransformComponent>();
+	auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent>();
 
-	view.each([](const auto& gravity, auto& rigidBody, auto& transform)
+	view.each([](const auto& gravity, auto& rigidBody)
 		{
 			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+		});
+}
+void ENTTPhysicsUpdate(entt::registry& registry)
+{
+	auto view = registry.view<const ENTTRigidBodyComponent, ENTTTransformComponent>();
 
+	view.each([](const auto& rigidBody, auto& transform)
+		{
 			transform.Position.x += rigidBody.Velocity.x;
 			transform.Position.y += rigidBody.Velocity.y;
 		});
 }
 
-void GravityUpdate(ECS::System& system)
+void GravityUpdate(const ECS::System& system)
 {
-	auto view = system.CreateView<GravityComponent, RigidBodyComponent, TransformComponent>();
+	auto view = system.CreateView<GravityComponent, RigidBodyComponent>();
 
-	view.ForEach([](auto& gravity, auto& rigidBody, auto& transform)->void
+	view.ForEach([](const auto& gravity, auto& rigidBody)->void
 		{
 			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+		});
+}
+void PhysicsUpdate(const ECS::System& system)
+{
+	auto view = system.CreateView<RigidBodyComponent, TransformComponent>();
 
+	view.ForEach([](const auto& rigidBody, auto& transform)->void
+		{
 			transform.Position.x += rigidBody.Velocity.x;
 			transform.Position.y += rigidBody.Velocity.y;
 		});
@@ -53,7 +67,7 @@ void GravityUpdate(ECS::System& system)
 
 /* Defines! */
 // #define GAMEOBJECT
-// #define ENTT
+#define ENTT
 #define CUSTOMECS
 
 #define WRITE_TO_FILE
@@ -63,12 +77,14 @@ void GravityUpdate(ECS::System& system)
 /* Things to test */
 #ifdef CUSTOMECS
 ECS::System g_GravitySystem;
+ECS::System g_PhysicsSystem;
 #endif
 #ifdef GAMEOBJECT
 std::vector<GO::GameObject*> g_GameObjects;
 #endif
 #ifdef ENTT
-entt::registry g_Registry;
+entt::registry g_GravityRegistry;
+entt::registry g_PhysicsRegistry;
 #endif
 
 #ifdef CUSTOMECS
@@ -101,6 +117,9 @@ void TestInitECS(const ECS::Entity amount)
 		g_GravitySystem.AddComponent<TransformComponent>(entity);
 		g_GravitySystem.AddComponent<RigidBodyComponent>(entity);
 		g_GravitySystem.AddComponent<GravityComponent>(entity);
+
+		g_PhysicsSystem.AddComponent<RigidBodyComponent>(entity);
+		g_PhysicsSystem.AddComponent<TransformComponent>(entity);
 	}
 
 	t2 = std::chrono::steady_clock::now();
@@ -117,6 +136,7 @@ void TestUpdateECS()
 	t1 = std::chrono::steady_clock::now();
 
 	GravityUpdate(g_GravitySystem);
+	PhysicsUpdate(g_PhysicsSystem);
 
 	t2 = std::chrono::steady_clock::now();
 
@@ -179,10 +199,13 @@ void TestInitENTT(const ECS::Entity amount)
 
 	for (int i{}; i < amount; ++i)
 	{
-		const auto enttEntity{ g_Registry.create() };
-		g_Registry.emplace<ENTTGravity>(enttEntity);
-		g_Registry.emplace<ENTTTransformComponent>(enttEntity);
-		g_Registry.emplace<ENTTRigidBodyComponent>(enttEntity);
+		const auto enttEntity{ g_GravityRegistry.create() };
+		g_GravityRegistry.emplace<ENTTGravity>(enttEntity);
+		g_GravityRegistry.emplace<ENTTTransformComponent>(enttEntity);
+		g_GravityRegistry.emplace<ENTTRigidBodyComponent>(enttEntity);
+
+		g_PhysicsRegistry.emplace<ENTTTransformComponent>(enttEntity);
+		g_PhysicsRegistry.emplace<ENTTRigidBodyComponent>(enttEntity);
 	}
 
 	t2 = std::chrono::steady_clock::now();
@@ -196,7 +219,8 @@ void TestUpdateENTT()
 
 	t1 = std::chrono::steady_clock::now();
 
-	ENTTUpdate(g_Registry);
+	ENTTGravityUpdate(g_GravityRegistry);
+	ENTTPhysicsUpdate(g_PhysicsRegistry);
 
 	t2 = std::chrono::steady_clock::now();
 

@@ -3,6 +3,7 @@
 
 #include "../ComponentManager/ComponentManager.h"
 #include "../EntityManager/EntityManager.h"
+#include "../SparseSet/SparseSet.h"
 
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
@@ -53,12 +54,15 @@ namespace ECS
 		System& operator=(const System&) noexcept = delete;
 		System& operator=(System&&) noexcept = delete;
 
-		Entity CreateEntity() const;
+		Entity CreateEntity();
+
+		void ClearEntities();
 
 		template<typename TComponent>
 		void AddComponent(Entity entity) const
 		{
 			assert(entity != InvalidEntityID);
+			assert(Entities.Contains(entity));
 
 			ComponentManager::GetInstance()->AddComponent<TComponent>(entity);
 			EntityManager::GetInstance()->SetEntitySignature(entity, TComponent::GetComponentID());
@@ -71,8 +75,30 @@ namespace ECS
 		}
 
 		template<typename TComponent>
-		TComponent& GetComponent(Entity id) { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
+		TComponent& GetComponent(Entity id) { assert(id != InvalidEntityID); assert(Entities.Contains(id)); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
 		template<typename TComponent>
-		const TComponent& GetComponent(Entity id) const { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
+		const TComponent& GetComponent(Entity id) const { assert(id != InvalidEntityID); assert(Entities.Contains(id)); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
+	
+	private:
+		template<typename TComponent>
+		std::vector<TComponent> FilterEntities(const std::vector<TComponent>& v) const
+		{
+			constexpr ComponentType componentID(TComponent::GetComponentID());
+			std::vector<TComponent> filtered(v.size());
+			const EntityManager* const pEntityManager(EntityManager::GetInstance());
+			Entity counter{};
+
+			for (const Entity& entity : Entities)
+			{
+				if (pEntityManager->GetEntitySignature(entity)[componentID])
+				{
+					filtered[counter] = v[counter++];
+				}
+			}
+
+			return filtered;
+		}
+
+		SparseSet<Entity> Entities{};
 	};
 }

@@ -2,8 +2,15 @@
 
 namespace ECS
 {
-	Entity System::CreateEntity() const
+	Entity System::CreateEntity()
 	{
-		return EntityManager::GetInstance()->CreateEntity();
+		Entities.Add(EntityManager::GetInstance()->CreateEntity());
+
+		return Entities.Back();
+	}
+
+	void System::ClearEntities()
+	{
+		Entities.Clear();
 	}
 }
