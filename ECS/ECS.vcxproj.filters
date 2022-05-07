@@ -284,5 +284,8 @@
     <ClInclude Include="ENTTComponents\ENTTComponents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SparseSet\SparseSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

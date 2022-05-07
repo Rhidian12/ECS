@@ -232,6 +232,7 @@
     <ClInclude Include="GOComponents\GOComponents.h" />
     <ClInclude Include="GOComponent\GOComponent.h" />
     <ClInclude Include="Point2f\Point2f.h" />
+    <ClInclude Include="SparseSet\SparseSet.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
