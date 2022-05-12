@@ -23,8 +23,9 @@ namespace ECS
 		Entity CreateEntity();
 		void ReleaseEntity(Entity entity);
 
-		void SetEntitySignature(Entity entity, EntitySignature&& sig) { assert(entity < EntitySignatures.size()); EntitySignatures[entity] = std::move(sig); }
 		void SetEntitySignature(Entity entity, const EntitySignature sig) { assert(entity < EntitySignatures.size()); EntitySignatures[entity] = sig; }
+		void SetEntitySignature(Entity entity, const ComponentType id) { assert(entity < EntitySignatures.size()); EntitySignatures[entity].set(id); }
+
 		EntitySignature GetEntitySignature(Entity entity) const { assert(entity < EntitySignatures.size()); return EntitySignatures[entity]; }
 
 	private:
