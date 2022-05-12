@@ -149,14 +149,14 @@ namespace ECS
 		size_t Size() const { return _Size; }
 		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
 
-		RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
-		RandomConstIterator<SparseValue> begin() const noexcept { return RandomConstIterator(PackedSet.data()); }
-
-		RandomIterator<SparseValue> end() noexcept { return RandomIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
-		RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
-
-		RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(PackedSet.data()); }
-		RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
+		// RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
+		// RandomConstIterator<SparseValue> begin() const noexcept { return RandomConstIterator(PackedSet.data()); }
+		// 
+		// RandomIterator<SparseValue> end() noexcept { return RandomIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
+		// RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
+		// 
+		// RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(PackedSet.data()); }
+		// RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
 
 	private:
 		std::vector<std::pair<SparseValue, bool>> SparseSet;

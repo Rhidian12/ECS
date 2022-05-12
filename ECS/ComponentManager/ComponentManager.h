@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ECSConstants.h"
+#include "../SparseSet/SparseSet.h"
 
 #include <vector> /* std::vector */
 #include <memory> /* std::unique_ptr */
@@ -13,6 +14,8 @@ namespace ECS
 	{
 	public:
 		virtual ~IComponentArray() = default;
+
+		virtual void RemoveComponent(Entity) = 0;
 	};
 
 	template<typename TComponent>
@@ -23,17 +26,17 @@ namespace ECS
 		{
 			static_assert(std::is_default_constructible_v<TComponent>, "Component must be default constructible");
 
-			Entities.push_back(entity);
+			Entities.Add(entity);
 			Components.push_back(TComponent());
 		}
 		template<typename ... Values>
 		void AddComponent(const Entity entity, Values&&... values)
 		{
-			Entities.push_back(entity);
+			Entities.Add(entity);
 			Components.push_back(TComponent(std::forward<Values>(values)...));
 		}
 
-		void RemoveComponent(Entity entity)
+		virtual void RemoveComponent(Entity entity) override
 		{
 			const size_t distance(std::distance(Entities.cbegin(), std::find(Entities.cbegin(), Entities.cend(), entity)));
 			Entities.erase(std::remove(Entities.begin(), Entities.end(), entity), Entities.end());
@@ -42,27 +45,35 @@ namespace ECS
 
 		TComponent& GetComponent(const Entity entity)
 		{
-			const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
+			// const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
 
-			assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
+			// assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
 
-			const size_t index(std::distance(Entities.cbegin(), cIt));
+			// const size_t index(std::distance(Entities.cbegin(), cIt));
 
-			assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
+			// assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
 
-			return Components[index];
+			// return Components[index];
+
+			assert(Entities.Contains(entity) && "ComponentArray::GetComponent() > This Entity does not have the corresponding component!");
+
+			return Components[Entities.Find(entity)];
 		}
 		const TComponent& GetComponent(const Entity entity) const
 		{
-			const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
+			//const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
 
-			assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
+			//assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
 
-			const size_t index(std::distance(Entities.cbegin(), cIt));
+			//const size_t index(std::distance(Entities.cbegin(), cIt));
 
-			assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
+			//assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
 
-			return Components[index];
+			//return Components[index];
+
+			assert(Entities.Contains(entity) && "ComponentArray::GetComponent() > This Entity does not have the corresponding component!");
+
+			return Components[Entities.Find(entity)];
 		}
 
 		std::vector<TComponent>& GetComponents() { return Components; }
@@ -70,7 +81,7 @@ namespace ECS
 
 	private:
 		std::vector<TComponent> Components;
-		std::vector<Entity> Entities;
+		SparseSet<Entity> Entities;
 	};
 
 	class ComponentManager final
@@ -120,12 +131,21 @@ namespace ECS
 			static_cast<ComponentArray<TComponent>*>(pArray.get())->AddComponent(entity, values...);
 		}
 
-		template<typename TComponent>
-		void RemoveComponent(Entity entity)
+		void RemoveComponent(Entity entity, EntitySignature id)
 		{
-			assert(TComponent::GetComponentID() < ComponentArrays.size());
+			for (ComponentType i{}; i < MaxComponentTypes; ++i)
+			{
+				if (id.test(i))
+				{
+					assert(i < ComponentArrays.size());
 
-			static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->RemoveComponent(entity);
+					if (ComponentArrays[i])
+					{
+						ComponentArrays[i]->RemoveComponent(entity);
+					}
+				}
+			}
+			// static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->RemoveComponent(entity);
 		}
 
 		template<typename TComponent>
@@ -145,6 +165,6 @@ namespace ECS
 
 		inline static std::unique_ptr<ComponentManager> Instance{};
 
-		std::vector<std::unique_ptr<IComponentArray>> ComponentArrays;
+		std::vector<std::unique_ptr<IComponentArray>> ComponentArrays{};
 	};
 }

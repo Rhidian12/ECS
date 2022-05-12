@@ -108,8 +108,8 @@ void TestInitECS(const ECS::Entity amount)
 	std::chrono::steady_clock::time_point t1{};
 	std::chrono::steady_clock::time_point t2{};
 
-	g_GravitySystem.ClearEntities();
-	g_PhysicsSystem.ClearEntities();
+	g_GravitySystem.ReleaseEntities();
+	g_PhysicsSystem.ReleaseEntities();
 
 	t1 = std::chrono::steady_clock::now();
 
@@ -242,8 +242,8 @@ int main(int*, char* [])
 	using namespace GO;
 
 	/* Benchmarking Constants */
-	constexpr Entity AmountOfEntities{ MaxEntities };
-	constexpr int Iterations{ 100 };
+	constexpr Entity AmountOfEntities{ 500 };
+	constexpr int Iterations{ 5 };
 
 	/* Initialize different systems */
 	for (int i{}; i < Iterations; ++i)

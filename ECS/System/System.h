@@ -59,6 +59,7 @@ namespace ECS
 		Entity CreateEntity();
 
 		void ClearEntities();
+		void ReleaseEntities();
 
 		template<typename TComponent>
 		void AddComponent(Entity entity) const

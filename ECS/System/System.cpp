@@ -18,4 +18,14 @@ namespace ECS
 	{
 		Entities.Clear();
 	}
+
+	void System::ReleaseEntities()
+	{
+		for (Entity entity{}; entity < Entities.Size(); ++entity)
+		{
+			EntityManager::GetInstance()->ReleaseEntity(entity);
+
+			ComponentManager::GetInstance()->RemoveComponent(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
+		}
+	}
 }
