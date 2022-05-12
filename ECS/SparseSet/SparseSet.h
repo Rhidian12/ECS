@@ -1,12 +1,8 @@
 #pragma once
 
-#include "../Utils/Utils.h"
-
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
 #include <utility> /* std::pair */
-#include <type_traits> /* std::is_void_v */
-#include <functional> /* std::function */
 
 namespace ECS
 {
@@ -112,162 +108,59 @@ namespace ECS
 		Type* Pointer{ nullptr };
 	};
 
-	namespace Internal
-	{
-		template<typename SparseKey, typename SparseValue, typename Convertor>
-		constexpr bool IsConvertorValid() { return !std::is_void_v<Convertor> && std::is_invocable_r_v<SparseKey, Convertor, SparseValue>; }
-	}
-
-	template<typename SparseKey, typename SparseValue,
-		typename Convertor = void, bool IsConverterValid = Internal::IsConvertorValid<SparseKey, SparseValue, Convertor>()>
+	template<typename SparseValue>
 	class SparseSet final
 	{
 	public:
-		SparseSet()
-		{
-			static_assert(std::is_integral_v<SparseKey>, "The Key must be an integral type");
-
-			if constexpr (!Internal::IsConvertorValid<SparseKey, SparseValue, Convertor>())
-			{
-				static_assert(Utils::IsExplicitlyConvertible_v<SparseValue, SparseKey>, "The Value must be explicitly convertible to the Key");
-			}
-		}
-
 		void Add(const SparseValue& value)
 		{
 			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(value, true)).first);
 
-			const SparseKey convertedValue{ static_cast<SparseKey>(addedValue) };
-			if (convertedValue >= _SparseSet.size())
+			if (addedValue >= this->SparseSet.size())
 			{
-				_SparseSet.resize(convertedValue + 1);
+				this->SparseSet.resize(addedValue + 1);
 			}
 
-			_SparseSet[convertedValue] = std::make_pair(static_cast<SparseKey>(_Size++), true);
+			this->SparseSet[addedValue] = std::make_pair(_Size++, true);
 		}
 		void Add(SparseValue&& value)
 		{
 			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(std::move(value), true)).first);
 
-			const SparseKey convertedValue{ static_cast<SparseKey>(addedValue) };
-			if (convertedValue >= _SparseSet.size())
+			if (addedValue >= this->SparseSet.size())
 			{
-				_SparseSet.resize(convertedValue + 1);
+				this->SparseSet.resize(addedValue + 1);
 			}
 
-			_SparseSet[convertedValue] = std::make_pair(static_cast<SparseKey>(_Size++), true);
+			this->SparseSet[addedValue] = std::make_pair(_Size++, true);
 		}
 
-		bool Contains(const SparseValue& value) const { assert(static_cast<SparseKey>(value) < _SparseSet.size()); return _SparseSet[static_cast<SparseKey>(value)].second; }
+		bool Contains(const SparseValue& value) const { assert(value < this->SparseSet.size()); return this->SparseSet[value].second; }
 
-		SparseValue& Find(const SparseValue& value) { assert(static_cast<SparseKey>(value) < _SparseSet.size()); assert(_SparseSet[static_cast<SparseKey>(value)].second); return PackedSet[_SparseSet[static_cast<SparseKey>(value)].first].first; }
-		const SparseValue& Find(const SparseValue& value) const { assert(static_cast<SparseKey>(value) < _SparseSet.size()); assert(_SparseSet[static_cast<SparseKey>(value)].second); return PackedSet[_SparseSet[static_cast<SparseKey>(value)].first].first; }
+		SparseValue& Find(const SparseValue& value) { assert(value < this->SparseSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first].first; }
+		const SparseValue& Find(const SparseValue& value) const { assert(value < this->SparseSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first].first; }
 
-		SparseValue& Front() { assert(PackedSet.size() > 0u); return PackedSet[0].first; }
+		SparseValue& Front() { assert(PackedSet.size() > 0); return PackedSet[0].first; }
 		const SparseValue& Front() const { assert(PackedSet.size() > 0); return PackedSet[0].first; }
 
-		SparseValue& Back() { assert(PackedSet.size() > 0u); return PackedSet[_Size - 1].first; }
-		const SparseValue& Back() const { assert(PackedSet.size() > 0u); return PackedSet[_Size - 1].first; }
+		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
+		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
 
 		size_t Size() const { return _Size; }
-		void Clear() { _SparseSet.clear(); PackedSet.clear(); }
+		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
 
 		RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
 		RandomConstIterator<SparseValue> begin() const noexcept { return RandomConstIterator(PackedSet.data()); }
 
-		RandomIterator<SparseValue> end() noexcept { return RandomIterator(PackedSet.data() + PackedSet.size()); }
-		RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(PackedSet.data() + PackedSet.size()); }
+		RandomIterator<SparseValue> end() noexcept { return RandomIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
+		RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
 
 		RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(PackedSet.data()); }
-		RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator(PackedSet.data() + PackedSet.size()); }
+		RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
 
 	private:
-		std::vector<std::pair<SparseKey, bool>> _SparseSet;
+		std::vector<std::pair<SparseValue, bool>> SparseSet;
 		std::vector<std::pair<SparseValue, bool>> PackedSet;
 		size_t _Size;
-	};
-
-	template<typename SparseKey, typename SparseValue, typename Convertor>
-	class SparseSet<SparseKey, SparseValue, Convertor, true>
-	{
-	public:
-		SparseSet(Convertor conv)
-			: ConversionFn{ conv }
-		{
-			static_assert(std::is_integral_v<SparseKey>, "The Key must be an integral type");
-		}
-
-		void Add(const SparseValue& value)
-		{
-			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(value, true)).first);
-
-			const SparseKey convertedValue{ ConversionFn(addedValue) };
-			if (convertedValue >= _SparseSet.size())
-			{
-				_SparseSet.resize(convertedValue + 1);
-			}
-
-			_SparseSet[convertedValue] = std::make_pair(static_cast<SparseKey>(_Size++), true);
-		}
-		void Add(SparseValue&& value)
-		{
-			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(std::move(value), true)).first);
-
-			const SparseKey convertedValue{ ConversionFn(addedValue) };
-			if (convertedValue >= _SparseSet.size())
-			{
-				_SparseSet.resize(convertedValue + 1);
-			}
-
-			_SparseSet[convertedValue] = std::make_pair(static_cast<SparseKey>(_Size++), true);
-		}
-
-		bool Contains(const SparseValue& value) const { assert(ConversionFn(value) < _SparseSet.size()); return _SparseSet[ConversionFn(value)].second; }
-
-		SparseValue& Find(const SparseValue& value) { assert(ConversionFn(value) < _SparseSet.size()); assert(_SparseSet[ConversionFn(value)].second); return PackedSet[_SparseSet[ConversionFn(value)].first].first; }
-		const SparseValue& Find(const SparseValue& value) const { assert(ConversionFn(value) < _SparseSet.size()); assert(_SparseSet[ConversionFn(value)].second); return PackedSet[_SparseSet[ConversionFn(value)].first].first; }
-
-		SparseValue& Front() { assert(PackedSet.size() > 0u); return PackedSet[0].first; }
-		const SparseValue& Front() const { assert(PackedSet.size() > 0); return PackedSet[0].first; }
-
-		SparseValue& Back() { assert(PackedSet.size() > 0u); return PackedSet[_Size - 1].first; }
-		const SparseValue& Back() const { assert(PackedSet.size() > 0u); return PackedSet[_Size - 1].first; }
-
-		size_t Size() const { return _Size; }
-		void Clear() { _SparseSet.clear(); PackedSet.clear(); }
-
-		RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
-		RandomConstIterator<SparseValue> begin() const noexcept { return RandomConstIterator(PackedSet.data()); }
-
-		RandomIterator<SparseValue> end() noexcept { return RandomIterator(PackedSet.data() + PackedSet.size()); }
-		RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(PackedSet.data() + PackedSet.size()); }
-
-		RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(PackedSet.data()); }
-		RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator(PackedSet.data() + PackedSet.size()); }
-
-	private:
-		std::vector<std::pair<SparseKey, bool>> _SparseSet;
-		std::vector<std::pair<SparseValue, bool>> PackedSet;
-		size_t _Size;
-
-		template<bool TIsConvertorValid>
-		struct Conversion {};
-
-		template<>
-		struct Conversion<true>
-		{
-			Conversion(const std::function<SparseKey(SparseValue)>& fn)
-				: Converter{ fn }
-			{}
-
-			SparseKey operator()(const SparseValue& val) const
-			{
-				return Converter(val);
-			}
-
-			std::function<SparseKey(SparseValue)> Converter;
-		};
-
-		Conversion<Internal::IsConvertorValid<SparseKey, SparseValue, Convertor>()> ConversionFn;
 	};
 }

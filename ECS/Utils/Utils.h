@@ -105,21 +105,5 @@ namespace ECS
 		{
 			return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
 		}
-
-		template <typename Type, typename OtherType, typename = void>
-		struct IsExplicitlyConvertibleImpl : std::false_type {};
-
-		template <typename Type, typename OtherType>
-		struct IsExplicitlyConvertibleImpl<
-			Type, OtherType, std::void_t<decltype(static_cast<OtherType>(std::declval<Type>()))>>
-			: std::true_type {};
-
-		template <typename Type, typename OtherType>
-		struct IsExplicitlyConvertible
-			: IsExplicitlyConvertibleImpl<Type, OtherType> {};
-
-		template <typename Type, typename OtherType>
-		inline constexpr bool IsExplicitlyConvertible_v =
-			IsExplicitlyConvertible<Type, OtherType>::value;
 	}
 }

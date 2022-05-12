@@ -10,11 +10,6 @@
 
 namespace ECS
 {
-	namespace Internal
-	{
-		inline Entity ConvertToEntity(EntitySignature sig) { return static_cast<Entity>(sig.to_ulong()); }
-	}
-
 	class EntityManager final
 	{
 	public:
@@ -29,7 +24,6 @@ namespace ECS
 		void ReleaseEntity(Entity entity);
 
 		EntitySignature GetEntitySignature(Entity entity) const;
-		void SetEntitySignature(Entity entity, EntitySignature sig);
 
 	private:
 		EntityManager();
@@ -38,7 +32,7 @@ namespace ECS
 
 		inline static std::unique_ptr<EntityManager> Instance;
 
-		SparseSet<Entity, EntitySignature, decltype(Internal::ConvertToEntity)> EntitySignatures{ &Internal::ConvertToEntity };
+		SparseSet<EntitySignature> EntitySignatures;
 		std::queue<Entity> Entities;
 	};
 }
