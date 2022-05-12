@@ -33,6 +33,13 @@ namespace ECS
 			Components.push_back(TComponent(std::forward<Values>(values)...));
 		}
 
+		void RemoveComponent(Entity entity)
+		{
+			const size_t distance(std::distance(Entities.cbegin(), std::find(Entities.cbegin(), Entities.cend(), entity)));
+			Entities.erase(std::remove(Entities.begin(), Entities.end(), entity), Entities.end());
+			Components.erase(Components.cbegin() + distance);
+		}
+
 		TComponent& GetComponent(const Entity entity)
 		{
 			const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
@@ -111,6 +118,14 @@ namespace ECS
 			}
 
 			static_cast<ComponentArray<TComponent>*>(pArray.get())->AddComponent(entity, values...);
+		}
+
+		template<typename TComponent>
+		void RemoveComponent(Entity entity)
+		{
+			assert(TComponent::GetComponentID() < ComponentArrays.size());
+
+			static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->RemoveComponent(entity);
 		}
 
 		template<typename TComponent>
