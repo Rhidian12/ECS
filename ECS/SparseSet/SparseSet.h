@@ -161,6 +161,6 @@ namespace ECS
 	private:
 		std::vector<std::pair<SparseValue, bool>> SparseSet;
 		std::vector<std::pair<SparseValue, bool>> PackedSet;
-		size_t _Size;
+		SparseValue _Size;
 	};
 }
