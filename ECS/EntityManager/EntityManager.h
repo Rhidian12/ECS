@@ -23,7 +23,9 @@ namespace ECS
 		Entity CreateEntity();
 		void ReleaseEntity(Entity entity);
 
-		EntitySignature GetEntitySignature(Entity entity) const;
+		void SetEntitySignature(Entity entity, EntitySignature&& sig) { assert(entity < EntitySignatures.size()); EntitySignatures[entity] = std::move(sig); }
+		void SetEntitySignature(Entity entity, const EntitySignature sig) { assert(entity < EntitySignatures.size()); EntitySignatures[entity] = sig; }
+		EntitySignature GetEntitySignature(Entity entity) const { assert(entity < EntitySignatures.size()); return EntitySignatures[entity]; }
 
 	private:
 		EntityManager();
@@ -32,7 +34,7 @@ namespace ECS
 
 		inline static std::unique_ptr<EntityManager> Instance;
 
-		SparseSet<EntitySignature> EntitySignatures;
+		std::vector<EntitySignature> EntitySignatures;
 		std::queue<Entity> Entities;
 	};
 }

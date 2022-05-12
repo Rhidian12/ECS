@@ -27,17 +27,22 @@ namespace ECS
 		const Entity entity(Entities.front());
 		Entities.pop();
 
-		EntitySignatures.Add(entity);
+		if (EntitySignatures.size() <= entity)
+		{
+			EntitySignatures.resize(entity + 1);
+		}
+
+		EntitySignatures[entity] = EntitySignature();;
 		
 		return entity;
 	}
 
 	void EntityManager::ReleaseEntity(Entity entity)
 	{
-	}
+		assert(entity < EntitySignatures.size());
+		
+		EntitySignatures.erase(EntitySignatures.begin() + entity);
 
-	EntitySignature EntityManager::GetEntitySignature(Entity entity) const
-	{
-		EntitySignatures.Find(entity);
+		EntitySignatures.push_back(entity);
 	}
 }
