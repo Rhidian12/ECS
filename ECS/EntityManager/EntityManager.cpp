@@ -27,17 +27,23 @@ namespace ECS
 		const Entity entity(Entities.front());
 		Entities.pop();
 
-		EntitySignatures.Add(entity);
+		EntitySignatures.Add(EntitySignature());
 		
 		return entity;
 	}
 
 	void EntityManager::ReleaseEntity(Entity entity)
 	{
+		
 	}
 
 	EntitySignature EntityManager::GetEntitySignature(Entity entity) const
 	{
-		EntitySignatures.Find(entity);
+		return EntitySignatures.Find(entity);
+	}
+
+	void EntityManager::SetEntitySignature(Entity entity, EntitySignature sig)
+	{
+		EntitySignatures.Find(sig)
 	}
 }

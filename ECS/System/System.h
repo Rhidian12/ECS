@@ -103,6 +103,6 @@ namespace ECS
 			return filtered;
 		}
 
-		SparseSet<Entity> Entities{};
+		SparseSet<uint16_t, Entity> Entities{};
 	};
 }
