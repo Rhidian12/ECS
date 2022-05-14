@@ -61,6 +61,8 @@ namespace ECS
 		void ClearEntities();
 		void ReleaseEntities();
 
+		size_t GetAmountOfEntities() const { return Entities.Size(); }
+
 		template<typename TComponent>
 		void AddComponent(Entity entity) const
 		{
