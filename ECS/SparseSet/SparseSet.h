@@ -151,8 +151,17 @@ namespace ECS
 
 		void Remove(const SparseValue& value)
 		{
-			PackedSet.erase(std::remove(PackedSet.begin(), PackedSet.end(), SparseSet[value].first), PackedSet.end());
-			this->SparseSet.erase(std::remove(this->SparseSet.begin(), this->SparseSet.end(), _Size--), this->SparseSet.end());
+			PackedSet.erase(std::remove_if(PackedSet.begin(), PackedSet.end(), [this, value](const std::pair<SparseValue, bool>& a)
+				{
+					return a.first == this->SparseSet[value].first;
+				}), PackedSet.end());
+
+			this->SparseSet.erase(std::remove_if(this->SparseSet.begin(), this->SparseSet.end(), [this](const std::pair<SparseValue, bool>& a)
+				{
+					return a.first == _Size;
+				}), this->SparseSet.end());
+
+			--_Size;
 		}
 
 		// RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
