@@ -147,7 +147,7 @@ namespace ECS
 		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
 
 		size_t Size() const { return _Size; }
-		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
+		void Clear() { this->SparseSet.clear(); PackedSet.clear(); _Size = 0; }
 
 		void Remove(const SparseValue& value)
 		{
