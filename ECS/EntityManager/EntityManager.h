@@ -6,7 +6,7 @@
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
 #include <memory> /* std::unique_ptr */
-#include <queue> /* std::queue */
+#include <deque> /* std::deque */
 
 namespace ECS
 {
@@ -21,7 +21,7 @@ namespace ECS
 		EntityManager& operator=(EntityManager&&) noexcept = delete;
 
 		Entity CreateEntity();
-		void ReleaseEntity(Entity entity);
+		bool ReleaseEntity(Entity entity);
 
 		void SetEntitySignature(Entity entity, const EntitySignature sig) { assert(entity < EntitySignatures.size()); EntitySignatures[entity] = sig; }
 		void SetEntitySignature(Entity entity, const ComponentType id) { assert(entity < EntitySignatures.size()); EntitySignatures[entity].set(id); }
@@ -36,6 +36,6 @@ namespace ECS
 		inline static std::unique_ptr<EntityManager> Instance;
 
 		std::vector<EntitySignature> EntitySignatures;
-		std::queue<Entity> Entities;
+		std::deque<Entity> Entities;
 	};
 }

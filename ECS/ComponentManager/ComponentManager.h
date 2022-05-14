@@ -26,21 +26,24 @@ namespace ECS
 		{
 			static_assert(std::is_default_constructible_v<TComponent>, "Component must be default constructible");
 
-			Entities.Add(entity);
+			Entities.push_back(entity);
 			Components.push_back(TComponent());
 		}
 		template<typename ... Values>
 		void AddComponent(const Entity entity, Values&&... values)
 		{
-			Entities.Add(entity);
+			Entities.push_back(entity);
 			Components.push_back(TComponent(std::forward<Values>(values)...));
 		}
 
 		virtual void RemoveComponent(Entity entity) override
 		{
-			const size_t distance(std::distance(Entities.cbegin(), std::find(Entities.cbegin(), Entities.cend(), entity)));
-			Entities.erase(std::remove(Entities.begin(), Entities.end(), entity), Entities.end());
-			Components.erase(Components.cbegin() + distance);
+			auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
+
+			assert(cIt != Entities.cend());
+
+			Components.erase(Components.begin() + entity);
+			Entities.erase(cIt);
 		}
 
 		TComponent& GetComponent(const Entity entity)
@@ -81,7 +84,7 @@ namespace ECS
 
 	private:
 		std::vector<TComponent> Components;
-		SparseSet<Entity> Entities;
+		std::vector<Entity> Entities;
 	};
 
 	class ComponentManager final

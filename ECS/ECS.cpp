@@ -66,7 +66,7 @@ void PhysicsUpdate(const ECS::System& system)
 }
 
 /* Defines! */
-// #define GAMEOBJECT
+#define GAMEOBJECT
 #define ENTT
 #define CUSTOMECS
 
@@ -108,8 +108,11 @@ void TestInitECS(const ECS::Entity amount)
 	std::chrono::steady_clock::time_point t1{};
 	std::chrono::steady_clock::time_point t2{};
 
-	g_GravitySystem.ReleaseEntities();
-	g_PhysicsSystem.ReleaseEntities();
+	if (g_GravitySystem.GetAmountOfEntities() > 0)
+	{
+		g_GravitySystem.ReleaseEntities();
+		g_PhysicsSystem.ReleaseEntities();
+	}
 
 	t1 = std::chrono::steady_clock::now();
 

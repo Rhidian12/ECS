@@ -6,7 +6,7 @@ namespace ECS
 	{
 		for (Entity i{}; i < MaxEntities; ++i)
 		{
-			Entities.push(i);
+			Entities.push_back(i);
 		}
 	}
 
@@ -25,7 +25,7 @@ namespace ECS
 		assert(Entities.size() > 0);
 
 		const Entity entity(Entities.front());
-		Entities.pop();
+		Entities.pop_front();
 
 		if (EntitySignatures.size() <= entity)
 		{
@@ -33,16 +33,25 @@ namespace ECS
 		}
 
 		EntitySignatures[entity] = EntitySignature();;
-		
+
 		return entity;
 	}
 
-	void EntityManager::ReleaseEntity(Entity entity)
+	bool EntityManager::ReleaseEntity(Entity entity)
 	{
-		assert(entity < EntitySignatures.size());
-		
-		EntitySignatures.erase(EntitySignatures.begin() + entity);
+		if (std::find(Entities.cbegin(), Entities.cend(), entity) == Entities.cend())
+		{
+			assert(entity < EntitySignatures.size());
 
-		EntitySignatures.push_back(entity);
+			EntitySignatures.erase(EntitySignatures.begin() + entity);
+
+			EntitySignatures.push_back(entity);
+
+			Entities.push_back(entity);
+
+			return true;
+		}
+
+		return false;
 	}
 }

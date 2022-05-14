@@ -23,9 +23,10 @@ namespace ECS
 	{
 		for (Entity entity{}; entity < Entities.Size(); ++entity)
 		{
-			EntityManager::GetInstance()->ReleaseEntity(entity);
-
-			ComponentManager::GetInstance()->RemoveComponent(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
+			if (EntityManager::GetInstance()->ReleaseEntity(entity))
+			{
+				ComponentManager::GetInstance()->RemoveComponent(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
+			}
 		}
 
 		Entities.Clear();

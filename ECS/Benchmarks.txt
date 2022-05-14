@@ -14,3 +14,42 @@ Program ran update code 100 amount of times
 ECS Init Average: 8017726 nanoseconds
 ECS Update Average: 30895665 nanoseconds
 
+Program Created 500 Entities
+Program ran update code 5 amount of times
+ECS Init Average: 14105180 nanoseconds
+ENTT Init Average: 4296300 nanoseconds
+
+ECS Update Average: 2550540 nanoseconds
+
+ENTT Update Average: 675860 nanoseconds
+
+Program Created 500 Entities
+Program ran update code 5 amount of times
+ECS Init Average: 15406020 nanoseconds
+ENTT Init Average: 4448660 nanoseconds
+
+ECS Update Average: 2558480 nanoseconds
+
+ENTT Update Average: 698520 nanoseconds
+
+Program Created 500 Entities
+Program ran update code 5 amount of times
+ECS Init Average: 467960 nanoseconds
+ENTT Init Average: 280400 nanoseconds
+
+ECS Update Average: 279320 nanoseconds
+
+ENTT Update Average: 6060 nanoseconds
+
+Program Created 500 Entities
+Program ran update code 5 amount of times
+ECS Init Average: 525240 nanoseconds
+GO Init Average: 426340 nanoseconds
+ENTT Init Average: 303420 nanoseconds
+
+ECS Update Average: 321260 nanoseconds
+
+GO Update Average: 81100 nanoseconds
+
+ENTT Update Average: 6340 nanoseconds
+
