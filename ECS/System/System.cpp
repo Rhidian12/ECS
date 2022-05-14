@@ -27,5 +27,7 @@ namespace ECS
 
 			ComponentManager::GetInstance()->RemoveComponent(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
 		}
+
+		Entities.Clear();
 	}
 }
