@@ -149,6 +149,12 @@ namespace ECS
 		size_t Size() const { return _Size; }
 		void Clear() { this->SparseSet.clear(); PackedSet.clear(); }
 
+		void Remove(const SparseValue& value)
+		{
+			PackedSet.erase(std::remove(PackedSet.begin(), PackedSet.end(), SparseSet[value].first), PackedSet.end());
+			this->SparseSet.erase(std::remove(this->SparseSet.begin(), this->SparseSet.end(), _Size--), this->SparseSet.end());
+		}
+
 		// RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
 		// RandomConstIterator<SparseValue> begin() const noexcept { return RandomConstIterator(PackedSet.data()); }
 		// 
