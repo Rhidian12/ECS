@@ -246,7 +246,7 @@ int main(int*, char* [])
 
 	/* Benchmarking Constants */
 	constexpr Entity AmountOfEntities{ 500 };
-	constexpr int Iterations{ 5 };
+	constexpr int Iterations{ 50 };
 
 	/* Initialize different systems */
 	for (int i{}; i < Iterations; ++i)
