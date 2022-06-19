@@ -38,45 +38,51 @@ namespace ECS
 
 		virtual void RemoveComponent(Entity entity) override
 		{
-			auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
-
-			assert(cIt != Entities.cend());
-
-			Components.erase(Components.begin() + entity);
-			Entities.erase(cIt);
+			for (Entity i{}; i < Entities.size();)
+			{
+				if (i == entity)
+				{
+					Entities.erase(Entities.begin() + i);
+					Components.erase(Components.begin() + i);
+				}
+				else
+				{
+					++i;
+				}
+			}
 		}
 
 		TComponent& GetComponent(const Entity entity)
 		{
-			// const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
+			 const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
 
-			// assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
+			 assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
 
-			// const size_t index(std::distance(Entities.cbegin(), cIt));
+			 const size_t index(std::distance(Entities.cbegin(), cIt));
 
-			// assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
+			 assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
 
-			// return Components[index];
+			 return Components[index];
 
-			assert(Entities.Contains(entity) && "ComponentArray::GetComponent() > This Entity does not have the corresponding component!");
+			// assert(Entities.Contains(entity) && "ComponentArray::GetComponent() > This Entity does not have the corresponding component!");
 
-			return Components[Entities.Find(entity)];
+			// return Components[Entities.Find(entity)];
 		}
 		const TComponent& GetComponent(const Entity entity) const
 		{
-			//const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
+			const auto cIt(std::find(Entities.cbegin(), Entities.cend(), entity));
 
-			//assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
+			assert(cIt != Entities.cend() && "ComponentArray::GetComponent() > This entity does not have the corresponding component!");
 
-			//const size_t index(std::distance(Entities.cbegin(), cIt));
+			const size_t index(std::distance(Entities.cbegin(), cIt));
 
-			//assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
+			assert(index < Components.size() && "ComponentArray::GetComponent() > The index found is invalid!");
 
-			//return Components[index];
+			return Components[index];
 
-			assert(Entities.Contains(entity) && "ComponentArray::GetComponent() > This Entity does not have the corresponding component!");
+			// assert(Entities.Contains(entity) && "ComponentArray::GetComponent() > This Entity does not have the corresponding component!");
 
-			return Components[Entities.Find(entity)];
+			// return Components[Entities.Find(entity)];
 		}
 
 		std::vector<TComponent>& GetComponents() { return Components; }
@@ -134,6 +140,7 @@ namespace ECS
 			static_cast<ComponentArray<TComponent>*>(pArray.get())->AddComponent(entity, values...);
 		}
 
+		/* [TODO]: This is wrong, since ComponentID can take up multiple bits, no? */
 		void RemoveComponent(Entity entity, EntitySignature id)
 		{
 			for (ComponentType i{}; i < MaxComponentTypes; ++i)
