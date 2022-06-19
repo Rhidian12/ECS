@@ -152,6 +152,7 @@
     <ClCompile Include="System\System.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="catch.hpp" />
     <ClInclude Include="ComponentManager\ComponentManager.h" />
     <ClInclude Include="ECSComponents\ECSComponents.h" />
     <ClInclude Include="EntityManager\EntityManager.h" />
