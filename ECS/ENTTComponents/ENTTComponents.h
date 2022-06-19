@@ -17,6 +17,7 @@ struct ENTTTransformComponent final
 
 struct ENTTRigidBodyComponent final
 {
-	float Mass{ ECS::Utils::RandomFloat(0.f, 100.f) };
+	// float Mass{ ECS::Utils::RandomFloat(0.f, 100.f) };
+	float Mass{ 100.f };
 	Point2f Velocity{};
 };

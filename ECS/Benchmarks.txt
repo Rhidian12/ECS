@@ -1,55 +1,24 @@
-Program Created 65534 Entities
-Program ran update code 100 amount of times
-GO Init Average: 21844411 nanoseconds
-GO Update Average: 167370317 nanoseconds
+Program Created 5000 Entities
+Program ran update code 50 amount of times
+ECS Init Average: 429530 nanoseconds
+GO Init Average: 1687395 nanoseconds
+ENTT Init Average: 1132327 nanoseconds
 
-Program Created 65534 Entities
-Program ran update code 100 amount of times
-ENTT Init Average: 9275767 nanoseconds
+ECS Update Average: 23412 nanoseconds
 
-ENTT Update Average: 31126960 nanoseconds
+GO Update Average: 6459642 nanoseconds
 
-Program Created 65534 Entities
-Program ran update code 100 amount of times
-ECS Init Average: 8017726 nanoseconds
-ECS Update Average: 30895665 nanoseconds
+ENTT Update Average: 41490 nanoseconds
 
-Program Created 500 Entities
-Program ran update code 5 amount of times
-ECS Init Average: 14105180 nanoseconds
-ENTT Init Average: 4296300 nanoseconds
+Program Created 10000 Entities
+Program ran update code 50 amount of times
+ECS Init Average: 832957 nanoseconds
+GO Init Average: 3294042 nanoseconds
+ENTT Init Average: 2200045 nanoseconds
 
-ECS Update Average: 2550540 nanoseconds
+ECS Update Average: 36545 nanoseconds
 
-ENTT Update Average: 675860 nanoseconds
+GO Update Average: 11435895 nanoseconds
 
-Program Created 500 Entities
-Program ran update code 5 amount of times
-ECS Init Average: 15406020 nanoseconds
-ENTT Init Average: 4448660 nanoseconds
-
-ECS Update Average: 2558480 nanoseconds
-
-ENTT Update Average: 698520 nanoseconds
-
-Program Created 500 Entities
-Program ran update code 5 amount of times
-ECS Init Average: 467960 nanoseconds
-ENTT Init Average: 280400 nanoseconds
-
-ECS Update Average: 279320 nanoseconds
-
-ENTT Update Average: 6060 nanoseconds
-
-Program Created 500 Entities
-Program ran update code 5 amount of times
-ECS Init Average: 525240 nanoseconds
-GO Init Average: 426340 nanoseconds
-ENTT Init Average: 303420 nanoseconds
-
-ECS Update Average: 321260 nanoseconds
-
-GO Update Average: 81100 nanoseconds
-
-ENTT Update Average: 6340 nanoseconds
+ENTT Update Average: 73445 nanoseconds
 

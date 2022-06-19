@@ -74,10 +74,18 @@ void PhysicsUpdate(const ECS::System& system)
 #define APPEND_TO_FILE
 // #define OVERWRITE_TO_FILE
 
+#define UNIT_TESTS
+//#define BENCHMARKS
+
+#ifdef UNIT_TESTS
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
+#endif
+
 /* Things to test */
 #ifdef CUSTOMECS
-ECS::System g_GravitySystem;
-ECS::System g_PhysicsSystem;
+ECS::System g_GravitySystem{};
+ECS::System g_PhysicsSystem{};
 #endif
 #ifdef GAMEOBJECT
 std::vector<GO::GameObject*> g_GameObjects;
@@ -85,6 +93,7 @@ std::vector<GO::GameObject*> g_GameObjects;
 #ifdef ENTT
 entt::registry g_GravityRegistry;
 entt::registry g_PhysicsRegistry;
+std::vector<entt::entity> g_enttEntities{};
 #endif
 
 #ifdef CUSTOMECS
@@ -204,6 +213,7 @@ void TestInitENTT(const ECS::Entity amount)
 
 	g_GravityRegistry.destroy(g_GravityRegistry.data(), g_GravityRegistry.data() + g_GravityRegistry.size());
 	g_PhysicsRegistry.destroy(g_PhysicsRegistry.data(), g_PhysicsRegistry.data() + g_PhysicsRegistry.size());
+	g_enttEntities.clear();
 
 	t1 = std::chrono::steady_clock::now();
 
@@ -217,6 +227,8 @@ void TestInitENTT(const ECS::Entity amount)
 		enttEntity = g_PhysicsRegistry.create();
 		g_PhysicsRegistry.emplace<ENTTTransformComponent>(enttEntity);
 		g_PhysicsRegistry.emplace<ENTTRigidBodyComponent>(enttEntity);
+
+		g_enttEntities.push_back(enttEntity);
 	}
 
 	t2 = std::chrono::steady_clock::now();
@@ -239,13 +251,14 @@ void TestUpdateENTT()
 }
 #endif
 
+#ifdef BENCHMARKS
 int main(int*, char* [])
 {
 	using namespace ECS;
 	using namespace GO;
 
 	/* Benchmarking Constants */
-	constexpr Entity AmountOfEntities{ 500 };
+	constexpr Entity AmountOfEntities{ 10'000 };
 	constexpr int Iterations{ 50 };
 
 	/* Initialize different systems */
@@ -274,6 +287,17 @@ int main(int*, char* [])
 #ifdef ENTT
 		TestUpdateENTT();
 #endif
+	}
+
+	for (int i{}; i < AmountOfEntities; ++i)
+	{
+		auto ecs = g_GravitySystem.GetComponent<RigidBodyComponent>(i);
+		auto entt = g_GravityRegistry.get<ENTTRigidBodyComponent>(g_enttEntities[i]);
+
+		if (!Utils::Equals(ecs.Velocity.y, entt.Velocity.y))
+		{
+			std::abort();
+		}
 	}
 
 	/* Cleanup results */
@@ -318,6 +342,9 @@ int main(int*, char* [])
 	}
 
 	/* Print results */
+	std::cout << "Amount of entities: " << AmountOfEntities << "\n";
+	std::cout << "Iterations: " << Iterations << "\n\n";
+
 #ifdef CUSTOMECS
 	std::cout << "ECS Init Average:\t\t" << std::accumulate(g_ECSInitTimes.cbegin(), g_ECSInitTimes.cend(), (long long)0) / g_ECSInitTimes.size() << " nanoseconds\n";
 #endif
@@ -381,3 +408,35 @@ int main(int*, char* [])
 
 	return 0;
 }
+#endif
+
+#ifdef UNIT_TESTS
+TEST_CASE("Testing custom ECS")
+{
+	ECS::System gravitySystem{};
+
+	REQUIRE(gravitySystem.GetAmountOfEntities() == 0);
+
+	SECTION("Making one entity")
+	{
+		ECS::Entity entity{ gravitySystem.CreateEntity() };
+
+		REQUIRE(entity == 0);
+	}
+
+	SECTION("Making one entity and adding components to it")
+	{
+		ECS::Entity entity{ gravitySystem.CreateEntity() };
+
+		REQUIRE(entity == 0);
+
+		gravitySystem.AddComponent<GravityComponent>(entity);
+		gravitySystem.AddComponent<RigidBodyComponent>(entity);
+		gravitySystem.AddComponent<TransformComponent>(entity);
+
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 1);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 1);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 1);
+	}
+}
+#endif
