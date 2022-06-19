@@ -31,7 +31,6 @@ namespace ECS
 		{
 			if (EntityManager::GetInstance()->ReleaseEntity(entity))
 			{
-				ComponentManager::GetInstance()->RemoveComponent(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
 			}
 		}
 
