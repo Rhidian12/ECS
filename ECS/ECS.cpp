@@ -421,14 +421,13 @@ TEST_CASE("Testing custom ECS")
 	{
 		ECS::Entity entity{ gravitySystem.CreateEntity() };
 
+		/* for this one it's possible, but when entities get deleted, their id's get pushed back */
 		REQUIRE(entity == 0);
 	}
 
 	SECTION("Making one entity and adding components to it")
 	{
 		ECS::Entity entity{ gravitySystem.CreateEntity() };
-
-		REQUIRE(entity == 0);
 
 		gravitySystem.AddComponent<GravityComponent>(entity);
 		gravitySystem.AddComponent<RigidBodyComponent>(entity);
@@ -437,6 +436,54 @@ TEST_CASE("Testing custom ECS")
 		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 1);
 		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 1);
 		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 1);
+	}
+
+	SECTION("Making ten entities and adding components to all of those")
+	{
+		for (int i{}; i < 10; ++i)
+		{
+			ECS::Entity entity{ gravitySystem.CreateEntity() };
+
+			gravitySystem.AddComponent<GravityComponent>(entity);
+			gravitySystem.AddComponent<RigidBodyComponent>(entity);
+			gravitySystem.AddComponent<TransformComponent>(entity);
+		}
+
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 10);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 10);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 10);
+	}
+
+	SECTION("Making 100 entities and adding components to all of those")
+	{
+		for (int i{}; i < 100; ++i)
+		{
+			ECS::Entity entity{ gravitySystem.CreateEntity() };
+
+			gravitySystem.AddComponent<GravityComponent>(entity);
+			gravitySystem.AddComponent<RigidBodyComponent>(entity);
+			gravitySystem.AddComponent<TransformComponent>(entity);
+		}
+
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 100);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 100);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 100);
+	}
+
+	SECTION("Making 1000 entities and adding components to all of those")
+	{
+		for (int i{}; i < 1000; ++i)
+		{
+			ECS::Entity entity{ gravitySystem.CreateEntity() };
+
+			gravitySystem.AddComponent<GravityComponent>(entity);
+			gravitySystem.AddComponent<RigidBodyComponent>(entity);
+			gravitySystem.AddComponent<TransformComponent>(entity);
+		}
+
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 1000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 1000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 1000);
 	}
 }
 #endif
