@@ -114,68 +114,61 @@ namespace ECS
 	public:
 		void Add(const SparseValue& value)
 		{
-			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(value, true)).first);
-
-			if (addedValue >= this->SparseSet.size())
+			if (value == std::numeric_limits<SparseValue>::max())
 			{
-				this->SparseSet.resize(addedValue + 1);
+				return;
 			}
 
-			this->SparseSet[addedValue] = std::make_pair(_Size++, true);
-		}
-		void Add(SparseValue&& value)
-		{
-			const SparseValue& addedValue(PackedSet.emplace_back(std::make_pair(std::move(value), true)).first);
-
-			if (addedValue >= this->SparseSet.size())
+			if (Contains(value))
 			{
-				this->SparseSet.resize(addedValue + 1);
+				return;
 			}
 
-			this->SparseSet[addedValue] = std::make_pair(_Size++, true);
+			if (Packed.size() <= value)
+			{
+				Packed.resize(value + 1);
+			}
+			if (Sparse.size() <= value)
+			{
+				Sparse.resize(value + 1);
+			}
+
+			Packed[_Size] = value;
+			Sparse[value] = _Size++;
 		}
+		/* [TODO]: Make r-value overload */
 
-		bool Contains(const SparseValue& value) const { assert(value < this->SparseSet.size()); return this->SparseSet[value].second; }
+		bool Contains(const SparseValue& value) const { return value < _Size&& Packed[Sparse[value]] == value; }
 
-		SparseValue& Find(const SparseValue& value) { assert(value < this->SparseSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first].first; }
-		const SparseValue& Find(const SparseValue& value) const { assert(value < this->SparseSet.size()); assert(this->SparseSet[value].second); return PackedSet[SparseSet[value].first].first; }
-
-		SparseValue& Front() { assert(PackedSet.size() > 0); return PackedSet[0].first; }
-		const SparseValue& Front() const { assert(PackedSet.size() > 0); return PackedSet[0].first; }
-
-		SparseValue& Back() { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
-		const SparseValue& Back() const { assert(PackedSet.size() > 0); return PackedSet[_Size - 1].first; }
+		SparseValue& Find(const SparseValue& value) { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
+		const SparseValue& Find(const SparseValue& value) const { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
 
 		size_t Size() const { return _Size; }
-		void Clear() { this->SparseSet.clear(); PackedSet.clear(); _Size = 0; }
+		void Clear() { Sparse.clear(); Packed.clear(); _Size = 0; }
 
 		void Remove(const SparseValue& value)
 		{
-			PackedSet.erase(std::remove_if(PackedSet.begin(), PackedSet.end(), [this, value](const std::pair<SparseValue, bool>& a)
-				{
-					return a.first == this->SparseSet[value].first;
-				}), PackedSet.end());
+			if (Contains(value))
+			{
+				Packed[Sparse[value]] = Packed[_Size - 1];
+				Sparse[Packed[_Size - 1]] = Sparse[value];
 
-			this->SparseSet.erase(std::remove_if(this->SparseSet.begin(), this->SparseSet.end(), [this](const std::pair<SparseValue, bool>& a)
-				{
-					return a.first == _Size;
-				}), this->SparseSet.end());
-
-			--_Size;
+				--_Size;
+			}
 		}
 
-		// RandomIterator<SparseValue> begin() noexcept { return RandomIterator(PackedSet.data()); }
-		// RandomConstIterator<SparseValue> begin() const noexcept { return RandomConstIterator(PackedSet.data()); }
-		// 
-		// RandomIterator<SparseValue> end() noexcept { return RandomIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
-		// RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
-		// 
-		// RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(PackedSet.data()); }
-		// RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator(PackedSet.data() + static_cast<SparseValue>(PackedSet.size())); }
+		 RandomIterator<SparseValue> begin() noexcept { return RandomIterator(Packed.data()); }
+		 RandomConstIterator<SparseValue> begin() const noexcept { return RandomConstIterator(Packed.data()); }
+		 
+		 RandomIterator<SparseValue> end() noexcept { return RandomIterator(Packed.data() + static_cast<SparseValue>(Packed.size())); }
+		 RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(Packed.data() + static_cast<SparseValue>(Packed.size())); }
+		 
+		 RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(Packed.data()); }
+		 RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator(Packed.data() + static_cast<SparseValue>(Packed.size())); }
 
 	private:
-		std::vector<std::pair<SparseValue, bool>> SparseSet;
-		std::vector<std::pair<SparseValue, bool>> PackedSet;
+		std::vector<SparseValue> Sparse;
+		std::vector<SparseValue> Packed;
 		SparseValue _Size;
 	};
 }
