@@ -1,5 +1,7 @@
 #include "EntityManager.h"
 
+#include "../ComponentManager/ComponentManager.h"
+
 namespace ECS
 {
 	EntityManager::EntityManager()
@@ -7,7 +9,6 @@ namespace ECS
 	{
 		for (Entity i{}; i < MaxEntities; ++i)
 		{
-			// Entities.push_back(i);
 			Entities.Add(i);
 		}
 	}
@@ -24,20 +25,6 @@ namespace ECS
 
 	Entity EntityManager::CreateEntity()
 	{
-		//assert(Entities.size() > 0);
-
-		//const Entity entity(Entities.front());
-		//Entities.pop_front();
-
-		//if (EntitySignatures.size() <= entity)
-		//{
-		//	EntitySignatures.resize(entity + 1);
-		//}
-
-		//EntitySignatures[entity] = EntitySignature();
-
-		//return entity;
-
 		assert(Entities.Size() > 0);
 
 		const Entity entity(Entities.Find(CurrentEntityCounter++));
@@ -55,28 +42,14 @@ namespace ECS
 
 	bool EntityManager::ReleaseEntity(Entity entity)
 	{
-		//if (std::find(Entities.cbegin(), Entities.cend(), entity) == Entities.cend())
-		//{
-		//	assert(entity < EntitySignatures.size());
-
-		//	EntitySignatures.erase(EntitySignatures.begin() + entity);
-
-		//	EntitySignatures.push_back(entity);
-
-		//	Entities.push_back(entity);
-
-		//	return true;
-		//}
-
-		//return false;
-
 		if (!Entities.Contains(entity))
 		{
 			assert(entity < EntitySignatures.size());
 
-			EntitySignatures.erase(EntitySignatures.begin() + entity);
+			ComponentManager::GetInstance()->RemoveComponent(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
 
-			EntitySignatures.push_back(entity);
+			EntitySignatures.erase(EntitySignatures.begin() + entity);
+			EntitySignatures.push_back(EntitySignature());
 
 			Entities.Add(entity);
 
