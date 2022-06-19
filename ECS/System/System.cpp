@@ -29,9 +29,7 @@ namespace ECS
 	{
 		for (const Entity entity : Entities)
 		{
-			if (EntityManager::GetInstance()->ReleaseEntity(entity))
-			{
-			}
+			EntityManager::GetInstance()->ReleaseEntity(entity);
 		}
 
 		Entities.Clear();
