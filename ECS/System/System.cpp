@@ -2,6 +2,11 @@
 
 namespace ECS
 {
+	System::~System()
+	{
+		ReleaseEntities();
+	}
+
 	void System::AddEntity(Entity entity)
 	{
 		Entities.Add(entity);

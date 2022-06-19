@@ -49,6 +49,7 @@ namespace ECS
 	{
 	public:
 		System() = default;
+		~System();
 
 		System(const System&) noexcept = delete;
 		System(System&&) noexcept = delete;
