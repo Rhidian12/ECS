@@ -65,7 +65,7 @@ namespace ECS
 	public:
 		using difference_type = std::ptrdiff_t;
 
-		RandomConstIterator(Type* const pPointer)
+		RandomConstIterator(Type* pPointer)
 			: Pointer{ pPointer }
 		{}
 
@@ -112,21 +112,21 @@ namespace ECS
 	class SparseSet final
 	{
 	public:
-		void Add(const SparseValue& value)
+		bool Add(const SparseValue& value)
 		{
 			if (value == std::numeric_limits<SparseValue>::max())
 			{
-				return;
+				return false;
 			}
 
 			if (Contains(value))
 			{
-				return;
+				return false;
 			}
 
-			if (Packed.size() <= value)
+			if (Packed.size() <= _Size)
 			{
-				Packed.resize(value + 1);
+				Packed.resize(_Size + 1);
 			}
 			if (Sparse.size() <= value)
 			{
@@ -135,6 +135,8 @@ namespace ECS
 
 			Packed[_Size] = value;
 			Sparse[value] = _Size++;
+
+			return true;
 		}
 		/* [TODO]: Make r-value overload */
 
@@ -146,7 +148,7 @@ namespace ECS
 		size_t Size() const { return _Size; }
 		void Clear() { Sparse.clear(); Packed.clear(); _Size = 0; }
 
-		void Remove(const SparseValue& value)
+		bool Remove(const SparseValue& value)
 		{
 			if (Contains(value))
 			{
@@ -154,7 +156,11 @@ namespace ECS
 				Sparse[Packed[_Size - 1]] = Sparse[value];
 
 				--_Size;
+
+				return true;
 			}
+
+			return false;
 		}
 
 		 RandomIterator<SparseValue> begin() noexcept { return RandomIterator(Packed.data()); }
@@ -163,8 +169,9 @@ namespace ECS
 		 RandomIterator<SparseValue> end() noexcept { return RandomIterator(Packed.data() + static_cast<SparseValue>(Packed.size())); }
 		 RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(Packed.data() + static_cast<SparseValue>(Packed.size())); }
 		 
-		 RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(Packed.data()); }
-		 RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator(Packed.data() + static_cast<SparseValue>(Packed.size())); }
+		 /* [TODO]: Figure out why this causes errors */
+		 //RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(Packed.data()); }
+		 //RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator<SparseValue>(Packed.data() + Packed.size()); }
 
 	private:
 		std::vector<SparseValue> Sparse;
