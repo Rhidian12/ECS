@@ -140,7 +140,7 @@ namespace ECS
 		}
 		/* [TODO]: Make r-value overload */
 
-		bool Contains(const SparseValue& value) const { return value < _Size&& Packed[Sparse[value]] == value; }
+		bool Contains(const SparseValue& value) const { return (value < Sparse.size()) && (Packed[Sparse[value]] == value); }
 
 		SparseValue& Find(const SparseValue& value) { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
 		const SparseValue& Find(const SparseValue& value) const { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
