@@ -15,7 +15,7 @@ namespace ECS
 	template<typename ... TComponents>
 	class View final
 	{
-		using ViewContainerType = std::tuple<std::vector<TComponents>...>;
+		using ViewContainerType = std::tuple<std::vector<TComponents>&...>;
 
 	public:
 		View(ViewContainerType&& components)
@@ -37,7 +37,7 @@ namespace ECS
 		template<size_t ... Indices>
 		void ForEach(const std::function<void(TComponents&...)>& function, size_t index, std::index_sequence<Indices...>)
 		{
-			auto tuple{ std::make_tuple(std::get<Indices>(Components)[index]...) };
+			auto tuple{ std::tuple<TComponents&...>(std::get<Indices>(Components)[index]...) };
 			std::apply(function, tuple);
 		}
 
@@ -78,7 +78,7 @@ namespace ECS
 		{
 			// return View<TComponents...>(std::tuple<std::vector<TComponents>&...>(ComponentManager::GetInstance()->GetComponents<TComponents>()...));
 		
-			return View<TComponents...>(std::make_tuple(ComponentManager::GetInstance()->GetComponents<TComponents>()...));
+			return View<TComponents...>(std::tuple<std::vector<TComponents>&...>(ComponentManager::GetInstance()->GetComponents<TComponents>()...));
 		}
 
 		template<typename TComponent>

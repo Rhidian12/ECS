@@ -9,9 +9,10 @@ namespace ECS
 
 	Entity System::CreateEntity()
 	{
-		Entities.Add(EntityManager::GetInstance()->CreateEntity());
+		const Entity entity(EntityManager::GetInstance()->CreateEntity());
+		Entities.Add(entity);
 
-		return Entities.Back();
+		return entity;
 	}
 
 	void System::ClearEntities()
@@ -21,7 +22,7 @@ namespace ECS
 
 	void System::ReleaseEntities()
 	{
-		for (Entity entity{}; entity < Entities.Size(); ++entity)
+		for (const Entity entity : Entities)
 		{
 			if (EntityManager::GetInstance()->ReleaseEntity(entity))
 			{
