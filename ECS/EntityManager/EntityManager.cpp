@@ -40,7 +40,7 @@ namespace ECS
 
 		assert(Entities.Size() > 0);
 
-		const Entity entity(CurrentEntityCounter++);
+		const Entity entity(Entities.Find(CurrentEntityCounter++));
 		Entities.Remove(entity);
 
 		if (EntitySignatures.size() <= entity)
