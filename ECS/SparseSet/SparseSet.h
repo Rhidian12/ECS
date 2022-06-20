@@ -112,13 +112,17 @@ namespace ECS
 	class SparseSet final
 	{
 	public:
+		SparseSet()
+			: Sparse{}
+			, Packed{}
+			, _Size{}
+		{
+			Sparse.reserve(std::numeric_limits<SparseValue>::max());
+			Packed.reserve(std::numeric_limits<SparseValue>::max());
+		}
+
 		bool Add(const SparseValue& value)
 		{
-			if (value == std::numeric_limits<SparseValue>::max())
-			{
-				return false;
-			}
-
 			if (Contains(value))
 			{
 				return false;
