@@ -108,7 +108,7 @@ namespace ECS
 		Type* Pointer{ nullptr };
 	};
 
-	template<typename SparseValue>
+	template<typename T>
 	class SparseSet final
 	{
 	public:
@@ -117,11 +117,13 @@ namespace ECS
 			, Packed{}
 			, _Size{}
 		{
-			Sparse.reserve(std::numeric_limits<SparseValue>::max());
-			Packed.reserve(std::numeric_limits<SparseValue>::max());
+			static_assert(std::is_integral_v<T>, "SparseSet only supports integer types");
+
+			Sparse.reserve(std::numeric_limits<T>::max());
+			Packed.reserve(std::numeric_limits<T>::max());
 		}
 
-		bool Add(const SparseValue& value)
+		bool Add(const T& value)
 		{
 			if (Contains(value))
 			{
@@ -144,15 +146,15 @@ namespace ECS
 		}
 		/* [TODO]: Make r-value overload */
 
-		bool Contains(const SparseValue& value) const { return (value < Sparse.size()) && (Packed[Sparse[value]] == value); }
+		bool Contains(const T value) const { return (value < Sparse.size()) && (Packed[Sparse[value]] == value); }
 
-		SparseValue& Find(const SparseValue& value) { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
-		const SparseValue& Find(const SparseValue& value) const { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
+		T Find(const T value) { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
+		const T& Find(const T value) const { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
 
 		size_t Size() const { return _Size; }
 		void Clear() { Sparse.clear(); Packed.clear(); _Size = 0; }
 
-		bool Remove(const SparseValue& value)
+		bool Remove(const T value)
 		{
 			if (Contains(value))
 			{
@@ -167,19 +169,19 @@ namespace ECS
 			return false;
 		}
 
-		 RandomIterator<SparseValue> begin() noexcept { return RandomIterator(Packed.data()); }
-		 RandomConstIterator<SparseValue> begin() const noexcept { return RandomConstIterator(Packed.data()); }
+		 RandomIterator<T> begin() noexcept { return RandomIterator(Packed.data()); }
+		 RandomConstIterator<T> begin() const noexcept { return RandomConstIterator(Packed.data()); }
 		 
-		 RandomIterator<SparseValue> end() noexcept { return RandomIterator(Packed.data() + static_cast<SparseValue>(Packed.size())); }
-		 RandomConstIterator<SparseValue> end() const noexcept { return RandomConstIterator(Packed.data() + static_cast<SparseValue>(Packed.size())); }
+		 RandomIterator<T> end() noexcept { return RandomIterator(Packed.data() + static_cast<T>(Packed.size())); }
+		 RandomConstIterator<T> end() const noexcept { return RandomConstIterator(Packed.data() + static_cast<T>(Packed.size())); }
 		 
 		 /* [TODO]: Figure out why this causes errors */
 		 //RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(Packed.data()); }
 		 //RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator<SparseValue>(Packed.data() + Packed.size()); }
 
 	private:
-		std::vector<SparseValue> Sparse;
-		std::vector<SparseValue> Packed;
-		SparseValue _Size;
+		std::vector<T> Sparse;
+		std::vector<T> Packed;
+		T _Size;
 	};
 }
