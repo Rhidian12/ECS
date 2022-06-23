@@ -26,6 +26,7 @@ namespace ECS
 	Entity EntityManager::CreateEntity()
 	{
 		assert(Entities.Size() > 0);
+		assert(Entities.Contains(CurrentEntityCounter));
 
 		const Entity entity(Entities.Find(CurrentEntityCounter++));
 		Entities.Remove(entity);

@@ -36,7 +36,6 @@ namespace ECS
 		inline static std::unique_ptr<EntityManager> Instance;
 
 		std::vector<EntitySignature> EntitySignatures;
-		// std::deque<Entity> Entities;
 		SparseSet<Entity> Entities;
 		Entity CurrentEntityCounter;
 	};
