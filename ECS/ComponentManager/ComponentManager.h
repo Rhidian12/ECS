@@ -42,10 +42,12 @@ namespace ECS
 
 		virtual void RemoveComponent(Entity entity) override
 		{
-			const Entity sparseValue = Entities.Find(entity);
-			if (Entities.Remove(entity))
+			if (Entities.Contains(entity))
 			{
-				Components.erase(Components.begin() + sparseValue);
+				if (Entities.Remove(entity))
+				{
+					Components.erase(Components.begin() + entity);
+				}
 			}
 		}
 
