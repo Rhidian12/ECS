@@ -158,10 +158,10 @@ namespace ECS
 		{
 			if (Contains(value))
 			{
-				Packed[Sparse[value]] = Packed[_Size - 1];
-				Sparse[Packed[_Size - 1]] = Sparse[value];
-
 				--_Size;
+
+				Packed[Sparse[value]] = Packed[_Size];
+				Sparse[Packed[_Size]] = Sparse[value];
 
 				return true;
 			}
