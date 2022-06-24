@@ -411,6 +411,127 @@ int main(int*, char* [])
 #endif
 
 #ifdef UNIT_TESTS
+TEST_CASE("Testing SparseSet")
+{
+	ECS::SparseSet<uint16_t> set{};
+
+	REQUIRE(set.Size() == 0);
+
+	SECTION("Testing basic adding")
+	{
+		set.Add(5);
+
+		REQUIRE(set.Contains(5));
+		REQUIRE(set.Size() == 1);
+		REQUIRE(set.Find(5) == 0); /* should be the first element */
+	}
+
+	SECTION("Add and Remove 1 value")
+	{
+		set.Add(5);
+
+		REQUIRE(set.Contains(5));
+		REQUIRE(set.Size() == 1);
+		REQUIRE(set.Find(5) == 0); /* should be the first element */
+
+		set.Remove(5);
+
+		REQUIRE(set.Size() == 0);
+	}
+
+	SECTION("Testing clear")
+	{
+		for (int i{}; i < 10; ++i)
+		{
+			set.Add(i);
+		}
+
+		REQUIRE(set.Size() == 10);
+
+		set.Clear();
+
+		REQUIRE(set.Size() == 0);
+	}
+
+	SECTION("Testing iterator")
+	{
+		for (int i{}; i < 10; ++i)
+		{
+			set.Add(i);
+		}
+
+		REQUIRE(set.Size() == 10);
+
+		int counter{};
+		for (const int i : set)
+		{
+			REQUIRE(i == counter++);
+		}
+	}
+
+	SECTION("Adding 10 000 elements")
+	{
+		for (int i{}; i < 10'000; ++i)
+		{
+			set.Add(i);
+		}
+
+		REQUIRE(set.Size() == 10'000);
+		REQUIRE(set.Find(0) == 0);
+		REQUIRE(set.Contains(7500));
+		REQUIRE(set.Contains(1));
+		REQUIRE(set.Contains(9999));
+		REQUIRE(set.Contains(5000));
+
+		set.Clear();
+
+		REQUIRE(set.Size() == 0);
+	}
+
+	SECTION("Adding max elements")
+	{
+		for (int i{}; i < std::numeric_limits<uint16_t>::max(); ++i)
+		{
+			set.Add(i);
+		}
+
+		REQUIRE(set.Size() == std::numeric_limits<uint16_t>::max());
+		REQUIRE(set.Find(0) == 0);
+		REQUIRE(set.Contains(7500));
+		REQUIRE(set.Contains(1));
+		REQUIRE(set.Contains(9999));
+		REQUIRE(set.Contains(5000));
+
+		set.Clear();
+
+		REQUIRE(set.Size() == 0);
+	}
+
+	SECTION("Adding Max elements and removing certain elements")
+	{
+		for (int i{}; i < std::numeric_limits<uint16_t>::max(); ++i)
+		{
+			set.Add(i);
+		}
+
+		REQUIRE(set.Size() == std::numeric_limits<uint16_t>::max());
+
+		for (int i{}; i < 10'000; ++i)
+		{
+			REQUIRE(set.Contains(i));
+			set.Remove(i);
+			REQUIRE(!set.Contains(i));
+		}
+
+		for (int i{}; i < 10'000; ++i)
+		{
+			REQUIRE(!set.Contains(i));
+			set.Add(i);
+			REQUIRE(set.Contains(i));
+		}
+	}
+}
+
 TEST_CASE("Testing custom ECS")
 {
 	ECS::System gravitySystem{};
