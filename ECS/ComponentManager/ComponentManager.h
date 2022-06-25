@@ -15,7 +15,7 @@ namespace ECS
 	public:
 		virtual ~IComponentArray() = default;
 
-		virtual void RemoveComponent(Entity) = 0;
+		virtual void RemoveComponent(const Entity) = 0;
 	};
 
 	template<typename TComponent>
@@ -40,7 +40,7 @@ namespace ECS
 			}
 		}
 
-		virtual void RemoveComponent(Entity entity) override
+		virtual void RemoveComponent(const Entity entity) override
 		{
 			if (Entities.Contains(entity))
 			{

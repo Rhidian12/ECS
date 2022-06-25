@@ -9,20 +9,20 @@ namespace ECS
 
 	void System::AddEntity(Entity entity)
 	{
-		Entities.push_back(entity);
+		Entities.Add(entity);
 	}
 
 	Entity System::CreateEntity()
 	{
 		const Entity entity(EntityManager::GetInstance()->CreateEntity());
-		Entities.push_back(entity);
+		Entities.Add(entity);
 
 		return entity;
 	}
 
 	void System::ClearEntities()
 	{
-		Entities.clear();
+		Entities.Clear();
 	}
 
 	void System::ReleaseEntities()
@@ -32,6 +32,6 @@ namespace ECS
 			EntityManager::GetInstance()->ReleaseEntity(entity);
 		}
 
-		Entities.clear();
+		Entities.Clear();
 	}
 }

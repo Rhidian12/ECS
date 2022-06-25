@@ -121,6 +121,8 @@ namespace ECS
 
 			Sparse.reserve(std::numeric_limits<T>::max());
 			Packed.reserve(std::numeric_limits<T>::max());
+
+			Sparse.resize(MaxEntities, InvalidEntityID);
 		}
 
 		bool Add(const T& value)
@@ -146,7 +148,10 @@ namespace ECS
 		}
 		/* [TODO]: Make r-value overload */
 
-		bool Contains(const T value) const { return (value < Sparse.size()) && (Packed[Sparse[value]] == value); }
+		bool Contains(const T value) const
+		{
+			return (value < Sparse.size()) && (Sparse[value] != InvalidEntityID);
+		}
 
 		T Find(const T value) { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
 		const T& Find(const T value) const { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }

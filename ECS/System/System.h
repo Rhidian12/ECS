@@ -61,13 +61,13 @@ namespace ECS
 		void ClearEntities();
 		void ReleaseEntities();
 
-		size_t GetAmountOfEntities() const { return Entities.size(); }
+		size_t GetAmountOfEntities() const { return Entities.Size(); }
 
 		template<typename TComponent>
 		void AddComponent(Entity entity) const
 		{
 			assert(entity != InvalidEntityID);
-			// assert(Entities.Contains(entity));
+			assert(Entities.Contains(entity));
 
 			ComponentManager::GetInstance()->AddComponent<TComponent>(entity);
 			EntityManager::GetInstance()->SetEntitySignature(entity, TComponent::GetComponentID());
@@ -80,9 +80,9 @@ namespace ECS
 		}
 
 		template<typename TComponent>
-		TComponent& GetComponent(Entity id) { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
+		TComponent& GetComponent(const Entity id) { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
 		template<typename TComponent>
-		const TComponent& GetComponent(Entity id) const { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
+		const TComponent& GetComponent(const Entity id) const { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
 	
 	private:
 		template<typename TComponent>
@@ -93,7 +93,7 @@ namespace ECS
 			const EntityManager* const pEntityManager(EntityManager::GetInstance());
 			Entity counter{};
 
-			for (const Entity& entity : Entities)
+			for (const Entity entity : Entities)
 			{
 				if (pEntityManager->GetEntitySignature(entity)[componentID])
 				{
@@ -104,6 +104,6 @@ namespace ECS
 			return filtered;
 		}
 
-		std::vector<Entity> Entities{};
+		SparseSet<Entity> Entities{};
 	};
 }
