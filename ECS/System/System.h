@@ -65,13 +65,23 @@ namespace ECS
 		size_t GetAmountOfEntities() const { return Entities.Size(); }
 
 		template<typename TComponent>
-		void AddComponent(Entity entity) const
+		void AddComponent(const Entity entity) const
 		{
 			assert(entity != InvalidEntityID);
 			assert(Entities.Contains(entity));
 
 			ComponentManager::GetInstance()->AddComponent<TComponent>(entity);
 			EntityManager::GetInstance()->SetEntitySignature(entity, TComponent::GetComponentID());
+		}
+
+		template<typename TComponent>
+		void RemoveComponent(const Entity entity) const
+		{
+			assert(entity != InvalidEntityID);
+			assert(Entities.Contains(entity));
+
+			ComponentManager::GetInstance()->RemoveComponent(entity, TComponent::GetComponentID());
+			EntityManager::GetInstance()->GetEntitySignature(entity).flip(TComponent::GetComponentID());
 		}
 
 		template<typename ... TComponents>

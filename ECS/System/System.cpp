@@ -22,6 +22,8 @@ namespace ECS
 
 	void System::RemoveEntitiy(const Entity entity)
 	{
+		assert(Entities.Contains(entity));
+
 		Entities.Remove(entity);
 	}
 
