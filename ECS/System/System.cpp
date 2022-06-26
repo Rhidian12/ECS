@@ -20,6 +20,11 @@ namespace ECS
 		return entity;
 	}
 
+	void System::RemoveEntitiy(const Entity entity)
+	{
+		Entities.Remove(entity);
+	}
+
 	void System::ClearEntities()
 	{
 		Entities.Clear();

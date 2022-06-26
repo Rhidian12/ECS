@@ -58,6 +58,7 @@ namespace ECS
 		void AddEntity(Entity entity);
 		Entity CreateEntity();
 
+		void RemoveEntitiy(const Entity entity);
 		void ClearEntities();
 		void ReleaseEntities();
 
