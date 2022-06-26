@@ -26,7 +26,8 @@ namespace ECS
 		void SetEntitySignature(Entity entity, const EntitySignature sig) { assert(entity < EntitySignatures.size()); EntitySignatures[entity] = sig; }
 		void SetEntitySignature(Entity entity, const ComponentType id) { assert(entity < EntitySignatures.size()); EntitySignatures[entity].set(id); }
 
-		EntitySignature GetEntitySignature(Entity entity) const { assert(entity < EntitySignatures.size()); return EntitySignatures[entity]; }
+		EntitySignature& GetEntitySignature(const Entity entity) { assert(entity < EntitySignatures.size()); return EntitySignatures[entity]; }
+		EntitySignature GetEntitySignature(const Entity entity) const { assert(entity < EntitySignatures.size()); return EntitySignatures[entity]; }
 
 	private:
 		EntityManager();

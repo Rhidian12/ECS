@@ -47,7 +47,7 @@ namespace ECS
 		{
 			assert(entity < EntitySignatures.size());
 
-			ComponentManager::GetInstance()->RemoveComponent(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
+			ComponentManager::GetInstance()->RemoveAllComponents(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
 
 			EntitySignatures.erase(EntitySignatures.begin() + entity);
 			EntitySignatures.push_back(EntitySignature());
