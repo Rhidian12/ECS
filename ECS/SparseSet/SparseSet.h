@@ -59,13 +59,13 @@ namespace ECS
 		Type* Pointer{ nullptr };
 	};
 
-	template<typename Type>
+	template<typename T>
 	class RandomConstIterator final
 	{
 	public:
 		using difference_type = std::ptrdiff_t;
 
-		RandomConstIterator(Type* pPointer)
+		RandomConstIterator(T* pPointer)
 			: Pointer{ pPointer }
 		{}
 
@@ -78,9 +78,9 @@ namespace ECS
 		RandomConstIterator& operator+=(difference_type diff) { Pointer += diff; return *this; }
 		RandomConstIterator& operator-=(difference_type diff) { Pointer -= diff; return *this; }
 
-		const Type& operator*() const { return *Pointer; }
-		const Type* operator->() const { return Pointer; }
-		const Type& operator[](difference_type diff) const { return Pointer[diff]; }
+		const T& operator*() const { return *Pointer; }
+		const T* operator->() const { return Pointer; }
+		const T& operator[](difference_type diff) const { return Pointer[diff]; }
 
 		RandomConstIterator& operator++() { ++Pointer; return *this; }
 		RandomConstIterator& operator--() { --Pointer; return *this; }
@@ -105,7 +105,7 @@ namespace ECS
 		bool operator<=(const RandomConstIterator& it) const { return Pointer <= it.Pointer; };
 
 	private:
-		Type* Pointer{ nullptr };
+		T* Pointer{ nullptr };
 	};
 
 	template<typename T>
@@ -176,15 +176,14 @@ namespace ECS
 			return false;
 		}
 
-		 RandomIterator<T> begin() noexcept { return RandomIterator(Packed.data()); }
-		 RandomConstIterator<T> begin() const noexcept { return RandomConstIterator(Packed.data()); }
-		 
-		 RandomIterator<T> end() noexcept { return RandomIterator(Packed.data() + static_cast<T>(Packed.size())); }
-		 RandomConstIterator<T> end() const noexcept { return RandomConstIterator(Packed.data() + static_cast<T>(Packed.size())); }
-		 
-		 /* [TODO]: Figure out why this causes errors */
-		 RandomConstIterator<T> cbegin() const { return RandomConstIterator(Packed.data()); }
-		 RandomConstIterator<T> cend() const { return RandomConstIterator(Packed.data() + Packed.size()); }
+		RandomIterator<T> begin() { return RandomIterator(Packed.data()); }
+		RandomIterator<const T> begin() const { return RandomIterator<const T>(Packed.data()); }
+
+		RandomIterator<T> end() { return RandomIterator{ Packed.data() + Packed.size() }; }
+		RandomIterator<const T> end() const { return RandomIterator<const T>{ Packed.data() + Packed.size() }; }
+
+		RandomConstIterator<T> cbegin() const { return RandomConstIterator(Packed.data()); }
+		RandomConstIterator<T> cend() const { return RandomConstIterator(Packed.data() + Packed.size()); }
 
 	private:
 		std::vector<T> Sparse;
