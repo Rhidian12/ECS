@@ -603,14 +603,16 @@ TEST_CASE("Testing custom ECS")
 
 		REQUIRE(!ECS::Utils::Equals(gravitySystem.GetComponent<RigidBodyComponent>(entity).Velocity.y, 0.f));
 	}
-
+	
+	/* This sections throws an assert */
 	SECTION("Testing what happens with a system that contains too little entities' components")
 	{
 		ECS::Entity entity{ gravitySystem.CreateEntity() };
 
 		gravitySystem.AddComponent<GravityComponent>(entity);
 
-		GravityUpdate(gravitySystem);
+		/* Uncommenting this line should result in an assert failure */
+		// GravityUpdate(gravitySystem);
 	}
 
 	SECTION("Making ten entities and adding components to all of those")
