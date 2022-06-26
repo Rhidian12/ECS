@@ -88,6 +88,13 @@ namespace ECS
 		template<typename ... TComponents>
 		View<TComponents...> CreateView() const
 		{
+#ifdef _DEBUG
+			const EntityManager* const pManager{ EntityManager::GetInstance() };
+			for (const Entity entity : Entities)
+			{
+				assert(CheckEntityComponents<TComponents...>(entity));
+			}
+#endif
 			return View<TComponents...>(std::tuple<std::vector<TComponents>&...>(ComponentManager::GetInstance()->GetComponents<TComponents>()...));
 		}
 
@@ -97,23 +104,10 @@ namespace ECS
 		const TComponent& GetComponent(const Entity id) const { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
 	
 	private:
-		template<typename TComponent>
-		std::vector<TComponent> FilterEntities(const std::vector<TComponent>& v) const
+		template<typename ... TComponents>
+		bool CheckEntityComponents(const Entity entity) const
 		{
-			constexpr ComponentType componentID(TComponent::GetComponentID());
-			std::vector<TComponent> filtered(v.size());
-			const EntityManager* const pEntityManager(EntityManager::GetInstance());
-			Entity counter{};
-
-			for (const Entity entity : Entities)
-			{
-				if (pEntityManager->GetEntitySignature(entity)[componentID])
-				{
-					filtered[counter] = v[counter++];
-				}
-			}
-
-			return filtered;
+			return (EntityManager::GetInstance()->GetEntitySignature(entity).test(TComponents::GetComponentID()) && ...);
 		}
 
 		SparseSet<Entity> Entities{};
