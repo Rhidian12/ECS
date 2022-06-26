@@ -592,6 +592,27 @@ TEST_CASE("Testing custom ECS")
 		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 0);
 	}
 
+	SECTION("Testing Component Update")
+	{
+		ECS::Entity entity{ gravitySystem.CreateEntity() };
+
+		gravitySystem.AddComponent<GravityComponent>(entity);
+		gravitySystem.AddComponent<RigidBodyComponent>(entity);
+
+		GravityUpdate(gravitySystem);
+
+		REQUIRE(!ECS::Utils::Equals(gravitySystem.GetComponent<RigidBodyComponent>(entity).Velocity.y, 0.f));
+	}
+
+	SECTION("Testing what happens with a system that contains too little entities' components")
+	{
+		ECS::Entity entity{ gravitySystem.CreateEntity() };
+
+		gravitySystem.AddComponent<GravityComponent>(entity);
+
+		GravityUpdate(gravitySystem);
+	}
+
 	SECTION("Making ten entities and adding components to all of those")
 	{
 		for (int i{}; i < 10; ++i)
