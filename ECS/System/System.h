@@ -79,6 +79,7 @@ namespace ECS
 		{
 			assert(entity != InvalidEntityID);
 			assert(Entities.Contains(entity));
+			assert(EntityManager::GetInstance()->GetEntitySignature(entity).test(TComponent::GetComponentID()));
 
 			ComponentManager::GetInstance()->RemoveComponent(entity, TComponent::GetComponentID());
 			EntityManager::GetInstance()->GetEntitySignature(entity).flip(TComponent::GetComponentID());
