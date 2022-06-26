@@ -165,8 +165,10 @@ namespace ECS
 			{
 				--_Size;
 
-				Packed[Sparse[value]] = Packed[_Size];
-				Sparse[Packed[_Size]] = Sparse[value];
+				// Packed[Sparse[value]] = Packed[_Size];
+				// Sparse[Packed[_Size]] = Sparse[value];
+
+				Sparse[value] = InvalidEntityID;
 
 				return true;
 			}
@@ -181,8 +183,8 @@ namespace ECS
 		 RandomConstIterator<T> end() const noexcept { return RandomConstIterator(Packed.data() + static_cast<T>(Packed.size())); }
 		 
 		 /* [TODO]: Figure out why this causes errors */
-		 //RandomConstIterator<SparseValue> cbegin() const noexcept { return RandomConstIterator(Packed.data()); }
-		 //RandomConstIterator<SparseValue> cend() const noexcept { return RandomConstIterator<SparseValue>(Packed.data() + Packed.size()); }
+		 RandomConstIterator<T> cbegin() const { return RandomConstIterator(Packed.data()); }
+		 RandomConstIterator<T> cend() const { return RandomConstIterator(Packed.data() + Packed.size()); }
 
 	private:
 		std::vector<T> Sparse;
