@@ -119,7 +119,7 @@ namespace ECS
 			static_cast<ComponentArray<TComponent>*>(pArray.get())->AddComponent(entity, values...);
 		}
 
-		void RemoveComponent(Entity entity, EntitySignature id)
+		void RemoveAllComponents(Entity entity, EntitySignature id)
 		{
 			for (ComponentType i{}; i < MaxComponentTypes; ++i)
 			{
@@ -134,6 +134,16 @@ namespace ECS
 				}
 			}
 			// static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->RemoveComponent(entity);
+		}
+
+		void RemoveComponent(const Entity entity, const ComponentType componentID)
+		{
+			assert(componentID != InvalidComponentID);
+
+			if (ComponentArrays[componentID])
+			{
+				ComponentArrays[componentID]->RemoveComponent(entity);
+			}
 		}
 
 		template<typename TComponent>
