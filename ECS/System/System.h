@@ -103,6 +103,8 @@ namespace ECS
 		template<typename TComponent>
 		const TComponent& GetComponent(const Entity id) const { assert(id != InvalidEntityID); return ComponentManager::GetInstance()->GetComponent<TComponent>(id); }
 	
+		const SparseSet<Entity>& GetEntities() const { return Entities; }
+
 	private:
 		template<typename ... TComponents>
 		bool CheckEntityComponents(const Entity entity) const
