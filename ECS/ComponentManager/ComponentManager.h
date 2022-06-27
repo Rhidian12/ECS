@@ -22,12 +22,22 @@ namespace ECS
 	class ComponentArray final : public IComponentArray
 	{
 	public:
+		ComponentArray()
+			: Components{}
+			, ComponentIndices{}
+			, Entities{}
+		{
+			ComponentIndices.reserve(MaxEntities);
+			ComponentIndices.resize(MaxEntities, InvalidEntityID);
+		}
+
 		void AddComponent(const Entity entity)
 		{
 			static_assert(std::is_default_constructible_v<TComponent>, "Component must be default constructible");
 
 			if (Entities.Add(entity))
 			{
+				ComponentIndices[entity] = static_cast<Entity>(Components.size());
 				Components.push_back(TComponent());
 			}
 		}
@@ -36,7 +46,8 @@ namespace ECS
 		{
 			if (Entities.Add(entity))
 			{
-				Components.push_back(TComponent(std::forward<Values>(values)...));
+				ComponentIndices[entity] = static_cast<Entity>(Components.size());
+				Components.push_back(TComponent(values...));
 			}
 		}
 
@@ -46,7 +57,16 @@ namespace ECS
 			{
 				if (Entities.Remove(entity))
 				{
-					Components.erase(Components.begin() + entity);
+					Components.erase(Components.begin() + ComponentIndices[entity]);
+					ComponentIndices[entity] = InvalidEntityID;
+
+					for (Entity i(entity + static_cast<Entity>(1u)); i < ComponentIndices.size(); ++i)
+					{
+						if (ComponentIndices[i] != 0 && ComponentIndices[i] != InvalidEntityID)
+						{
+							--ComponentIndices[i];
+						}
+					}
 				}
 			}
 		}
@@ -67,8 +87,11 @@ namespace ECS
 		std::vector<TComponent>& GetComponents() { return Components; }
 		const std::vector<TComponent>& GetComponents() const { return Components; }
 
+		Entity GetNrOfComponents() const { return static_cast<Entity>(Components.size()); }
+
 	private:
 		std::vector<TComponent> Components;
+		std::vector<Entity> ComponentIndices;
 		SparseSet<Entity> Entities;
 	};
 
@@ -133,7 +156,6 @@ namespace ECS
 					}
 				}
 			}
-			// static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->RemoveComponent(entity);
 		}
 
 		void RemoveComponent(const Entity entity, const ComponentType componentID)
@@ -155,6 +177,9 @@ namespace ECS
 		std::vector<TComponent>& GetComponents() { assert(TComponent::GetComponentID() < ComponentArrays.size()); return static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->GetComponents(); }
 		template<typename TComponent>
 		const std::vector<TComponent>& GetComponents() const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->GetComponents(); }
+
+		template<typename TComponent>
+		Entity GetNrOfComponents() const { assert(TComponent::GetComponentID() < ComponentArrays.size()); return static_cast<ComponentArray<TComponent>*>(ComponentArrays[TComponent::GetComponentID()].get())->GetNrOfComponents(); }
 
 	private:
 		ComponentManager() = default;
