@@ -66,16 +66,16 @@ void PhysicsUpdate(const ECS::System& system)
 }
 
 /* Defines! */
-#define GAMEOBJECT
-#define ENTT
+//#define GAMEOBJECT
+// #define ENTT
 #define CUSTOMECS
 
-#define WRITE_TO_FILE
+//#define WRITE_TO_FILE
 #define APPEND_TO_FILE
 // #define OVERWRITE_TO_FILE
 
-#define UNIT_TESTS
-//#define BENCHMARKS
+//#define UNIT_TESTS
+#define BENCHMARKS
 
 #ifdef UNIT_TESTS
 #define CATCH_CONFIG_MAIN
@@ -258,7 +258,7 @@ int main(int*, char* [])
 	using namespace GO;
 
 	/* Benchmarking Constants */
-	constexpr Entity AmountOfEntities{ 10'000 };
+	constexpr Entity AmountOfEntities{ 10'00 };
 	constexpr int Iterations{ 50 };
 
 	/* Initialize different systems */
@@ -289,6 +289,7 @@ int main(int*, char* [])
 #endif
 	}
 
+#if defined(CUSTOMECS) && defined(ENTT)
 	for (int i{}; i < AmountOfEntities; ++i)
 	{
 		auto ecs = g_GravitySystem.GetComponent<RigidBodyComponent>(i);
@@ -299,6 +300,7 @@ int main(int*, char* [])
 			std::abort();
 		}
 	}
+#endif
 
 	/* Cleanup results */
 #ifdef CUSTOMECS
@@ -554,9 +556,9 @@ TEST_CASE("Testing custom ECS")
 		gravitySystem.AddComponent<RigidBodyComponent>(entity);
 		gravitySystem.AddComponent<TransformComponent>(entity);
 
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 1);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 1);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 1);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 1);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 1);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 1);
 	}
 
 	SECTION("Adding and Release Entities")
@@ -578,18 +580,18 @@ TEST_CASE("Testing custom ECS")
 		gravitySystem.AddComponent<RigidBodyComponent>(entity);
 		gravitySystem.AddComponent<TransformComponent>(entity);
 
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 1);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 1);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 1);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 1);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 1);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 1);
 
 		gravitySystem.RemoveComponent<GravityComponent>(entity);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 0);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 0);
 
 		gravitySystem.RemoveComponent<RigidBodyComponent>(entity);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 0);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 0);
 
 		gravitySystem.RemoveComponent<TransformComponent>(entity);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 0);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 0);
 	}
 
 	SECTION("Testing Component Update")
@@ -603,7 +605,37 @@ TEST_CASE("Testing custom ECS")
 
 		REQUIRE(!ECS::Utils::Equals(gravitySystem.GetComponent<RigidBodyComponent>(entity).Velocity.y, 0.f));
 	}
-	
+
+	SECTION("Testing 1000 Component Update")
+	{
+		for (int i{}; i < 1000; ++i)
+		{
+			ECS::Entity entity{ gravitySystem.CreateEntity() };
+
+			gravitySystem.AddComponent<GravityComponent>(entity);
+			gravitySystem.AddComponent<RigidBodyComponent>(entity);
+			gravitySystem.AddComponent<TransformComponent>(entity);
+		}
+
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 1000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 1000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 1000);
+
+		GravityUpdate(gravitySystem);
+
+		for (const ECS::Entity entity : gravitySystem.GetEntities())
+		{
+			REQUIRE(!ECS::Utils::Equals(gravitySystem.GetComponent<RigidBodyComponent>(entity).Velocity.y, 0.f));
+		}
+	}
+
+	SECTION("The previous Section should have cleared all Components")
+	{
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 0);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 0);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 0);
+	}
+
 	/* This sections throws an assert */
 	SECTION("Testing what happens with a system that contains too little entities' components")
 	{
@@ -626,9 +658,9 @@ TEST_CASE("Testing custom ECS")
 			gravitySystem.AddComponent<TransformComponent>(entity);
 		}
 
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 10);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 10);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 10);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 10);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 10);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 10);
 	}
 
 	SECTION("Making 100 entities and adding components to all of those")
@@ -642,9 +674,9 @@ TEST_CASE("Testing custom ECS")
 			gravitySystem.AddComponent<TransformComponent>(entity);
 		}
 
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 100);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 100);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 100);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 100);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 100);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 100);
 	}
 
 	SECTION("Making 1000 entities and adding components to all of those")
@@ -658,9 +690,9 @@ TEST_CASE("Testing custom ECS")
 			gravitySystem.AddComponent<TransformComponent>(entity);
 		}
 
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 1000);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 1000);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 1000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 1000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 1000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 1000);
 	}
 
 	SECTION("Making 10 000 entities and adding components to all of those")
@@ -674,9 +706,9 @@ TEST_CASE("Testing custom ECS")
 			gravitySystem.AddComponent<TransformComponent>(entity);
 		}
 
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<GravityComponent>().size() == 10'000);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<RigidBodyComponent>().size() == 10'000);
-		REQUIRE(ECS::ComponentManager::GetInstance()->GetComponents<TransformComponent>().size() == 10'000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 10'000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 10'000);
+		REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 10'000);
 	}
 
 	//SECTION("Making max entities and adding components to all of those")
