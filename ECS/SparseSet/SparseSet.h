@@ -119,8 +119,8 @@ namespace ECS
 		{
 			static_assert(std::is_integral_v<T>, "SparseSet only supports integer types");
 
-			Sparse.reserve(std::numeric_limits<T>::max());
-			Packed.reserve(std::numeric_limits<T>::max());
+			Sparse.reserve(MaxEntities);
+			Packed.reserve(MaxEntities);
 
 			Sparse.resize(MaxEntities, InvalidEntityID);
 		}
@@ -148,10 +148,7 @@ namespace ECS
 		}
 		/* [TODO]: Make r-value overload */
 
-		bool Contains(const T value) const
-		{
-			return (value < Sparse.size()) && (Sparse[value] != InvalidEntityID);
-		}
+		bool Contains(const T value) const { return (value < Sparse.size()) && (Sparse[value] != InvalidEntityID); }
 
 		T Find(const T value) { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
 		const T& Find(const T value) const { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
@@ -164,9 +161,6 @@ namespace ECS
 			if (Contains(value))
 			{
 				--_Size;
-
-				// Packed[Sparse[value]] = Packed[_Size];
-				// Sparse[Packed[_Size]] = Sparse[value];
 
 				Sparse[value] = InvalidEntityID;
 
