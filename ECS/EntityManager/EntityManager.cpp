@@ -5,12 +5,18 @@
 namespace ECS
 {
 	EntityManager::EntityManager()
-		: CurrentEntityCounter{}
+		: EntitySignatures{}
+		, EntitySignatureIndices{}
+		, Entities{}
+		, CurrentEntityCounter{}
 	{
 		for (Entity i{}; i < MaxEntities; ++i)
 		{
 			Entities.Add(i);
 		}
+
+		EntitySignatureIndices.reserve(MaxEntities);
+		EntitySignatureIndices.resize(MaxEntities, InvalidEntityID);
 	}
 
 	EntityManager* EntityManager::GetInstance()
@@ -31,12 +37,8 @@ namespace ECS
 		const Entity entity(CurrentEntityCounter++);
 		Entities.Remove(entity);
 
-		if (EntitySignatures.size() <= entity)
-		{
-			EntitySignatures.resize(entity + 1);
-		}
-
-		EntitySignatures[entity] = EntitySignature();
+		EntitySignatureIndices[entity] = static_cast<Entity>(EntitySignatures.size());
+		EntitySignatures.push_back(EntitySignature());
 
 		return entity;
 	}
@@ -45,12 +47,18 @@ namespace ECS
 	{
 		if (!Entities.Contains(entity))
 		{
-			assert(entity < EntitySignatures.size());
+			ComponentManager::GetInstance()->RemoveAllComponents(entity, GetEntitySignature(entity));
 
-			ComponentManager::GetInstance()->RemoveAllComponents(entity, EntityManager::GetInstance()->GetEntitySignature(entity));
+			EntitySignatures.erase(EntitySignatures.begin() + EntitySignatureIndices[entity]);
+			EntitySignatureIndices[entity] = InvalidEntityID;
 
-			EntitySignatures.erase(EntitySignatures.begin() + entity);
-			EntitySignatures.push_back(EntitySignature());
+			for (Entity i(entity + static_cast<Entity>(1u)); i < EntitySignatureIndices.size(); ++i)
+			{
+				if (EntitySignatureIndices[i] != 0 && EntitySignatureIndices[i] != InvalidEntityID)
+				{
+					--EntitySignatureIndices[i];
+				}
+			}
 
 			Entities.Add(entity);
 
