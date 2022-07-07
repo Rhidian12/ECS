@@ -22,16 +22,6 @@ namespace ECS
 		EntitySignatures.resize(MaxEntities, EntitySignature());
 	}
 
-	EntityManager* EntityManager::GetInstance()
-	{
-		if (!Instance)
-		{
-			Instance = std::make_unique<EntityManager>();
-		}
-
-		return Instance.get();
-	}
-
 	Entity EntityManager::CreateEntity()
 	{
 		assert(Entities.Size() > 0);
@@ -49,7 +39,7 @@ namespace ECS
 	{
 		if (!Entities.Contains(entity))
 		{
-			ComponentManager::GetInstance()->RemoveAllComponents(entity, GetEntitySignature(entity));
+			ComponentManager::GetInstance().RemoveAllComponents(entity, GetEntitySignature(entity));
 
 			EntitySignatures[EntitySignatureIndices[entity]] = EntitySignature();
 			EntitySignatureIndices[entity] = InvalidEntityID;

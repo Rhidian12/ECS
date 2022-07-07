@@ -149,9 +149,7 @@ namespace ECS
 		/* [TODO]: Make r-value overload */
 
 		bool Contains(const T value) const { return (value < Sparse.size()) && (Sparse[value] != InvalidEntityID); }
-
-		T Find(const T value) { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
-		const T& Find(const T value) const { assert(Sparse[value] < _Size); assert(Packed[Sparse[value]] == value); return Sparse[value]; }
+		T GetIndex(const T value) const { assert(Contains(value)); return Sparse[value]; }
 
 		size_t Size() const { return _Size; }
 		void Clear() { Sparse.clear(); Packed.clear(); _Size = 0; }
