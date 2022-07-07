@@ -170,6 +170,9 @@ namespace ECS
 			return false;
 		}
 
+		T& operator[](const size_t index) { assert(index < _Size); return Packed[index]; }
+		const T operator[](const size_t index) const { assert(index < _Size); return Packed[index]; }
+
 		RandomIterator<T> begin() { return RandomIterator(Packed.data()); }
 		RandomIterator<const T> begin() const { return RandomIterator<const T>(Packed.data()); }
 
