@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../Component/Component.h"
 #include "../Point2f/Point2f.h"
 #include "../Utils/Utils.h"
 

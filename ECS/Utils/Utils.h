@@ -99,8 +99,10 @@ namespace ECS
 			return wrappedName.substr(prefixLength, typeNameLength).data();
 		}
 
-		/* const char* or std::string_view cannot be passed as template parameters, but macros can bypass this */
-#define CONSTEXPRSTRINGHASH(x) (CRC32<sizeof(x) - 2>(x) ^ 0xFFFFFFFF)
+		constexpr size_t ConstexprStringHash(const char* pString)
+		{
+			return CRC32<sizeof(pString) - 2>(pString) ^ 0xFFFFFFFF;
+		}
 
 		inline float RandomFloat(float min, float max)
 		{

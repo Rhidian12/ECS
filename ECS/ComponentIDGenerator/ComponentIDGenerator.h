@@ -11,7 +11,7 @@ namespace ECS
 
 		constexpr const char* typeName(ConstexprTypeName<Type>());
 
-		constexpr ComponentType hash(static_cast<ComponentType>(CONSTEXPRSTRINGHASH(typeName)));
+		constexpr ComponentType hash(static_cast<ComponentType>(ConstexprStringHash(typeName)));
 
 		return hash;
 	}

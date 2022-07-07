@@ -2,7 +2,6 @@
 
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
-#include <utility> /* std::pair */
 
 namespace ECS
 {

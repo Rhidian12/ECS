@@ -1,10 +1,5 @@
 #pragma once
 
-#include "../ECSConstants.h"
-
-#include "../ComponentManager/ComponentManager.h"
-#include "../EntityManager/EntityManager.h"
-
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
 #include <utility> /* std::move(), ... */

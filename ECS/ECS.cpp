@@ -2,15 +2,12 @@
 //
 #include "ECSConstants.h"
 
-#include <iostream>
-
-//#include "System/System.h"
-//#include "Component/Component.h"
-#include "EntityManager/EntityManager.h"
+#include "Registry/Registry.h"
 
 #include "GOComponent/GOComponent.h"
 #include "GameObject/GameObject.h"
 
+#include <iostream>
 #include <chrono>
 #include <deque>
 #include <algorithm>
@@ -46,20 +43,20 @@ void ENTTPhysicsUpdate(entt::registry& registry)
 		});
 }
 
-void GravityUpdate(const ECS::EntityManager& entityManager)
+void GravityUpdate(const ECS::Registry& entityManager)
 {
 	auto view = entityManager.CreateView<GravityComponent, RigidBodyComponent>();
 
-	view.ForEach([](auto& gravity, auto& rigidBody)->void
+	view.ForEach([](const auto& gravity, auto& rigidBody)->void
 		{
 			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
 		});
 }
-void PhysicsUpdate(const ECS::EntityManager& entityManager)
+void PhysicsUpdate(const ECS::Registry& entityManager)
 {
 	auto view = entityManager.CreateView<RigidBodyComponent, TransformComponent>();
 
-	view.ForEach([](auto& rigidBody, auto& transform)->void
+	view.ForEach([](const auto& rigidBody, auto& transform)->void
 		{
 			transform.Position.x += rigidBody.Velocity.x;
 			transform.Position.y += rigidBody.Velocity.y;
@@ -97,7 +94,7 @@ std::deque<long long> g_enttInitTimes{};
 #endif
 
 #ifdef CUSTOMECS
-void TestInitECS(ECS::EntityManager& registry, const ECS::Entity amount)
+void TestInitECS(ECS::Registry& registry, const ECS::Entity amount)
 {
 	using namespace ECS;
 
@@ -118,7 +115,7 @@ void TestInitECS(ECS::EntityManager& registry, const ECS::Entity amount)
 
 	g_ECSInitTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 }
-void TestUpdateECS(ECS::EntityManager& registry)
+void TestUpdateECS(ECS::Registry& registry)
 {
 	using namespace ECS;
 
@@ -229,7 +226,7 @@ int main(int*, char* [])
 	constexpr int Iterations{ 1 };
 
 #ifdef CUSTOMECS
-	ECS::EntityManager ECS{};
+	ECS::Registry ECS{};
 #endif
 #ifdef GAMEOBJECT
 	std::vector<GO::GameObject*> gameObjects{};

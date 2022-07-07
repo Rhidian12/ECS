@@ -3,18 +3,18 @@
 #include "../ECSConstants.h"
 #include "../SparseSet/SparseSet.h"
 #include "../View/View.h"
+#include "../ComponentManager/ComponentManager.h"
+#include "../ComponentIDGenerator/ComponentIDGenerator.h"
 
-#include <vector> /* std::vector */
 #include <assert.h> /* assert() */
-#include <memory> /* std::unique_ptr */
-#include <deque> /* std::deque */
+#include <unordered_map> /* unordered_map */
 
 namespace ECS
 {
-	class EntityManager final
+	class Registry final
 	{
 	public:
-		EntityManager();
+		Registry();
 
 		/* [TODO]: Rule of 5 */
 
@@ -27,6 +27,7 @@ namespace ECS
 		template<typename T>
 		T AddComponent(const Entity entity)
 		{
+			SetEntitySignature(entity, GenerateComponentID<T>());
 			return ComponentManager::GetInstance().AddComponent<T>(entity);
 		}
 		/* [TODO]: Add variadic template overload */
@@ -55,15 +56,13 @@ namespace ECS
 		bool ReleaseEntity(Entity entity);
 		Entity GetAmountOfEntities() const { return CurrentEntityCounter; }
 
-		void SetEntitySignature(const Entity entity, const EntitySignature sig) { assert(entity < EntitySignatures.size()); EntitySignatures[entity] = sig; }
-		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true) { assert(entity < EntitySignatures.size()); EntitySignatures[entity].set(id, val); }
+		void SetEntitySignature(const Entity entity, const EntitySignature sig) { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); EntitySignatures[entity] = sig; }
+		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true) { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); EntitySignatures[entity].set(id, val); }
 
-		EntitySignature& GetEntitySignature(const Entity entity) { assert(EntitySignatureIndices[entity] != InvalidEntityID); return EntitySignatures[EntitySignatureIndices[entity]]; }
-		EntitySignature GetEntitySignature(const Entity entity) const { assert(EntitySignatureIndices[entity] != InvalidEntityID); return EntitySignatures[EntitySignatureIndices[entity]]; }
+		EntitySignature GetEntitySignature(const Entity entity) const { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); return EntitySignatures.find(entity)->second; }
 
 	private:
-		std::vector<EntitySignature> EntitySignatures;
-		std::vector<Entity> EntitySignatureIndices;
+		std::unordered_map<Entity, EntitySignature> EntitySignatures;
 		SparseSet<Entity> Entities;
 		Entity CurrentEntityCounter;
 	};
