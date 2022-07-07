@@ -29,6 +29,8 @@ namespace ECS
 		{
 			ComponentIndices.reserve(MaxEntities);
 			ComponentIndices.resize(MaxEntities, InvalidEntityID);
+
+			Components.reserve(MaxEntities);
 		}
 
 		void AddComponent(const Entity entity)
