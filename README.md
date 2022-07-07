@@ -1,14 +1,13 @@
 # ECS
 
-**THIS IS CURRENTLY UNDERGOING MAJOR CHANGES AND WILL MOST LIKELY NOT WORK**
-
 ## Introduction
 An Entity-Component-System (ECS) is an alternative way of storing information regarding Components and Entities.
-The traditional approach is to have a `GameObject` that has a list of `Component`, in which the `GameObject` acts as a wrapper around the `Component` list and manages all of them. This is a very good approach, but has some drawbacks:
-- There are a lot of virtual function calls present, since the `GameObject` (usually) has a pointer to a base `Component` class, on which it calls an `Update` function for example.
-- The Components are all scattered in memory, resulting in a lot of cache misses. For example, assume we have 1.000 rocks in our scene, and all of these rocks float up and down in the air. These rocks will need some `RockMovementComponent` that continiously translates the rock it's attached to. This will have to happen a 1.000 times per frame, and every time we need to go through our virtual function call, go fetch the data from memory, which is probably scattered all over the place, since the Components are not stored contiguously.
+The traditional approach is to have a `GameObject` that has a list of `Components`, in which the `GameObject` acts as a wrapper around the `Component` list and manages all of them. This is a very good approach, but has some drawbacks:
+- There are a lot of virtual function calls present, since the `GameObject` (usually) has a pointer to a base `Component` class, on which it calls an `Update` function to all of the derived `Components`.
+- The Components are all scattered in memory, because they are defined on the heap, resulting in a lot of cache misses. For example, assume we have 1.000 rocks in our scene, and all of these rocks float up and down in the air. These rocks will need some `RockMovementComponent` that continiously translates the rock it's attached to. This will have to happen a 1.000 times per frame, and every time we need to go through our virtual function call, which means going through a vtable, go fetch the data from memory, which is probably scattered all over the place, since the Components are not stored contiguously.
 
 ```cpp
+// Keep in mind that this is an example and not the absolute best way of implementing this
 class RockMovementComponent final : public Component
 {
 public:
@@ -40,7 +39,29 @@ private:
 };
 ```
 
-Instead of having tons of scattered components all doing the same thing, needing the same type of data, stored in different GameObjects. We could store all of these Components together, preventing cache misses, and let overarching systems execute code.
+This is a very Object-Oriented way of working, which is fine, but costs a lot of memory and time.</br>
+However, what if we were to use a <i>Data-Oriented</i> way of working?
+In our Data-Oriented design, Objects no longer exist.</br>
+Let me demonstrate: </br>
+In a Object-Oriented design fashion, we could make a class `Ball` that contains the Ball's position, size, colour and velocity.
+```cpp
+class Ball final
+{
+public:
+  Ball()
+    : Position{}
+    , Radius{}
+    , Colour{}
+    , Velocity{}
+  {}
+
+private:
+  Vec3 Position;
+  float Radius;
+  RGBColour Colour;
+  Vec3 Velocity;
+};
+```
 
 This is the basis of an ECS.
 Instead of using GameObjects which manage the Components, we have Entities, which are nothing more than an ID.
