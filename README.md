@@ -267,7 +267,7 @@ view.ForEach([](const auto& gravity, auto& rigidBody)->void
   });
 ```
 
-However, this is <i>not</i> the best way of going about this. A `View` should return immutable data! You are asking for a <i>view</i> of the Components, not asking for permission to change them! I have decided to keep this design flaw in my code for simplicity's sake.
+However, this is <i>not</i> the best way of going about this. A `View` should return immutable data! You are asking for a <i>view</i> of the Components, not asking for permission to change them! I have decided to keep this design flaw in my code for simplicity's and, primarily, time's sake.
 
 ### Conclusion
 
