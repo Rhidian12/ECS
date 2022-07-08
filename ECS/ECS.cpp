@@ -43,18 +43,18 @@ void ENTTPhysicsUpdate(entt::registry& registry)
 		});
 }
 
-void GravityUpdate(const ECS::Registry& entityManager)
+void GravityUpdate(const ECS::Registry& registry)
 {
-	auto view = entityManager.CreateView<GravityComponent, RigidBodyComponent>();
+	auto view = registry.CreateView<GravityComponent, RigidBodyComponent>();
 
 	view.ForEach([](const auto& gravity, auto& rigidBody)->void
 		{
 			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
 		});
 }
-void PhysicsUpdate(const ECS::Registry& entityManager)
+void PhysicsUpdate(const ECS::Registry& registry)
 {
-	auto view = entityManager.CreateView<RigidBodyComponent, TransformComponent>();
+	auto view = registry.CreateView<RigidBodyComponent, TransformComponent>();
 
 	view.ForEach([](const auto& rigidBody, auto& transform)->void
 		{
@@ -102,7 +102,7 @@ void TestInitECS(ECS::Registry& registry, const ECS::Entity amount)
 
 	t1 = std::chrono::steady_clock::now();
 
-	for (int i{}; i < amount; ++i)
+	for (size_t i{}; i < amount; ++i)
 	{
 		Entity entity{ registry.CreateEntity() };
 
@@ -142,7 +142,7 @@ void TestInitGO(std::vector<GO::GameObject*>& gameObjects, const ECS::Entity amo
 
 	t1 = std::chrono::steady_clock::now();
 
-	for (int i{}; i < amount; ++i)
+	for (size_t i{}; i < amount; ++i)
 	{
 		GameObject* pG{ new GameObject{} };
 
@@ -185,7 +185,7 @@ void TestInitENTT(entt::registry& registry, std::vector<entt::entity>& entities,
 
 	t1 = std::chrono::steady_clock::now();
 
-	for (int i{}; i < amount; ++i)
+	for (size_t i{}; i < amount; ++i)
 	{
 		auto enttEntity{ registry.create() };
 		registry.emplace<ENTTGravity>(enttEntity);
@@ -222,7 +222,7 @@ int main(int*, char* [])
 	using namespace GO;
 
 	/* Benchmarking Constants */
-	constexpr Entity AmountOfEntities{ MaxEntities };
+	constexpr Entity AmountOfEntities{ 100'000 };
 	constexpr int Iterations{ 1 };
 
 #ifdef CUSTOMECS
@@ -264,18 +264,18 @@ int main(int*, char* [])
 #endif
 	}
 
-#if defined(CUSTOMECS) && defined(ENTT)
-	for (int i{}; i < AmountOfEntities; ++i)
-	{
-		auto ecscomponent = ECS.GetComponent<RigidBodyComponent>(i);
-		auto enttcomponent = entt.get<ENTTRigidBodyComponent>(entities[i]);
-
-		if (!Utils::Equals(ecscomponent.Velocity.y, enttcomponent.Velocity.y))
-		{
-			std::abort();
-		}
-	}
-#endif
+//#if defined(CUSTOMECS) && defined(ENTT)
+//	for (int i{}; i < AmountOfEntities; ++i)
+//	{
+//		auto ecscomponent = ECS.GetComponent<RigidBodyComponent>(i);
+//		auto enttcomponent = entt.get<ENTTRigidBodyComponent>(entities[i]);
+//
+//		if (!Utils::Equals(ecscomponent.Velocity.y, enttcomponent.Velocity.y))
+//		{
+//			std::abort();
+//		}
+//	}
+//#endif
 
 	/* Cleanup results */
 #ifdef CUSTOMECS

@@ -22,3 +22,15 @@ GO Update Average: 11435895 nanoseconds
 
 ENTT Update Average: 73445 nanoseconds
 
+Program Created 10000 Entities
+Program ran update code 50 amount of times
+ECS Init Average: 855842 nanoseconds
+GO Init Average: 3449980 nanoseconds
+ENTT Init Average: 2254270 nanoseconds
+
+ECS Update Average: 40210 nanoseconds
+
+GO Update Average: 11689827 nanoseconds
+
+ENTT Update Average: 72152 nanoseconds
+

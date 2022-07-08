@@ -4,12 +4,12 @@
 
 namespace ECS
 {
-	template<typename Type>
+	template<typename T>
 	constexpr ComponentType GenerateComponentID()
 	{
 		using namespace Utils;
 
-		constexpr const char* typeName(ConstexprTypeName<Type>());
+		constexpr const char* typeName(ConstexprTypeName<T>());
 
 		constexpr ComponentType hash(static_cast<ComponentType>(ConstexprStringHash(typeName)));
 

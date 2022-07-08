@@ -5,8 +5,8 @@
 
 namespace ECS
 {
-	using Entity = uint16_t; /* This supports ~65k possible entities, seems like enough */
-	using ComponentType = uint8_t; /* This supports 65,535 possible component types, seems like enough */
+	using Entity = uint32_t; /* This supports ~65k possible entities, seems like enough */
+	using ComponentType = uint8_t; /* This supports 256 possible component types, seems like enough */
 	using SystemID = ComponentType; /* This supports as many systems as there are Components */
 
 	constexpr Entity MaxEntities{ std::numeric_limits<Entity>::max() - 1 };
