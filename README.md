@@ -12,10 +12,10 @@ class RockMovementComponent final : public Component
 {
 public:
   RockMovementComponent(GameObject* pOwner)
-  : pOwner{ pOwner }
-  , pTransformComponent{}
-  , pAnimationCurveComponent{}
-  , RockSpeed{ 100.f }
+    : pOwner{ pOwner }
+    , pTransformComponent{}
+    , pAnimationCurveComponent{}
+    , RockSpeed{ 100.f }
   {
     pTransformComponent = pOwner->GetComponent<TransformComponent>();
     pAnimationCurveComponent = pOwner->GetComponent<AnimationCurveComponent>();
@@ -94,9 +94,10 @@ struct Ball final
 Although there is still a struct, therefore an object, that represents a `Ball`, it does not contain <i>any</i> functionality. It only contains data about what a `Ball` is. We cannot update this `Ball`, nor is it the purpose of this object to <i>be</i> updated. All of the data is tightly packed together in memory, and we if we store this `Ball` together with all other Balls, we have a contigious array of Balls, resulting in a lot less cache misses when we search for Balls in memory.
 
 This is the basis of an ECS.
-Instead of using GameObjects which manage the Components, we have Entities, which are nothing more than an ID.
-Instead of using Components which hold data and have functionality regarding that data, our Components only hold data.
-The final part of the ECS is a `System`. Systems can be many things and their implementation always differs on the programmer, but the basis of a `System` is that it's the functionality for Components and Entities. Components and Entities are nothing more than data, and a `System` is the functionality.
+Instead of using GameObjects which manage the Components, we have Entities, which are nothing more than an ID (number).
+Instead of using Components which hold data and have functionality regarding that data, our Components only hold data and have <i>no</i> functionality.
+The final part of the ECS is a `System`.<br>
+Systems can be many things and their implementation always differs on the programmer, but the basis of a `System` is that it's the functionality for Components and Entities. Components and Entities are nothing more than data, and a `System` is the functionality.
 
 The reason an ECS is faster than the traditional approach is because of Data Oriented Design (which once again leads into cache misses and hits).
 For those unfamiliar with a cache miss and hit, here's an oversimplification: <br>
@@ -114,220 +115,195 @@ For those who are unaware of what contiguous storage means: `std::vector`, the s
 ### Components
 
 This ECS uses a `ComponentManager` to store all Components and their Component ID's. Each Component has a unique ID which the ComponentManager uses to distinguish between different Components. <br>
-The way Components have different ID's is by using a combination of static variables and templating. <br>
-All user-defined Components must inherit from `Component`, which inherits from `IComponent`. The templated `Component` class requires a derived Component as its template, which then uses to instantiate `TypeCounter`. `TypeCounter` will always have the same base class, `IComponent`, but will be called with a different function template `DerivedComponent`.
+Components get assigned a unique ID via hashing their name. This is done completely at compile-time.<br>
 
 ```cpp
 #pragma once
 #include "../ECSConstants.h"
-#include "../TypeCounter/TypeCounter.h"
+#include "../Utils/Utils.h"
 
 namespace ECS
 {
-  class IComponent
+  template<typename Type>
+  constexpr ComponentType GenerateComponentID()
   {
-  public:
-    virtual ~IComponent() = default;
-  };
+    using namespace Utils;
 
-  template<typename DerivedComponent>
-  class Component : public IComponent
-  {
-  public:
-    virtual ~Component() = default;
+    constexpr const char* typeName(ConstexprTypeName<Type>());
 
-    static __forceinline auto GetComponentID() noexcept { return ComponentID; }
+    constexpr ComponentType hash(static_cast<ComponentType>(ConstexprStringHash(typeName)));
 
-  protected:
-    inline static const ComponentType ComponentID{ TypeCounter<IComponent>::Get<DerivedComponent>() };
-  };
+    return hash;
+  }
 }
 ```
 
+The `ComponentManager` itself has a `std::unordered_map` of Component ID's serving as a key and `IComponentArray` pointers as a value. The `IComponentArray` is a base class for `ComponentArray`, which stores all Components of a specific type.<br>
+
 ```cpp
-#pragma once
-#include "../ECSConstants.h"
-
-namespace ECS
+class IComponentArray
 {
-  /* This class is heavily based on a class made by the absolute genius Arne Van Kerschaver */
-  template <typename Type>
-  class TypeCounter final
+public:
+  virtual ~IComponentArray() = default;
+  
+  // Class is a bit simplified for readability's sake
+};
+
+template<typename T>
+class ComponentArray final : public IComponentArray
+{
+public:
+  T& AddComponent(const Entity entity)
   {
-  public:
-    /* Since it's ++Counter, the Component Counter will always start at 1, can be easily changed, but who cares */
-    template <typename SecondaryType>
-    __forceinline constexpr static ComponentType Get() { return ++Counter; }
+    assert(!Entities.Contains(entity) && "ComponentArray::AddComponent() > Entity has already been added");
 
-    __forceinline constexpr static ComponentType Get() { return Counter; }
+    Entities.Add(entity);
+    return Components.emplace_back(T{});
+  }
+  
+  // Class is a bit simplified for readability's sake
 
-  private:
-    inline static ComponentType Counter{};
-  };
-}
+private:
+  SparseSet<Entity> Entities;
+  std::vector<T> Components;
+};
 ```
 
-The `ComponentManager` itself has a `std::vector` of `ComponentKey`, a struct which holds a Component ID and a list of `IComponent*`. <br>
-When a new Component gets added to the ComponentManager, it is placed in the list at the index of its ComponentID. This makes it very easy to access Components via `GetComponent`, since all that is required is the ComponentID, and an EntityID. The ComponentID is always available, since it is a static function, which allows me to easily use `Type::GetComponentID()`, which works, as long as `Type` is a class that is derived from `Component`.<br>
-A possible safety check for this is using SFINAE, in the form of `std::enable_if_t<std::is_base_of_v<Component, Type>>`.
+Components get added to the `ComponentManager`, which creates a new `ComponentArray` if the added Component has not been added before.
 
 ```cpp
-template<typename Type>
-Type* ComponentManager::GetComponent(const Entity id) const noexcept
+class ComponentManager final
 {
-  if (id == InvalidEntityID)
-    return nullptr;
+public:
+  static ComponentManager& GetInstance();
 
-  const auto componentID{ Type::GetComponentID() };
-  const ComponentKey& key{ Components[componentID] };
+  ComponentManager(const ComponentManager&) noexcept = delete;
+  ComponentManager(ComponentManager&&) noexcept = delete;
+  ComponentManager& operator=(const ComponentManager&) noexcept = delete;
+  ComponentManager& operator=(ComponentManager&&) noexcept = delete;
 
-  if (key.ComponentID != InvalidComponentID)
+  template<typename T>
+  T& AddComponent(const Entity entity)
   {
-    return static_cast<Type*>(Components[componentID].Components[id]);
+    std::unique_ptr<IComponentArray>& pool{ ComponentPools[GenerateComponentID<T>()] };
+
+    if (!pool)
+    {
+      pool.reset(new ComponentArray<T>{});
+    }
+
+    return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
   }
-  else
-  {
-    return nullptr;
-  }
-}
-  ```
+  
+  // Class is a bit simplified for readability's sake
+    
+private:
+  ComponentManager() = default;
+
+  friend std::unique_ptr<ComponentManager> std::make_unique<ComponentManager>();
+  inline static std::unique_ptr<ComponentManager> Instance{};
+
+  std::unordered_map<ComponentType, std::unique_ptr<IComponentArray>> ComponentPools;
+};
+```
 
 ### Entities
 
-Entities are managed by the `EntityManager`, which holds a list of all possible Entities in existence, whether they're being used or not. It also allows the user to create and destroy entities, by reassigning Entity ID's. I used a `std::queue` to hold all possible Entity ID's, since it allows for easy pushing and popping of ID's.
+Entities are managed by the `Registry`, which holds a list of all possible Entities in existence, whether they're being used or not. It also allows the user to create and destroy entities, by reassigning Entity ID's. I used a `SparseSet` to hold all possible Entity ID's, since it is the most optimized way of storing integers and later looking for them.
 
 ```cpp
 #pragma once
-#include "../ECSConstants.h"
 
-#include <queue> /* std::queue */
-#include <array> /* std::array */
+#include "../ECSConstants.h"
+#include "../SparseSet/SparseSet.h"
+
+#include <assert.h> /* assert() */
+#include <unordered_map> /* unordered_map */
 
 namespace ECS
 {
-  class EntityManager final
+  class Registry final
   {
   public:
-    EntityManager();
+    Registry();
 
-    Entity CreateEntity() noexcept;
-    void DestroyEntity(const Entity id) noexcept;
+    Entity CreateEntity();
+    bool ReleaseEntity(Entity entity);
+    Entity GetAmountOfEntities() const { return CurrentEntityCounter; }
 
-    void SetSignatureSafe(const Entity id, const ComponentType& signature) noexcept;
-    const EntitySignature& GetEntitySignatureSafe(const Entity id) noexcept;
-
-    __forceinline auto SetSignatureUnsafe(const Entity id, const EntitySignature& signature) noexcept { EntitySignatures[id] = signature; }
-    __forceinline auto GetSignatureUnsafe(const Entity id) const noexcept { return EntitySignatures[id]; }
+    void SetEntitySignature(const Entity entity, const EntitySignature sig);
+    void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true);
+    EntitySignature GetEntitySignature(const Entity entity) const;
+    
+    // All functionality not pertaining to Entities has been cut for this snippet
 
   private:
-    std::queue<Entity> AvailableEntityIDs;
-    std::array<EntitySignature, MaxEntities> EntitySignatures;
+    std::unordered_map<Entity, EntitySignature> EntitySignatures;
+    SparseSet<Entity> Entities;
+    Entity CurrentEntityCounter;
   };
 }
 ```
 
 ### Systems
 
-The Systems are managed by the `SystemManager`. It manages the lifetime of all the Systems, creates them, and also executes them for ease-of-use. <br>
-The systems themselves are almost identical to the Components. They have a list of Entities and a static templated SystemID.
-
+I decided to model my ECS after EntT and how it handles Systems. EntT creates a `entt::basic_view` of Components on a `entt::registry` which you can loop over with a lambda.
 ```cpp
-#pragma once
-#include "../ECSConstants.h"
-#include "../TypeCounter/TypeCounter.h"
+auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent>();
 
-#include <array> /* std::array */
-
-namespace ECS
-{
-  class ISystem
+view.each([](const auto& gravity, auto& rigidBody)
   {
-  public:
-    virtual ~ISystem() = default;
-  };
-
-  template<typename DerivedSystem>
-  class System : public ISystem
-  {
-  public:
-    System();
-    virtual ~System() = default;
-
-    void AddEntity(const Entity id) noexcept;
-    void RemoveEntity(const Entity id) noexcept;
-
-    static __forceinline auto GetSystemID() noexcept { return SystemID; }
-
-  protected:
-    inline static const SystemID SystemID{ TypeCounter<ISystem>::Get<DerivedSystem>() };
-
-    std::array<Entity, MaxEntities> Entities;
-  };
-}
+    rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+  });
 ```
 
+I decided to make something similar:
 ```cpp
-#pragma once
-#include "../ECSConstants.h"
-#include "../System/System.h"
+auto view = registry.CreateView<GravityComponent, RigidBodyComponent>();
 
-#include "../TypeList/TypeList.h"
-
-#include <array> /* std::array */
-
-namespace ECS
-{
-  class SystemManager final
+view.ForEach([](const auto& gravity, auto& rigidBody)->void
   {
-  public:
-    ~SystemManager();
-
-    template<typename DerivedSystem>
-    DerivedSystem* const AddSystem() noexcept;
-
-    template<typename DerivedSystem>
-    DerivedSystem* const GetSystem() noexcept;
-
-    template<typename ... Systems>
-    void Update() noexcept;
-
-  private:
-    struct SystemInfo final
-    {
-      SystemInfo()
-        : SystemID{ InvalidSystemID }
-        , pSystem{}
-      {}
-
-      SystemInfo(const SystemID& id, ISystem* _pSystem)
-        : SystemID{ id }
-        , pSystem{ _pSystem }
-      {}
-
-      SystemID SystemID;
-      ISystem* pSystem;
-    };
-
-    std::array<SystemInfo, MaxSystems> Systems;
-
-    template<typename ... Systems, size_t ... Indices>
-    void Update(std::index_sequence<Indices...>);
-
-    template<typename System, size_t Index>
-    void Update();
-  };
-}
+    rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+  });
 ```
+
+However, this is <i>not</i> the best way of going about this. A `View` should return immutable data! You are asking for a <i>view</i> of the Components, not asking for permission to change them! I have decided to keep this design flaw in my code for simplicity's sake.
 
 ### Conclusion
 
-I compared the ECS I wrote to a traditional GameObject - Component system, and the ECS is slightly faster.
-The way I tested this is by creating ~ 65,000 entities (and Game Objects) that both do the same thing. They simulate some very simple physics using 3 different components (RigidBody, Transform and Gravity). <br>
-I then timed how long it took to run `System->Update()` vs. `for (GameObject* pG : GameObjects) { pG->Update(); }`. <br>
+I compared the ECS I wrote to a traditional GameObject - Component system and EntT and the ECS is slightly faster.
+The way I tested this is by creating 100'000 entities (and Game Objects) that both do the same thing. They simulate some very simple physics using 3 different components (RigidBody, Transform and Gravity). <br>
+I then timed how long it took to run EntT's lambda vs. my ECS's lambda vs. `for (GameObject* pG : GameObjects) { pG->Update(); }`. <br>
 These benchmarks can be found in the `ECS.cpp` file.
 
+## Benchmarks
 Visual Studio 2022, standard Release build on x64, times:
-- GameObject - Component: On average:    180589800 nanoseconds
-- Entity-Component-System: On average:   162662500 nanoseconds
 
-The ECS is slightly faster, but does come with the drawback of using more memory, since it allocates a lot of arrays in their entirety.
+#### Initialisation Times
+- Custom ECS Initialisation Time: 36416800 nanoseconds
+- EntT Initialisation Time:       20327500 nanoseconds
+- GameObject Initialisation Time: 36277600 nanoseconds
+
+#### Update Times
+- Custom ECS Update Time: 312400 nanoseconds
+- EntT Update Time:       774600 nanoseconds
+- GameObject Update Time: 2718600 nanoseconds 
+
+#### Total Times
+- Custom ECS Total Time: 36729200 nanoseconds
+- EntT Total Time:       21102100 nanoseconds
+- GameObject Total Time: 38996200 nanoseconds
+
+#### Memory Usage:
+- Custom ECS Total Memory Usage: 11 MB 
+- EntT Total Memory Usage:       Miniscule (Not visible in VS, less than 11 MB)
+- GameObject Total Memory Usage: 19 MB
+
+## Conclusion
+My ECS its update is twice as fast as EntT, <i>however</i> its initialisation is also ~79.15% faster than my ECS, which accounts for a *lot* of time. <br>
+In this example it makes the final time difference massive, however, do keep in mind that the entire proogram ran for ~0.0367 seconds in my ECS.<br>
+If the program were to run longer the time difference would be smaller.
+
+Although this project is not complete by any means, I am already extremely happy that my ECS works and remotely rivals EntT.
+
+## Disclaimer: There might be an error in my benchmarking, therefore it's entirely possible that EntT is WAY faster than my ECS.
