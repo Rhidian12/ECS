@@ -43,7 +43,7 @@ This is a very Object-Oriented way of working, which is fine, but costs a lot of
 However, what if we were to use a <i>Data-Oriented</i> way of working?
 In our Data-Oriented design, Objects no longer exist.</br>
 Let me demonstrate: </br>
-In a Object-Oriented design fashion, we could make a class `Ball` that contains the Ball's position, size, colour and velocity.
+In a Object-Oriented design fashion, we could make a class `Ball` that contains the Ball's position, size, colour and velocity. If we want to do anything with it, we need to get the `Ball` object and call its functions,
 ```cpp
 class Ball final
 {
@@ -54,6 +54,17 @@ public:
     , Colour{}
     , Velocity{}
   {}
+  
+  void Update(float DeltaTime)
+  {
+    Position += Velocity * DeltaTime;
+  }
+  
+  void SetPosition(const Vec3& pos) { Position = pos; }
+  /* similar setters */
+  
+  const Vec3& GetPosition() const { return Position; }
+  /* similar getters */
 
 private:
   Vec3 Position;
@@ -63,33 +74,29 @@ private:
 };
 ```
 
+If we were to make this class in a Data-Oriented design fashion, there would be no concept of a singular `Ball`. There is only a collection of data that we interpret as a `Ball`.
+```cpp
+struct Ball final
+{
+  Ball()
+    : Position{}
+    , Radius{}
+    , Colour{}
+    , Velocity{}
+  {}
+
+  Vec3 Position;
+  float Radius;
+  RGBColour Colour;
+  Vec3 Velocity;
+};
+```
+Although there is still a struct, therefore an object, that represents a `Ball`, it does not contain <i>any</i> functionality. It only contains data about what a `Ball` is. We cannot update this `Ball`, nor is it the purpose of this object to <i>be</i> updated. All of the data is tightly packed together in memory, and we if we store this `Ball` together with all other Balls, we have a contigious array of Balls, resulting in a lot less cache misses when we search for Balls in memory.
+
 This is the basis of an ECS.
 Instead of using GameObjects which manage the Components, we have Entities, which are nothing more than an ID.
 Instead of using Components which hold data and have functionality regarding that data, our Components only hold data.
-The final part of the ECS is a `System`. Systems are classes that have a list of `Entities`, and execute specific functionality on each `Entity`, provided the `Entity` has the required Components.
-
-```cpp
-class RockMovementSystem final : public System<RockMovementSystem>
-{
-public:
-  virtual void UpdateSystem() override
-  {
-    for (const Entity& entity : Entities)
-    {
-      if (pEntityManager->GetEntitySignature(entity) == flags)
-      {
-        TransformComponent* const pTransformComponent{ pComponentManager->GetComponent<TransformComponent>(entity) };
-        AnimationCurveComponent* const pAnimationCurve{ pComponentManager->GetComponent<AnimationCurveComponent>(entity);
-        RockComponent* const pRockComponent{ pComponentManager->GetComponent<RockComponent>(entity) };
-
-        pTransformComponent->SetPosition(Lerp(pRockComponent->StartPosition, pRockComponent->EndPosition, pAnimationCurveComponent->GetFloatValue()));
-      }
-    }
-  }
-
-  inline static std::bitset<MaxComponentTypes> flags{};
-};
-```
+The final part of the ECS is a `System`. Systems can be many things and their implementation always differs on the programmer, but the basis of a `System` is that it's the functionality for Components and Entities. Components and Entities are nothing more than data, and a `System` is the functionality.
 
 The reason an ECS is faster than the traditional approach is because of Data Oriented Design (which once again leads into cache misses and hits).
 For those unfamiliar with a cache miss and hit, here's an oversimplification: <br>
