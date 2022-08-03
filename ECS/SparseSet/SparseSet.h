@@ -121,26 +121,12 @@ namespace ECS
 
 		bool Add(const T& value)
 		{
-			if (Contains(value))
-			{
-				return false;
-			}
-
-			if (Packed.size() <= _Size)
-			{
-				Packed.resize(_Size + 1);
-			}
-			if (Sparse.size() <= value)
-			{
-				Sparse.resize(value + 1, InvalidEntityID);
-			}
-
-			Packed[_Size] = value;
-			Sparse[value] = _Size++;
-
-			return true;
+			return AddImpl(value);
 		}
-		/* [TODO]: Make r-value overload */
+		bool Add(T&& value)
+		{
+			return AddImpl(std::move(value));
+		}
 
 		bool Contains(const T value) const { return (value < Sparse.size()) && (Sparse[value] != InvalidEntityID); }
 		T GetIndex(const T value) const { assert(Contains(value)); return Sparse[value]; }
@@ -177,6 +163,29 @@ namespace ECS
 		RandomConstIterator<T> cend() const { return RandomConstIterator(Packed.data() + Packed.size()); }
 
 	private:
+		template<typename U>
+		bool AddImpl(U&& value)
+		{
+			if (Contains(value))
+			{
+				return false;
+			}
+
+			if (Packed.size() <= _Size)
+			{
+				Packed.resize(_Size + 1);
+			}
+			if (Sparse.size() <= value)
+			{
+				Sparse.resize(value + 1, InvalidEntityID);
+			}
+
+			Packed[_Size] = value;
+			Sparse[value] = _Size++;
+
+			return true;
+		}
+
 		std::vector<T> Sparse;
 		std::vector<T> Packed;
 		T _Size;
