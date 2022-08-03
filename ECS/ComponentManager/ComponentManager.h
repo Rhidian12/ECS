@@ -92,7 +92,7 @@ namespace ECS
 				pool.reset(new ComponentArray<T>{});
 			}
 
-			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity, args);
+			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, args...);
 		}
 
 		template<typename T>

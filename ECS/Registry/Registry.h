@@ -28,12 +28,17 @@ namespace ECS
 		}
 
 		template<typename T>
-		T AddComponent(const Entity entity)
+		T& AddComponent(const Entity entity)
 		{
 			SetEntitySignature(entity, GenerateComponentID<T>());
 			return ComponentManager::GetInstance().AddComponent<T>(entity);
 		}
-		/* [TODO]: Add variadic template overload */
+		template<typename T, typename ... Ts>
+		T& AddComponent(const Entity entity, Ts&& ... args)
+		{
+			SetEntitySignature(entity, GenerateComponentID<T>());
+			return ComponentManager::GetInstance().AddComponent<T, Ts...>(entity, args...);
+		}
 
 		template<typename T>
 		void RemoveComponent(const Entity entity)
