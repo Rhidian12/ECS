@@ -15,6 +15,7 @@ namespace ECS
 	{
 	public:
 		Registry();
+		~Registry();
 
 		Registry(const Registry&) noexcept = delete;
 		Registry(Registry&& other) noexcept;

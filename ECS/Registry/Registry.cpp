@@ -10,6 +10,14 @@ namespace ECS
 		, CurrentEntityCounter{}
 	{}
 
+	Registry::~Registry()
+	{
+		for (const Entity entity : Entities)
+		{
+			ReleaseEntity(entity);
+		}
+	}
+
 	Registry::Registry(Registry&& other) noexcept
 		: EntitySignatures{ std::move(other.EntitySignatures) }
 		, Entities{ std::move(other.Entities) }
