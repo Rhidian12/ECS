@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ComponentArray\ComponentArray.cpp" />
     <ClCompile Include="ComponentManager\ComponentManager.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="Registry\Registry.cpp" />
@@ -151,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
+    <ClInclude Include="ComponentArray\ComponentArray.h" />
     <ClInclude Include="ComponentManager\ComponentManager.h" />
     <ClInclude Include="ECSComponents\ECSComponents.h" />
     <ClInclude Include="Registry\Registry.h" />
