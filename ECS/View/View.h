@@ -14,7 +14,7 @@ namespace ECS
 		using ViewContainerType = std::tuple<std::vector<TComponents>&...>;
 
 	public:
-		View(ViewContainerType&& components)
+		explicit View(ViewContainerType&& components)
 			: Components{ std::move(components) }
 			, NrOfComponents{ std::get<0>(Components).size() }
 		{}

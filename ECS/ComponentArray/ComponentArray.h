@@ -18,12 +18,12 @@ namespace ECS
 	class ComponentArray final : public IComponentArray
 	{
 	public:
-		T& AddComponent(const Entity entity)
+		T& AddComponent()
 		{
 			return Components.emplace_back(T{});
 		}
 		template<typename ... Ts>
-		T& AddComponent(const Entity entity, Ts&& ... args)
+		T& AddComponent(Ts&& ... args)
 		{
 			return Components.emplace_back(T{ args... });
 		}

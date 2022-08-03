@@ -2,6 +2,7 @@
 
 #include "../ComponentManager/ComponentManager.h"
 
+#include <iostream>
 namespace ECS
 {
 	Registry::Registry()
@@ -12,9 +13,9 @@ namespace ECS
 
 	Registry::~Registry()
 	{
-		for (const Entity entity : Entities)
+		for (int i{ static_cast<int>(Entities.Size()) - 1 }; i >= 0; --i)
 		{
-			ReleaseEntity(entity);
+			ReleaseEntity(Entities[i]);
 		}
 	}
 
@@ -22,10 +23,12 @@ namespace ECS
 		: EntitySignatures{ std::move(other.EntitySignatures) }
 		, Entities{ std::move(other.Entities) }
 		, CurrentEntityCounter{ std::move(other.CurrentEntityCounter) }
+		, ComponentPools{ std::move(other.ComponentPools) }
 	{
 		other.EntitySignatures.clear();
 		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
+		other.ComponentPools.clear();
 	}
 
 	Registry& Registry::operator=(Registry&& other) noexcept
@@ -33,10 +36,12 @@ namespace ECS
 		EntitySignatures = std::move(other.EntitySignatures);
 		Entities = std::move(other.Entities);
 		CurrentEntityCounter = std::move(other.CurrentEntityCounter);
+		ComponentPools = std::move(other.ComponentPools);
 
 		other.EntitySignatures.clear();
 		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
+		other.ComponentPools.clear();
 
 		return *this;
 	}
@@ -57,7 +62,7 @@ namespace ECS
 	{
 		if (Entities.Contains(entity))
 		{
-			ComponentManager::GetInstance().RemoveAllComponents(entity, GetEntitySignature(entity));
+			RemoveAllComponents(entity, GetEntitySignature(entity));
 
 			EntitySignatures.erase(entity);
 
@@ -69,5 +74,18 @@ namespace ECS
 		}
 
 		return false;
+	}
+
+	void Registry::RemoveAllComponents(const Entity entity, const EntitySignature& sig)
+	{
+		for (ComponentType i{}; i < MaxComponentTypes; ++i)
+		{
+			if (sig.test(i))
+			{
+				assert(ComponentPools[i]);
+
+				ComponentPools[i]->Remove(Entities.GetIndex(entity));
+			}
+		}
 	}
 }
