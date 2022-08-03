@@ -10,6 +10,29 @@ namespace ECS
 		, CurrentEntityCounter{}
 	{}
 
+	Registry::Registry(Registry&& other) noexcept
+		: EntitySignatures{ std::move(other.EntitySignatures) }
+		, Entities{ std::move(other.Entities) }
+		, CurrentEntityCounter{ std::move(other.CurrentEntityCounter) }
+	{
+		other.EntitySignatures.clear();
+		other.Entities.Clear();
+		other.CurrentEntityCounter = 0;
+	}
+
+	Registry& Registry::operator=(Registry&& other) noexcept
+	{
+		EntitySignatures = std::move(other.EntitySignatures);
+		Entities = std::move(other.Entities);
+		CurrentEntityCounter = std::move(other.CurrentEntityCounter);
+
+		other.EntitySignatures.clear();
+		other.Entities.Clear();
+		other.CurrentEntityCounter = 0;
+
+		return *this;
+	}
+
 	Entity Registry::CreateEntity()
 	{
 		assert(CurrentEntityCounter <= MaxEntities);

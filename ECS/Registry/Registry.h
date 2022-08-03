@@ -16,7 +16,10 @@ namespace ECS
 	public:
 		Registry();
 
-		/* [TODO]: Rule of 5 */
+		Registry(const Registry&) noexcept = delete;
+		Registry(Registry&& other) noexcept;
+		Registry& operator=(const Registry&) noexcept = delete;
+		Registry& operator=(Registry&& other) noexcept;
 
 		template<typename ... TComponents>
 		[[nodiscard]] View<TComponents...> CreateView() const
