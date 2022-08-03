@@ -30,7 +30,14 @@ namespace ECS
 			Entities.Add(entity);
 			return Components.emplace_back(T{});
 		}
-		/* [TODO]: Make variadic template overload */
+		template<typename ... Ts>
+		T& AddComponent(const Entity entity, Ts&& ... args)
+		{
+			assert(!Entities.Contains(entity));
+
+			Entities.Add(entity);
+			return Components.emplace_back(T{ args... });
+		}
 
 		virtual void Remove(const Entity entity) override
 		{
@@ -75,7 +82,18 @@ namespace ECS
 
 			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
 		}
-		/* [TODO]: Make variadic template overload */
+		template<typename T, typename ... Ts>
+		T& AddComponent(const Entity entity, Ts&& ... args)
+		{
+			std::unique_ptr<IComponentArray>& pool{ ComponentPools[GenerateComponentID<T>()] };
+
+			if (!pool)
+			{
+				pool.reset(new ComponentArray<T>{});
+			}
+
+			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity, args);
+		}
 
 		template<typename T>
 		void RemoveComponent(const Entity entity)
