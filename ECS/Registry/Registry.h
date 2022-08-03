@@ -3,7 +3,6 @@
 #include "../ECSConstants.h"
 #include "../SparseSet/SparseSet.h"
 #include "../View/View.h"
-#include "../ComponentManager/ComponentManager.h"
 #include "../ComponentIDGenerator/ComponentIDGenerator.h"
 #include "../ComponentArray/ComponentArray.h"
 
