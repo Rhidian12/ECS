@@ -119,6 +119,8 @@ namespace ECS
 			static_assert(std::is_integral_v<T>, "SparseSet only supports integer types");
 		}
 
+		/* Default Rule of 5 is sufficient */
+
 		bool Add(const T& value)
 		{
 			return AddImpl(value);
