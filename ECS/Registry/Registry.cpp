@@ -1,8 +1,5 @@
 #include "Registry.h"
 
-#include "../ComponentManager/ComponentManager.h"
-
-#include <iostream>
 namespace ECS
 {
 	Registry::Registry()
