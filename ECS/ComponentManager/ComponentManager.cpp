@@ -9,7 +9,7 @@ namespace ECS
 			Instance = std::make_unique<ComponentManager>();
 		}
 
-		return *Instance;
+		return *Instance.get();
 	}
 
 }
