@@ -5,7 +5,7 @@
 
 namespace ECS
 {
-	using Entity = uint32_t; /* This supports ~65k possible entities, seems like enough */
+	using Entity = uint32_t; /* This supports ~4 billion possible entities, seems like enough */
 	using ComponentType = uint8_t; /* This supports 256 possible component types, seems like enough */
 	using SystemID = ComponentType; /* This supports as many systems as there are Components */
 
