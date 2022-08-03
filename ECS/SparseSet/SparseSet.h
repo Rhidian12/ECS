@@ -117,12 +117,6 @@ namespace ECS
 			, _Size{}
 		{
 			static_assert(std::is_integral_v<T>, "SparseSet only supports integer types");
-
-			// Sparse.reserve(MaxEntities);
-			// Packed.reserve(MaxEntities);
-			// 
-			// Sparse.resize(MaxEntities, InvalidEntityID);
-			// Packed.resize(MaxEntities, InvalidEntityID);
 		}
 
 		bool Add(const T& value)
