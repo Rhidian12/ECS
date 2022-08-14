@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
     <ClInclude Include="ComponentArray\ComponentArray.h" />
+    <ClInclude Include="DoubleStorage\DoubleStorage.h" />
     <ClInclude Include="ECSComponents\ECSComponents.h" />
     <ClInclude Include="Registry\Registry.h" />
     <ClInclude Include="ENTTComponents\ENTTComponents.h" />
