@@ -28,6 +28,11 @@ namespace ECS
 			Values.erase(Values.begin() + index);
 		}
 
+		bool ContainsKey(const TKey& key) const
+		{
+			return std::find(Keys.cbegin(), Keys.cend(), key) != Keys.cend();
+		}
+
 		TValue& GetValue(const TKey& key)
 		{
 			const auto index = std::find(Keys.begin(), Keys.end(), key) - Keys.begin();
