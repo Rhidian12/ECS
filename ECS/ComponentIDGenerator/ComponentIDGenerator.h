@@ -2,6 +2,8 @@
 #include "../ECSConstants.h"
 #include "../Utils/Utils.h"
 
+#include <string> /* std::string */
+
 namespace ECS
 {
 	template<typename T>
@@ -9,9 +11,9 @@ namespace ECS
 	{
 		using namespace Utils;
 
-		constexpr const char* typeName(ConstexprTypeName<T>());
+		constexpr std::string_view typeName(ConstexprTypeName<T>());
 
-		constexpr ComponentType hash(static_cast<ComponentType>(ConstexprStringHash(typeName)));
+		constexpr ComponentType hash(static_cast<ComponentType>(ConstexprStringHash(std::string{ typeName }.data(), std::string{ typeName }.size())));
 
 		return hash;
 	}
