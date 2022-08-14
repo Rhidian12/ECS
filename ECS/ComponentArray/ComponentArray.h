@@ -39,7 +39,7 @@ namespace ECS
 			Components.Remove(entity);
 		}
 
-		void SafeRemove(const Entity entity) override
+		void SafeRemove(const Entity entity)
 		{
 			Components.SafeRemove(entity);
 		}

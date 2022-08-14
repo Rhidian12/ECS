@@ -25,7 +25,21 @@ namespace ECS
 		template<typename ... TComponents>
 		[[nodiscard]] View<TComponents...> CreateView()
 		{
-			return View<TComponents...>{ std::tuple<std::vector<TComponents>&...>{ GetComponents<TComponents>()... } };
+			// commented code is wrong but runs at least
+			// return View<TComponents...>{ std::tuple<std::vector<TComponents>&...>{ GetComponents<TComponents>()... } };
+
+			using TTuple = std::tuple<std::vector<std::reference_wrapper<TComponents>>...>;
+
+			/* Get all components asked for by the user */
+			TTuple comps{ std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }...};
+
+			/* Remove any component that is attached to an entity that does NOT have the other components as well */
+
+			/* Loop over a vector and get rid of the elements in the vector that are attached to an entity but does not have all components */
+			auto indexSequence{ std::make_index_sequence<sizeof ... (TComponents)>{} };
+			FilterVector<TComponents...>(comps, indexSequence);
+
+			return View<TComponents...>{ std::move(comps) };
 		}
 
 		template<typename T>
@@ -103,6 +117,29 @@ namespace ECS
 
 	private:
 		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
+
+		template<typename ... TComponents, size_t ... Indices>
+		void FilterVector(std::tuple<std::vector<std::reference_wrapper<TComponents>>...>& tuple, std::index_sequence<Indices...>)
+		{
+			IComponentArray* compArrays[sizeof ... (TComponents)]{ ComponentPools[GenerateComponentID<TComponents>()].get() ... };
+
+			for (const Entity entity : Entities)
+			{
+				if (!(static_cast<ComponentArray<TComponents>*>(compArrays[Indices])->HasComponent(entity) && ...))
+				{
+					(SafeRemoveComponent(entity, compArrays[Indices], std::get<Indices>(tuple)), ...);
+				}
+			}
+		}
+
+		template<typename T>
+		void SafeRemoveComponent(const Entity entity, IComponentArray* pCompArr, std::vector<std::reference_wrapper<T>>& v)
+		{
+			if (static_cast<ComponentArray<T>*>(pCompArr)->HasComponent(entity))
+			{
+				v.erase(v.begin() + entity);
+			}
+		}
 
 		std::unordered_map<Entity, EntitySignature> EntitySignatures;
 		SparseSet<Entity> Entities;

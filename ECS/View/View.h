@@ -11,7 +11,9 @@ namespace ECS
 	template<typename ... TComponents>
 	class View final
 	{
-		using ViewContainerType = std::tuple<std::vector<TComponents>&...>;
+		// commented code is wrong but works lol
+		// using ViewContainerType = std::tuple<std::vector<TComponents>&...>;
+		using ViewContainerType = std::tuple<std::vector<std::reference_wrapper<TComponents>>...>;
 
 	public:
 		explicit View(ViewContainerType&& components)

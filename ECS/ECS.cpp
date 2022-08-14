@@ -233,7 +233,7 @@ int main(int*, char* [])
 
 	/* Benchmarking Constants */
 	constexpr Entity AmountOfEntities{ 100'000 };
-	constexpr int Iterations{ 10 };
+	constexpr int Iterations{ 1 };
 
 #ifdef CUSTOMECS
 	ECS::Registry ECS{};
