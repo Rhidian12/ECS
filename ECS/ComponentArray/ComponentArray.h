@@ -29,6 +29,11 @@ namespace ECS
 			return Components.Add(entity, T{ std::forward<Ts>(args)... });
 		}
 
+		bool HasComponent(const Entity entity) const
+		{
+			return Components.ContainsKey(entity);
+		}
+
 		virtual void Remove(const Entity entity) override
 		{
 			Components.Remove(entity);
