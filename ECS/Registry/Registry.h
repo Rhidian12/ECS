@@ -40,7 +40,7 @@ namespace ECS
 				pool.reset(new ComponentArray<T>{});
 			}
 
-			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent();
+			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
 		}
 		template<typename T, typename ... Ts>
 		T& AddComponent(const Entity entity, Ts&& ... args)
@@ -54,7 +54,7 @@ namespace ECS
 				pool.reset(new ComponentArray<T>{});
 			}
 
-			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(args...);
+			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...);
 		}
 
 		template<typename T>
@@ -62,7 +62,7 @@ namespace ECS
 		{
 			assert(Entities.Contains(entity));
 
-			ComponentPools[GenerateComponentID<T>()]->Remove(Entities.GetIndex(entity));
+			ComponentPools[GenerateComponentID<T>()]->Remove(entity);
 			SetEntitySignature(entity, GenerateComponentID<T>(), false);
 		}
 
@@ -70,13 +70,13 @@ namespace ECS
 		T& GetComponent(const Entity entity)
 		{
 			assert(ComponentPools[GenerateComponentID<T>()]);
-			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent<T>(Entities.GetIndex(entity));
+			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent<T>(entity);
 		}
 		template<typename T>
 		const T& GetComponent(const Entity entity) const
 		{
 			assert(ComponentPools[GenerateComponentID<T>()]);
-			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent<T>(Entities.GetIndex(entity));
+			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent<T>(entity);
 		}
 
 		template<typename T>

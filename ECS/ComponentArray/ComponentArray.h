@@ -3,6 +3,7 @@
 #include <vector> /* std::vector */
 
 #include "../ECSConstants.h"
+#include "../DoubleStorage/DoubleStorage.h"
 
 namespace ECS
 {
@@ -18,28 +19,28 @@ namespace ECS
 	class ComponentArray final : public IComponentArray
 	{
 	public:
-		T& AddComponent()
+		T& AddComponent(const Entity entity)
 		{
-			return Components.emplace_back(T{});
+			return Components.Add(entity, T{});
 		}
 		template<typename ... Ts>
-		T& AddComponent(Ts&& ... args)
+		T& AddComponent(const Entity entity, Ts&& ... args)
 		{
-			return Components.emplace_back(T{ args... });
+			return Components.Add(entity, T{ std::forward<Ts>(args)... });
 		}
 
 		virtual void Remove(const Entity entity) override
 		{
-			Components.erase(Components.begin() + entity);
+			Components.Remove(entity);
 		}
 
-		T& GetComponent(const Entity entity) { return Components[entity]; }
-		const T& GetComponent(const Entity entity) const { return Components[entity]; }
+		T& GetComponent(const Entity entity) { return Components.GetValue(entity); }
+		const T& GetComponent(const Entity entity) const { return Components.GetValue(entity); }
 
-		std::vector<T>& GetComponents() { return Components; }
-		const std::vector<T>& GetComponents() const { return Components; }
+		std::vector<T>& GetComponents() { return Components.GetValues(); }
+		const std::vector<T>& GetComponents() const { return Components.GetValues(); }
 
 	private:
-		std::vector<T> Components;
+		DoubleStorage<Entity, T> Components;
 	};
 }
