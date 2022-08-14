@@ -27,6 +27,18 @@ namespace ECS
 			Keys.erase(it);
 			Values.erase(Values.begin() + index);
 		}
+		void SafeRemove(const TKey& key)
+		{
+			auto it = std::find(Keys.begin(), Keys.end(), key);
+
+			if (it != Keys.end())
+			{
+				auto index = it - Keys.begin();
+
+				Keys.erase(it);
+				Values.erase(Values.begin() + index);
+			}
+		}
 
 		bool ContainsKey(const TKey& key) const
 		{
