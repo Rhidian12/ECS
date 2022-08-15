@@ -25,11 +25,9 @@ namespace ECS
 		template<typename ... TComponents>
 		[[nodiscard]] View<TComponents...> CreateView()
 		{
-			// commented code is wrong but runs at least
-			// return View<TComponents...>{ std::tuple<std::vector<TComponents>&...>{ GetComponents<TComponents>()... } };
-
 			/* Get all components asked for by the user */
-			std::tuple<std::vector<std::reference_wrapper<TComponents>>...> comps{ std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }... };
+			std::tuple<std::vector<std::reference_wrapper<TComponents>>...> comps{
+				std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }... };
 
 			/* Loop over a vector and get rid of the elements in the vector that are attached to an entity but does not have all components */
 			FilterVector<TComponents...>(comps, std::make_index_sequence<sizeof ... (TComponents)>{});
@@ -116,29 +114,21 @@ namespace ECS
 		template<typename ... TComponents, size_t ... Indices>
 		void FilterVector(std::tuple<std::vector<std::reference_wrapper<TComponents>>...>& tuple, std::index_sequence<Indices...>)
 		{
-			IComponentArray* compArrays[sizeof ... (TComponents)]{ ComponentPools[GenerateComponentID<TComponents>()].get() ... };
-
 			for (const Entity entity : Entities)
 			{
 				const EntitySignature& sig{ GetEntitySignature(entity) };
-				bool containsComponents[sizeof ... (TComponents)]{};
 
-				((containsComponents[Indices] = sig.test(GenerateComponentID<TComponents>())), ...);
-
-				if (!(containsComponents[Indices] && ...))
+				if (!(sig.test(GenerateComponentID<TComponents>()) && ...))
 				{
-					(SafeRemoveComponent(containsComponents[Indices], std::get<Indices>(tuple), entity), ...);
+					(SafeRemoveComponent(std::get<Indices>(tuple), entity), ...);
 				}
 			}
 		}
 
 		template<typename T>
-		void SafeRemoveComponent(bool bShouldRemove, std::vector<std::reference_wrapper<T>>& v, const Entity entity)
+		void SafeRemoveComponent(std::vector<std::reference_wrapper<T>>& v, const Entity entity)
 		{
-			if (bShouldRemove)
-			{
-				v.erase(v.begin() + entity);
-			}
+			v.erase(v.begin() + entity);
 		}
 
 		std::unordered_map<Entity, EntitySignature> EntitySignatures;

@@ -64,8 +64,8 @@ void PhysicsUpdate(ECS::Registry& registry)
 }
 
 /* Defines! */
-//#define GAMEOBJECT
-//#define ENTT
+#define GAMEOBJECT
+#define ENTT
 #define CUSTOMECS
 
 //#define WRITE_TO_FILE
@@ -145,7 +145,7 @@ std::vector<GO::GameObject*> TestInitGO(const ECS::Entity amount)
 	std::chrono::steady_clock::time_point t2{};
 
 	t1 = std::chrono::steady_clock::now();
-	
+
 	std::vector<GO::GameObject*> gameObjects{};
 
 	for (size_t i{}; i < amount; ++i)
@@ -234,6 +234,7 @@ int main(int*, char* [])
 	/* Benchmarking Constants */
 	constexpr Entity AmountOfEntities{ 100'000 };
 	constexpr int Iterations{ 1 };
+	constexpr float TimeToUpdate{ 5.f };
 
 #ifdef CUSTOMECS
 	ECS::Registry ECS{};
@@ -279,7 +280,10 @@ int main(int*, char* [])
 	}
 
 	/* Test different systems */
-	for (int i{}; i < Iterations; ++i)
+	float deltaTime{};
+	std::chrono::steady_clock::time_point now{ std::chrono::steady_clock::now() };
+
+	while (deltaTime < TimeToUpdate)
 	{
 #ifdef CUSTOMECS
 		TestUpdateECS(ECS);
@@ -290,6 +294,10 @@ int main(int*, char* [])
 #ifdef ENTT
 		TestUpdateENTT(entt);
 #endif
+
+		deltaTime += std::chrono::duration<float>(std::chrono::steady_clock::now() - now).count();
+
+		now = std::chrono::steady_clock::now();
 	}
 
 	/* Cleanup results */
@@ -336,6 +344,7 @@ int main(int*, char* [])
 	/* Print results */
 	std::cout << "Amount of entities: " << AmountOfEntities << "\n";
 	std::cout << "Iterations: " << Iterations << "\n\n";
+	std::cout << "Update Run Time: " << TimeToUpdate << " seconds\n\n";
 
 #ifdef CUSTOMECS
 	std::cout << "ECS Init Average:\t\t" << std::accumulate(g_ECSInitTimes.cbegin(), g_ECSInitTimes.cend(), (long long)0) / g_ECSInitTimes.size() << " nanoseconds\n";
@@ -399,7 +408,7 @@ int main(int*, char* [])
 #ifdef ENTT
 		file << "ENTT Update Average: " << std::accumulate(g_enttUpdateTimes.cbegin(), g_enttUpdateTimes.cend(), (long long)0) / g_enttUpdateTimes.size() << " nanoseconds\n\n";
 #endif
-	}
+}
 #endif
 
 	/* Cleanup systems */
