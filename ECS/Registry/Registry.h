@@ -28,16 +28,11 @@ namespace ECS
 			// commented code is wrong but runs at least
 			// return View<TComponents...>{ std::tuple<std::vector<TComponents>&...>{ GetComponents<TComponents>()... } };
 
-			using TTuple = std::tuple<std::vector<std::reference_wrapper<TComponents>>...>;
-
 			/* Get all components asked for by the user */
-			TTuple comps{ std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }... };
-
-			/* Remove any component that is attached to an entity that does NOT have the other components as well */
+			std::tuple<std::vector<std::reference_wrapper<TComponents>>...> comps{ std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }... };
 
 			/* Loop over a vector and get rid of the elements in the vector that are attached to an entity but does not have all components */
-			auto indexSequence{ std::make_index_sequence<sizeof ... (TComponents)>{} };
-			FilterVector<TComponents...>(comps, indexSequence);
+			FilterVector<TComponents...>(comps, std::make_index_sequence<sizeof ... (TComponents)>{});
 
 			return View<TComponents...>{ std::move(comps) };
 		}
