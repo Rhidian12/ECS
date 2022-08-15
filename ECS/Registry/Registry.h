@@ -31,7 +31,7 @@ namespace ECS
 			using TTuple = std::tuple<std::vector<std::reference_wrapper<TComponents>>...>;
 
 			/* Get all components asked for by the user */
-			TTuple comps{ std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }...};
+			TTuple comps{ std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }... };
 
 			/* Remove any component that is attached to an entity that does NOT have the other components as well */
 
@@ -113,7 +113,7 @@ namespace ECS
 		void SetEntitySignature(const Entity entity, const EntitySignature sig) { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); EntitySignatures[entity] = sig; }
 		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true) { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); EntitySignatures[entity].set(id, val); }
 
-		EntitySignature GetEntitySignature(const Entity entity) const { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); return EntitySignatures.find(entity)->second; }
+		const EntitySignature& GetEntitySignature(const Entity entity) const { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); return EntitySignatures.find(entity)->second; }
 
 	private:
 		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
@@ -125,17 +125,22 @@ namespace ECS
 
 			for (const Entity entity : Entities)
 			{
-				if (!(static_cast<ComponentArray<TComponents>*>(compArrays[Indices])->HasComponent(entity) && ...))
+				const EntitySignature& sig{ GetEntitySignature(entity) };
+				bool containsComponents[sizeof ... (TComponents)]{};
+
+				((containsComponents[Indices] = sig.test(GenerateComponentID<TComponents>())), ...);
+
+				if (!(containsComponents[Indices] && ...))
 				{
-					(SafeRemoveComponent(entity, compArrays[Indices], std::get<Indices>(tuple)), ...);
+					(SafeRemoveComponent(containsComponents[Indices], std::get<Indices>(tuple), entity), ...);
 				}
 			}
 		}
 
 		template<typename T>
-		void SafeRemoveComponent(const Entity entity, IComponentArray* pCompArr, std::vector<std::reference_wrapper<T>>& v)
+		void SafeRemoveComponent(bool bShouldRemove, std::vector<std::reference_wrapper<T>>& v, const Entity entity)
 		{
-			if (static_cast<ComponentArray<T>*>(pCompArr)->HasComponent(entity))
+			if (bShouldRemove)
 			{
 				v.erase(v.begin() + entity);
 			}
