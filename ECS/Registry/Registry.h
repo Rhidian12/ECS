@@ -120,15 +120,9 @@ namespace ECS
 
 				if (!(sig.test(GenerateComponentID<TComponents>()) && ...))
 				{
-					(SafeRemoveComponent(std::get<Indices>(tuple), entity), ...);
+					(std::get<Indices>(tuple).erase(std::get<Indices>(tuple).begin() + entity), ...);
 				}
 			}
-		}
-
-		template<typename T>
-		void SafeRemoveComponent(std::vector<std::reference_wrapper<T>>& v, const Entity entity)
-		{
-			v.erase(v.begin() + entity);
 		}
 
 		std::unordered_map<Entity, EntitySignature> EntitySignatures;
