@@ -23,10 +23,6 @@ namespace ECS
 				StackPointer += totalSize;
 				return pData;
 			}
-			else
-			{
-				/* Reallocate() */
-			}
 
 			throw std::bad_alloc{};
 		}
