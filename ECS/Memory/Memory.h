@@ -31,6 +31,8 @@ namespace ECS
 			throw std::bad_alloc{};
 		}
 
+		void Reallocate(const size_t newCapacity);
+
 	private:
 		size_t RoundToNextPowerOfTwo(size_t v) const
 		{
