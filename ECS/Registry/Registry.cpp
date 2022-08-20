@@ -6,6 +6,7 @@ namespace ECS
 		: EntitySignatures{}
 		, Entities{}
 		, CurrentEntityCounter{}
+		, Allocator{}
 	{}
 
 	Registry::~Registry()
@@ -21,6 +22,7 @@ namespace ECS
 		, Entities{ std::move(other.Entities) }
 		, CurrentEntityCounter{ std::move(other.CurrentEntityCounter) }
 		, ComponentPools{ std::move(other.ComponentPools) }
+		, Allocator{ std::move(other.Allocator) }
 	{
 		other.EntitySignatures.clear();
 		other.Entities.Clear();
@@ -34,6 +36,7 @@ namespace ECS
 		Entities = std::move(other.Entities);
 		CurrentEntityCounter = std::move(other.CurrentEntityCounter);
 		ComponentPools = std::move(other.ComponentPools);
+		Allocator = std::move(other.Allocator);
 
 		other.EntitySignatures.clear();
 		other.Entities.Clear();

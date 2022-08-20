@@ -4,12 +4,12 @@
 
 namespace ECS
 {
-	Allocator::Allocator()
-		: Allocator{ 1024 }
+	StackAllocator::StackAllocator()
+		: StackAllocator{ 1024 }
 	{
 	}
 
-	Allocator::Allocator(const size_t totalSize)
+	StackAllocator::StackAllocator(const size_t totalSize)
 		: pBuffer{}
 		, StackPointer{}
 		, Capacity{ RoundToNextPowerOfTwo(totalSize) }
@@ -17,12 +17,31 @@ namespace ECS
 		pBuffer = malloc(Capacity);
 	}
 
-	Allocator::~Allocator()
+	StackAllocator::StackAllocator(StackAllocator&& other) noexcept
+		: pBuffer{ std::move(other.pBuffer) }
+		, StackPointer{ std::move(other.StackPointer) }
+		, Capacity{ std::move(other.Capacity) }
+	{
+		other.pBuffer = nullptr;
+	}
+
+	StackAllocator& StackAllocator::operator=(StackAllocator&& other) noexcept
+	{
+		pBuffer = std::move(other.pBuffer);
+		StackPointer = std::move(other.StackPointer);
+		Capacity = std::move(other.Capacity);
+
+		other.pBuffer = nullptr;
+
+		return *this;
+	}
+
+	StackAllocator::~StackAllocator()
 	{
 		free(pBuffer);
 	}
 
-	void Allocator::Reallocate(const size_t newCapacity)
+	void StackAllocator::Reallocate(const size_t newCapacity)
 	{
 		free(pBuffer);
 

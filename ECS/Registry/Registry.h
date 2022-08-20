@@ -5,6 +5,7 @@
 #include "../View/View.h"
 #include "../ComponentIDGenerator/ComponentIDGenerator.h"
 #include "../ComponentArray/ComponentArray.h"
+#include "../Memory/Memory.h"
 
 #include <assert.h> /* assert() */
 #include <unordered_map> /* unordered_map */
@@ -26,8 +27,16 @@ namespace ECS
 		[[nodiscard]] View<TComponents...> CreateView()
 		{
 			/* Get all components asked for by the user */
-			std::tuple<std::vector<std::reference_wrapper<TComponents>>...> comps{
-				std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }... };
+			// std::tuple<std::vector<std::reference_wrapper<TComponents>>...> comps{
+			// 	std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }... };
+
+			std::tuple<std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>...> comps
+			{
+				std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>
+				{
+					GetComponents<TComponents>().begin(), GetComponents<TComponents>().end(), Allocator
+				}...
+			};
 
 			/* Loop over a vector and get rid of the elements in the vector that are attached to an entity but does not have all components */
 			FilterVector<TComponents...>(comps, std::make_index_sequence<sizeof ... (TComponents)>{});
@@ -47,7 +56,14 @@ namespace ECS
 				pool.reset(new ComponentArray<T>{});
 			}
 
-			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
+			T& comp{ static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity) };
+
+			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) > Allocator.GetCapacity() * 2.f / 3.f)
+			{
+				Allocator.Reallocate(Allocator.GetCapacity() * 2);
+			}
+
+			return comp;
 		}
 		template<typename T, typename ... Ts>
 		T& AddComponent(const Entity entity, Ts&& ... args)
@@ -61,7 +77,14 @@ namespace ECS
 				pool.reset(new ComponentArray<T>{});
 			}
 
-			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...);
+			T& comp{ static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...) };
+
+			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) > Allocator.GetCapacity() * 2.f / 3.f)
+			{
+				Allocator.Reallocate(Allocator.GetCapacity() * 2);
+			}
+
+			return comp;
 		}
 
 		template<typename T>
@@ -112,7 +135,8 @@ namespace ECS
 		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
 
 		template<typename ... TComponents, size_t ... Indices>
-		void FilterVector(std::tuple<std::vector<std::reference_wrapper<TComponents>>...>& tuple, std::index_sequence<Indices...>)
+		void FilterVector(std::tuple<std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>...>& tuple,
+			std::index_sequence<Indices...>)
 		{
 			for (const Entity entity : Entities)
 			{
@@ -129,5 +153,6 @@ namespace ECS
 		SparseSet<Entity> Entities;
 		Entity CurrentEntityCounter;
 		std::unordered_map<ComponentType, std::unique_ptr<IComponentArray>> ComponentPools;
+		StackAllocator Allocator;
 	};
 }
