@@ -10,8 +10,9 @@ ECS::Allocator::Allocator()
 ECS::Allocator::Allocator(const size_t totalSize)
 	: pBuffer{}
 	, StackPointer{}
+	, Capacity{ RoundToNextPowerOfTwo(totalSize) }
 {
-	pBuffer = malloc(RoundToNextPowerOfTwo(totalSize));
+	pBuffer = malloc(Capacity);
 }
 
 ECS::Allocator::~Allocator()

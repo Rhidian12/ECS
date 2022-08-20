@@ -10,6 +10,14 @@ namespace ECS
 
 		~Allocator();
 
+		template<typename T>
+		T* Allocate(const size_t nrOfElements)
+		{
+			const size_t totalSize{ sizeof(T) * nrOfElements };
+
+			if (totalSize)
+		}
+
 	private:
 		size_t RoundToNextPowerOfTwo(size_t v) const
 		{
@@ -25,5 +33,6 @@ namespace ECS
 
 		void* pBuffer;
 		size_t StackPointer;
+		size_t Capacity;
 	};
 }
