@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept> /* std::bad_alloc */
+
 namespace ECS
 {
 	class Allocator final
@@ -15,7 +17,18 @@ namespace ECS
 		{
 			const size_t totalSize{ sizeof(T) * nrOfElements };
 
-			if (totalSize)
+			if (totalSize < Capacity - StackPointer)
+			{
+				const T* const pData{ static_cast<T*>(pBuffer + StackPointer) };
+				StackPointer += totalSize;
+				return pData;
+			}
+			else
+			{
+				/* Reallocate() */
+			}
+
+			throw std::bad_alloc{};
 		}
 
 	private:
