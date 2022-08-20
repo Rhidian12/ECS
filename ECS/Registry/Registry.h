@@ -27,9 +27,6 @@ namespace ECS
 		[[nodiscard]] View<TComponents...> CreateView()
 		{
 			/* Get all components asked for by the user */
-			// std::tuple<std::vector<std::reference_wrapper<TComponents>>...> comps{
-			// 	std::vector<std::reference_wrapper<TComponents>>{ GetComponents<TComponents>().begin(), GetComponents<TComponents>().end() }... };
-
 			std::tuple<std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>...> comps
 			{
 				std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>
