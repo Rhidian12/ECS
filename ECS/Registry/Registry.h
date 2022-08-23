@@ -141,8 +141,17 @@ namespace ECS
 
 				if (!(sig.test(GenerateComponentID<TComponents>()) && ...))
 				{
-					(std::get<Indices>(tuple).erase(std::get<Indices>(tuple).begin() + entity), ...);
+					(SafeRemove(std::get<Indices>(tuple), entity), ...);
 				}
+			}
+		}
+
+		template<typename T>
+		void SafeRemove(std::vector<std::reference_wrapper<T>, STLAllocator<std::reference_wrapper<T>, StackAllocator>>& v, const Entity entity)
+		{
+			if (v.cbegin() + entity < v.cend())
+			{
+				v.erase(v.begin() + entity);
 			}
 		}
 
