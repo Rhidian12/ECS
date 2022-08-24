@@ -35,7 +35,7 @@ namespace ECS
 		template<size_t ... Indices>
 		void ForEach(const std::function<void(TComponents&...)>& function, size_t index, std::index_sequence<Indices...>)
 		{
-			auto tuple{ std::tuple<TComponents&...>(std::get<Indices>(Components)[index]...) };
+			auto tuple{ std::tuple<TComponents&...>(std::get<Indices>(Components)[index].get()...)};
 			std::apply(function, tuple);
 		}
 

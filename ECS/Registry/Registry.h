@@ -155,6 +155,9 @@ namespace ECS
 			}
 		}
 
+		/* [TODO]: Sort Entities based on their EntitySignature 
+		Keep pointers to each start and end entry of that sort value 
+		so we can make our loop smaller instead of Max Entities */
 		std::unordered_map<Entity, EntitySignature> EntitySignatures;
 		SparseSet<Entity> Entities;
 		Entity CurrentEntityCounter;
