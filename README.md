@@ -110,200 +110,29 @@ This means that whenever data is requested from memory, the cache will grab not 
 The way we can follow this Data Oriented Design and pay heed to the Locality of Reference is by making sure that all of our data is stored contiguously in memory.
 For those who are unaware of what contiguous storage means: `std::vector`, the standard C-array (`int[]`) and many other containers use contiguous storage, which means that they store all of their data directly next to each other in memory.
 
-## Implementation
+### Benchmarks
 
-### Components
-
-This ECS uses a `ComponentManager` to store all Components and their Component ID's. Each Component has a unique ID which the ComponentManager uses to distinguish between different Components. <br>
-Components get assigned a unique ID via hashing their name. This is done completely at compile-time.<br>
-
-```cpp
-#pragma once
-#include "../ECSConstants.h"
-#include "../Utils/Utils.h"
-
-namespace ECS
-{
-  template<typename Type>
-  constexpr ComponentType GenerateComponentID()
-  {
-    using namespace Utils;
-
-    constexpr const char* typeName(ConstexprTypeName<Type>());
-
-    constexpr ComponentType hash(static_cast<ComponentType>(ConstexprStringHash(typeName)));
-
-    return hash;
-  }
-}
-```
-
-The `ComponentManager` itself has a `std::unordered_map` of Component ID's serving as a key and `IComponentArray` pointers as a value. The `IComponentArray` is a base class for `ComponentArray`, which stores all Components of a specific type.<br>
-
-```cpp
-class IComponentArray
-{
-public:
-  virtual ~IComponentArray() = default;
-  
-  // Class is a bit simplified for readability's sake
-};
-
-template<typename T>
-class ComponentArray final : public IComponentArray
-{
-public:
-  T& AddComponent(const Entity entity)
-  {
-    assert(!Entities.Contains(entity) && "ComponentArray::AddComponent() > Entity has already been added");
-
-    Entities.Add(entity);
-    return Components.emplace_back(T{});
-  }
-  
-  // Class is a bit simplified for readability's sake
-
-private:
-  SparseSet<Entity> Entities;
-  std::vector<T> Components;
-};
-```
-
-Components get added to the `ComponentManager`, which creates a new `ComponentArray` if the added Component has not been added before.
-
-```cpp
-class ComponentManager final
-{
-public:
-  static ComponentManager& GetInstance();
-
-  ComponentManager(const ComponentManager&) noexcept = delete;
-  ComponentManager(ComponentManager&&) noexcept = delete;
-  ComponentManager& operator=(const ComponentManager&) noexcept = delete;
-  ComponentManager& operator=(ComponentManager&&) noexcept = delete;
-
-  template<typename T>
-  T& AddComponent(const Entity entity)
-  {
-    std::unique_ptr<IComponentArray>& pool{ ComponentPools[GenerateComponentID<T>()] };
-
-    if (!pool)
-    {
-      pool.reset(new ComponentArray<T>{});
-    }
-
-    return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
-  }
-  
-  // Class is a bit simplified for readability's sake
-    
-private:
-  ComponentManager() = default;
-
-  friend std::unique_ptr<ComponentManager> std::make_unique<ComponentManager>();
-  inline static std::unique_ptr<ComponentManager> Instance{};
-
-  std::unordered_map<ComponentType, std::unique_ptr<IComponentArray>> ComponentPools;
-};
-```
-
-### Entities
-
-Entities are managed by the `Registry`, which holds a list of all possible Entities in existence, whether they're being used or not. It also allows the user to create and destroy entities, by reassigning Entity ID's. I used a `SparseSet` to hold all possible Entity ID's, since it is the most optimized way of storing integers and later looking for them.
-
-```cpp
-#pragma once
-
-#include "../ECSConstants.h"
-#include "../SparseSet/SparseSet.h"
-
-#include <assert.h> /* assert() */
-#include <unordered_map> /* unordered_map */
-
-namespace ECS
-{
-  class Registry final
-  {
-  public:
-    Registry();
-
-    Entity CreateEntity();
-    bool ReleaseEntity(Entity entity);
-    Entity GetAmountOfEntities() const { return CurrentEntityCounter; }
-
-    void SetEntitySignature(const Entity entity, const EntitySignature sig);
-    void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true);
-    EntitySignature GetEntitySignature(const Entity entity) const;
-    
-    // All functionality not pertaining to Entities has been cut for this snippet
-
-  private:
-    std::unordered_map<Entity, EntitySignature> EntitySignatures;
-    SparseSet<Entity> Entities;
-    Entity CurrentEntityCounter;
-  };
-}
-```
-
-### Systems
-
-I decided to model my ECS after EntT and how it handles Systems. EntT creates a `entt::basic_view` of Components on a `entt::registry` which you can loop over with a lambda.
-```cpp
-auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent>();
-
-view.each([](const auto& gravity, auto& rigidBody)
-  {
-    rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
-  });
-```
-
-I decided to make something similar:
-```cpp
-auto view = registry.CreateView<GravityComponent, RigidBodyComponent>();
-
-view.ForEach([](const auto& gravity, auto& rigidBody)->void
-  {
-    rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
-  });
-```
-
-However, this is <i>not</i> the best way of going about this. A `View` should return immutable data! You are asking for a <i>view</i> of the Components, not asking for permission to change them! I have decided to keep this design flaw in my code for simplicity's and, primarily, time's sake.
-
-### Conclusion
+23/08: ECS is 233.84% slower than EntT and 204.55% slower than GameObject-Component approach
 
 I compared the ECS I wrote to a traditional GameObject - Component system and EntT and the ECS is slightly faster.
 The way I tested this is by creating 100'000 entities (and Game Objects) that both do the same thing. They simulate some very simple physics using 3 different components (RigidBody, Transform and Gravity). <br>
-I then timed how long it took to run EntT's lambda vs. my ECS's lambda vs. `for (GameObject* pG : GameObjects) { pG->Update(); }`. <br>
+I then timed how long it took to run EntT's lambda vs. my ECS's lambda vs. `for (GameObject* pG : GameObjects) { pG->Update(); }` over a duration of 5 seconds. <br>
 These benchmarks can be found in the `ECS.cpp` file.
 
 ## Benchmarks
 Visual Studio 2022, standard Release build on x64, times:
 
 #### Initialisation Times
-- Custom ECS Initialisation Time: 36416800 nanoseconds
-- EntT Initialisation Time:       20327500 nanoseconds
-- GameObject Initialisation Time: 36277600 nanoseconds
+- Custom ECS Initialisation Time: 32605600 nanoseconds
+- EntT Initialisation Time:       14511300 nanoseconds
+- GameObject Initialisation Time: 35082000 nanoseconds
 
 #### Update Times
-- Custom ECS Update Time: 312400 nanoseconds
-- EntT Update Time:       774600 nanoseconds
-- GameObject Update Time: 2718600 nanoseconds 
-
-#### Total Times
-- Custom ECS Total Time: 36729200 nanoseconds
-- EntT Total Time:       21102100 nanoseconds
-- GameObject Total Time: 38996200 nanoseconds
+- Custom ECS Update Time: 1610018 nanoseconds
+- EntT Update Time:       688503 nanoseconds
+- GameObject Update Time: 787093 nanoseconds 
 
 #### Memory Usage:
-- Custom ECS Total Memory Usage: 11 MB 
+- Custom ECS Total Memory Usage: 25 MB 
 - EntT Total Memory Usage:       Miniscule (Not visible in VS, less than 11 MB)
 - GameObject Total Memory Usage: 19 MB
-
-## Conclusion
-My ECS its update is twice as fast as EntT, <i>however</i> its initialisation is also ~79.15% faster than my ECS, which accounts for a *lot* of time. <br>
-In this example it makes the final time difference massive, however, do keep in mind that the entire proogram ran for ~0.0367 seconds in my ECS.<br>
-If the program were to run longer the time difference would be smaller.
-
-Although this project is not complete by any means, I am already extremely happy that my ECS works and remotely rivals EntT.
-
-## Disclaimer: There might be an error in my benchmarking, therefore it's entirely possible that EntT is WAY faster than my ECS.
