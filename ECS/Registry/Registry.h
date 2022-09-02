@@ -55,7 +55,8 @@ namespace ECS
 
 			T& comp{ static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity) };
 
-			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) > Allocator.GetCapacity() * 2.f / 3.f)
+			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) >
+				Allocator.GetCapacity() * 2.f / 3.f)
 			{
 				Allocator.Reallocate(Allocator.GetCapacity() * 2);
 			}
@@ -76,7 +77,8 @@ namespace ECS
 
 			T& comp{ static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...) };
 
-			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) > Allocator.GetCapacity() * 2.f / 3.f)
+			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) > 
+				Allocator.GetCapacity() * 2.f / 3.f)
 			{
 				Allocator.Reallocate(Allocator.GetCapacity() * 2);
 			}

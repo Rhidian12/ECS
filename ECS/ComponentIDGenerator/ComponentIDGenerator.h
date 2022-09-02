@@ -13,7 +13,13 @@ namespace ECS
 
 		constexpr std::string_view typeName(ConstexprTypeName<T>());
 
-		constexpr ComponentType hash(static_cast<ComponentType>(ConstexprStringHash(std::string{ typeName }.data(), std::string{ typeName }.size())));
+		constexpr ComponentType hash(
+			static_cast<ComponentType>(
+				ConstexprStringHash(
+					std::string{ typeName }.data(),
+					std::string{ typeName }.size()
+				))
+		);
 
 		return hash;
 	}
