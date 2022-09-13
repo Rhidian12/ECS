@@ -64,8 +64,8 @@ void PhysicsUpdate(ECS::Registry& registry)
 }
 
 /* Defines! */
-#define GAMEOBJECT
-#define ENTT
+// #define GAMEOBJECT
+// #define ENTT
 #define CUSTOMECS
 
 //#define WRITE_TO_FILE
