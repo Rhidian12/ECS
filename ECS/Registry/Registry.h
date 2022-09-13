@@ -137,13 +137,16 @@ namespace ECS
 		void FilterVector(std::tuple<std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>...>& tuple,
 			std::index_sequence<Indices...>)
 		{
-			for (const Entity entity : Entities)
+			Entity val{};
+			for (Entity entity : Entities)
 			{
 				const EntitySignature& sig{ GetEntitySignature(entity) };
 
 				if (!(sig.test(GenerateComponentID<TComponents>()) && ...))
 				{
+					entity -= val;
 					(SafeRemove(std::get<Indices>(tuple), entity), ...);
+					val += entity;
 				}
 			}
 		}
