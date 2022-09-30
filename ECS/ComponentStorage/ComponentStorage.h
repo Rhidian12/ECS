@@ -11,86 +11,73 @@ namespace ECS
 	{
 	public:
 		virtual ~IComponentStorage() = default;
+
+		virtual void Remove(const Entity) = 0;
+
+		virtual bool HasEntity(const Entity) const = 0;
 	};
-
-	template <typename...> struct TypeList;
-
-	template <typename T, typename... Ts>
-	struct TypeList<T, Ts...>
-	{
-		using Head = T;
-		using Tail = TypeList<Ts...>;
-	};
-
-	template <typename T> struct Length;
-
-	template <typename... Ts>
-	struct Length<TypeList<Ts...>>
-	{
-		static constexpr std::size_t Value = sizeof...(Ts);
-	};
-
-	template <typename T>
-	inline constexpr std::size_t Length_v = Length<T>::Value;
-
-	template <typename T, std::size_t Index> struct TypeAt;
-
-	template <typename T, typename... Ts>
-	struct TypeAt<TypeList<T, Ts...>, 0>
-	{
-		using Type = T;
-	};
-
-	template <typename T, typename... Ts, std::size_t Index>
-	struct TypeAt<TypeList<T, Ts...>, Index>
-	{
-		static_assert(Index < sizeof...(Ts) + 1, "index out of range");
-		using Type = typename TypeAt<TypeList<Ts...>, Index - 1>::Type;
-	};
-
-	template <typename T, std::size_t Index>
-	using TypeAt_t = typename TypeAt<T, Index>::Type;
 
 	template<typename ... Ts>
 	class ComponentStorage final : public IComponentStorage
 	{
 	public:
 		template<typename T>
-		void AddComponent(const Entity entity)
+		T& AddComponent(const Entity entity)
 		{
-			std::get<Index<T, Storage>::value>(Storage).Add(entity, T{});
+			return std::get<Index<DoubleStorage<Entity, T>, decltype(Storage)>::value>(Storage).Add(entity, T{});
 		}
 		template<typename T, typename ... Us>
-		void AddComponent(const Entity entity, Us&& ... args)
+		T& AddComponent(const Entity entity, Us&& ... args)
 		{
-			std::get<Index<T, Storage>::value>(Storage).Add(entity, T{ std::forward<Us>(args)... });
+			return std::get<Index<DoubleStorage<Entity, T>, decltype(Storage)>::value>(Storage).Add(entity, T{ std::forward<Us>(args)... });
 		}
 
 		template<typename T>
 		T& GetComponent(const Entity entity)
 		{
-			std::get<Index<T, Storage>::value>(Storage).GetValue(entity);
+			return std::get<Index<DoubleStorage<Entity, T>, decltype(Storage)>::value>(Storage).GetValue(entity);
 		}
 		template<typename T>
 		const T& GetComponent(const Entity entity) const
 		{
-			std::get<Index<T, Storage>::value>(Storage).GetValue(entity);
+			return std::get<Index<DoubleStorage<Entity, T>, decltype(Storage)>::value>(Storage).GetValue(entity);
 		}
 
 		template<typename T>
 		std::vector<T>& GetComponents()
 		{
-			std::get<Index<T, Storage>::value>(Storage).GetValues();
+			return std::get<Index<DoubleStorage<Entity, T>, decltype(Storage)>::value>(Storage).GetValues();
 		}
 		template<typename T>
 		const std::vector<T>& GetComponents() const
 		{
-			std::get<Index<T, Storage>::value>(Storage).GetValues();
+			return std::get<Index<DoubleStorage<Entity, T>, decltype(Storage)>::value>(Storage).GetValues();
 		}
 
-		using Types = TypeList<Ts...>;
+		virtual void Remove(const Entity entity) override
+		{
+			// RemoveImpl<0>(entity);
+
+			std::apply([entity](auto&& ... args) { (args.Remove(entity), ...); }, Storage);
+		}
+
+		virtual bool HasEntity(const Entity entity) const override
+		{
+			return std::get<0>(Storage).ContainsKey(entity);
+		}
 
 	private:
+		template<size_t I = 0, std::enable_if_t<I == sizeof ... (Ts), void>>
+		void RemoveImpl(const Entity) {}
+
+		template<size_t I = 0, std::enable_if_t<I < sizeof ... (Ts), void>>
+		void RemoveImpl(const Entity entity)
+		{
+			std::get<I>(Storage).Remove(entity);
+
+			Remove<I + 1>(entity);
+		}
+
 		std::tuple<DoubleStorage<Entity, Ts>...> Storage;
 
 		template <class T, class Tuple>

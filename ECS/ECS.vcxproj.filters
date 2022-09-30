@@ -27,12 +27,6 @@
     <ClCompile Include="Registry\Registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ComponentArray\ComponentArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Memory\Memory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ECSConstants.h">
@@ -281,13 +275,7 @@
     <ClInclude Include="View\View.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComponentArray\ComponentArray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DoubleStorage\DoubleStorage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\Memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ComponentStorage\ComponentStorage.h">
