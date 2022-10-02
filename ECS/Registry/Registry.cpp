@@ -3,9 +3,10 @@
 namespace ECS
 {
 	Registry::Registry()
-		: Entities{}
+		: EntitySignatures{}
+		, Entities{}
 		, CurrentEntityCounter{}
-		, ComponentPools{}
+		, Allocator{}
 	{}
 
 	Registry::~Registry()
@@ -17,10 +18,13 @@ namespace ECS
 	}
 
 	Registry::Registry(Registry&& other) noexcept
-		: Entities{ std::move(other.Entities) }
+		: EntitySignatures{ std::move(other.EntitySignatures) }
+		, Entities{ std::move(other.Entities) }
 		, CurrentEntityCounter{ std::move(other.CurrentEntityCounter) }
 		, ComponentPools{ std::move(other.ComponentPools) }
+		, Allocator{ std::move(other.Allocator) }
 	{
+		other.EntitySignatures.clear();
 		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
@@ -28,10 +32,13 @@ namespace ECS
 
 	Registry& Registry::operator=(Registry&& other) noexcept
 	{
+		EntitySignatures = std::move(other.EntitySignatures);
 		Entities = std::move(other.Entities);
 		CurrentEntityCounter = std::move(other.CurrentEntityCounter);
 		ComponentPools = std::move(other.ComponentPools);
+		Allocator = std::move(other.Allocator);
 
+		other.EntitySignatures.clear();
 		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
@@ -46,6 +53,8 @@ namespace ECS
 		const Entity entity(CurrentEntityCounter++);
 		Entities.Add(entity);
 
+		EntitySignatures.insert(std::make_pair(entity, EntitySignature{}));
+
 		return entity;
 	}
 
@@ -53,7 +62,9 @@ namespace ECS
 	{
 		if (Entities.Contains(entity))
 		{
-			RemoveAllComponents(entity);
+			RemoveAllComponents(entity, GetEntitySignature(entity));
+
+			EntitySignatures.erase(entity);
 
 			Entities.Remove(entity);
 
@@ -65,13 +76,15 @@ namespace ECS
 		return false;
 	}
 
-	void Registry::RemoveAllComponents(const Entity entity)
+	void Registry::RemoveAllComponents(const Entity entity, const EntitySignature& sig)
 	{
-		for (std::pair<const std::string, std::unique_ptr<IComponentStorage>>& pair : ComponentPools)
+		for (ComponentType i{}; i < MaxComponentTypes; ++i)
 		{
-			if (pair.second->HasEntity(entity))
+			if (sig.test(i))
 			{
-				pair.second->Remove(entity);
+				assert(ComponentPools[i]);
+
+				ComponentPools[i]->Remove(Entities.GetIndex(entity));
 			}
 		}
 	}

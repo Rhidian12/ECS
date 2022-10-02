@@ -1,3 +1,5 @@
+// ECS.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
 #include "ECSConstants.h"
 
 #include "Registry/Registry.h"
@@ -21,35 +23,49 @@
 #include "ECSComponents/ECSComponents.h"
 #include "GOComponents/GOComponents.h"
 
-void ENTTPhysicsUpdate(entt::registry& registry)
+void ENTTGravityUpdate(entt::registry& registry)
 {
-	auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent, ENTTTransformComponent>();
+	auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent>();
 
-	view.each([](const auto& gravity, auto& rigidBody, auto& transform)
+	view.each([](const auto& gravity, auto& rigidBody)
 		{
 			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+		});
+}
+void ENTTPhysicsUpdate(entt::registry& registry)
+{
+	auto view = registry.view<const ENTTRigidBodyComponent, ENTTTransformComponent>();
 
+	view.each([](const auto& rigidBody, auto& transform)
+		{
 			transform.Position.x += rigidBody.Velocity.x;
 			transform.Position.y += rigidBody.Velocity.y;
 		});
 }
 
-void PhysicsUpdate(ECS::Registry& registry)
+void GravityUpdate(ECS::Registry& registry)
 {
-	auto view = registry.CreateView<GravityComponent, RigidBodyComponent, TransformComponent>();
+	auto view = registry.CreateView<GravityComponent, RigidBodyComponent>();
 
-	view.ForEach([](const auto& gravity, auto& rigidBody, auto& transform)->void
+	view.ForEach([](const auto& gravity, auto& rigidBody)->void
 		{
 			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+		});
+}
+void PhysicsUpdate(ECS::Registry& registry)
+{
+	auto view = registry.CreateView<RigidBodyComponent, TransformComponent>();
 
+	view.ForEach([](const auto& rigidBody, auto& transform)->void
+		{
 			transform.Position.x += rigidBody.Velocity.x;
 			transform.Position.y += rigidBody.Velocity.y;
 		});
 }
 
 /* Defines! */
-#define GAMEOBJECT
-#define ENTT
+// #define GAMEOBJECT
+// #define ENTT
 #define CUSTOMECS
 
 //#define WRITE_TO_FILE
@@ -92,7 +108,9 @@ ECS::Registry TestInitECS(const ECS::Entity amount)
 	{
 		Entity entity{ registry.CreateEntity() };
 
-		registry.AddComponents<GravityComponent, RigidBodyComponent, TransformComponent>(entity);
+		registry.AddComponent<TransformComponent>(entity);
+		registry.AddComponent<RigidBodyComponent>(entity);
+		registry.AddComponent<GravityComponent>(entity);
 	}
 
 	t2 = std::chrono::steady_clock::now();
@@ -110,6 +128,7 @@ void TestUpdateECS(ECS::Registry& registry)
 
 	t1 = std::chrono::steady_clock::now();
 
+	GravityUpdate(registry);
 	PhysicsUpdate(registry);
 
 	t2 = std::chrono::steady_clock::now();
@@ -197,6 +216,7 @@ void TestUpdateENTT(entt::registry& registry)
 
 	t1 = std::chrono::steady_clock::now();
 
+	ENTTGravityUpdate(registry);
 	ENTTPhysicsUpdate(registry);
 
 	t2 = std::chrono::steady_clock::now();

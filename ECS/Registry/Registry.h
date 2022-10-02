@@ -4,11 +4,11 @@
 #include "../SparseSet/SparseSet.h"
 #include "../View/View.h"
 #include "../ComponentIDGenerator/ComponentIDGenerator.h"
-#include "../ComponentStorage/ComponentStorage.h"
+#include "../ComponentArray/ComponentArray.h"
+#include "../Memory/Memory.h"
 
 #include <assert.h> /* assert() */
 #include <unordered_map> /* unordered_map */
-#include <string> /* std::string */
 
 namespace ECS
 {
@@ -23,67 +23,150 @@ namespace ECS
 		Registry& operator=(const Registry&) noexcept = delete;
 		Registry& operator=(Registry&& other) noexcept;
 
-		template<typename ... Ts>
-		[[nodiscard]] View<Ts...> CreateView()
+		template<typename ... TComponents>
+		[[nodiscard]] View<TComponents...> CreateView()
 		{
-			return View<Ts...>{ std::move(GetComponents<Ts...>()) };
+			/* Get all components asked for by the user */
+			std::tuple<std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>...> comps
+			{
+				std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>
+				{
+					GetComponents<TComponents>().begin(), GetComponents<TComponents>().end(), Allocator
+				}...
+			};
+
+			/* Loop over a vector and get rid of the elements in the vector that are attached to an entity but does not have all components */
+			FilterVector<TComponents...>(comps, std::make_index_sequence<sizeof ... (TComponents)>{});
+
+			return View<TComponents...>{ std::move(comps) };
 		}
 
-		template<typename ... Ts>
-		std::tuple<Ts&...> AddComponents(const Entity entity)
+		template<typename T>
+		T& AddComponent(const Entity entity)
 		{
-			std::unique_ptr<IComponentStorage>& pool{ ComponentPools[GetCombinedTypeName<Ts...>()] };
+			SetEntitySignature(entity, GenerateComponentID<T>());
+
+			std::unique_ptr<IComponentArray>& pool{ ComponentPools[GenerateComponentID<T>()] };
 
 			if (!pool)
 			{
-				pool.reset(new ComponentStorage<Ts...>{});
+				pool.reset(new ComponentArray<T>{});
 			}
 
-			return std::tuple<Ts&...>(static_cast<ComponentStorage<Ts...>*>(pool.get())->AddComponent<Ts>(entity)...);
+			T& comp{ static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity) };
+
+			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) >
+				Allocator.GetCapacity() * 2.f / 3.f)
+			{
+				Allocator.Reallocate(Allocator.GetCapacity() * 2);
+			}
+
+			return comp;
+		}
+		template<typename T, typename ... Ts>
+		T& AddComponent(const Entity entity, Ts&& ... args)
+		{
+			SetEntitySignature(entity, GenerateComponentID<T>());
+
+			std::unique_ptr<IComponentArray>& pool{ ComponentPools[GenerateComponentID<T>()] };
+
+			if (!pool)
+			{
+				pool.reset(new ComponentArray<T>{});
+			}
+
+			T& comp{ static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...) };
+
+			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) > 
+				Allocator.GetCapacity() * 2.f / 3.f)
+			{
+				Allocator.Reallocate(Allocator.GetCapacity() * 2);
+			}
+
+			return comp;
 		}
 
-		template<typename ... Ts>
-		std::tuple<Ts&...> GetComponent(const Entity entity)
+		template<typename T>
+		void RemoveComponent(const Entity entity)
 		{
-			assert(ComponentPools[GetCombinedTypeName<Ts...>()]);
-			return std::tuple<Ts&...>(static_cast<ComponentStorage<Ts...>*>(ComponentPools[GetCombinedTypeName<Ts...>()].get())
-				->GetComponent<Ts>(entity)...);
-		}
-		template<typename ... Ts>
-		std::tuple<const Ts&...> GetComponent(const Entity entity) const
-		{
-			assert(ComponentPools[GetCombinedTypeName<Ts...>()]);
-			return std::tuple<const Ts&...>(static_cast<ComponentStorage<Ts...>*>(ComponentPools[GetCombinedTypeName<Ts...>()].get())
-				->GetComponent<Ts>(entity)...);
+			assert(Entities.Contains(entity));
+
+			ComponentPools[GenerateComponentID<T>()]->Remove(entity);
+			SetEntitySignature(entity, GenerateComponentID<T>(), false);
 		}
 
-		template<typename ... Ts>
-		std::tuple<std::vector<Ts>&...> GetComponents()
+		template<typename T>
+		T& GetComponent(const Entity entity)
 		{
-			assert(ComponentPools[GetCombinedTypeName<Ts...>()]);
-			return std::tuple<std::vector<Ts>&...>(static_cast<ComponentStorage<Ts...>*>(ComponentPools[GetCombinedTypeName<Ts...>()].get())
-				->GetComponents<Ts>()...);
+			assert(ComponentPools[GenerateComponentID<T>()]);
+			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent<T>(entity);
 		}
-		template<typename ... Ts>
-		std::tuple<const std::vector<Ts>&...> GetComponents() const
+		template<typename T>
+		const T& GetComponent(const Entity entity) const
 		{
-			assert(ComponentPools[GetCombinedTypeName<Ts...>()]);
-			return std::tuple<std::vector<Ts>&...>(static_cast<ComponentStorage<Ts...>*>(ComponentPools[GetCombinedTypeName<Ts...>()].get())
-				->GetComponents<Ts>()...);
+			assert(ComponentPools[GenerateComponentID<T>()]);
+			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent<T>(entity);
+		}
+
+		template<typename T>
+		std::vector<T>& GetComponents()
+		{
+			assert(ComponentPools[GenerateComponentID<T>()]);
+			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponents();
+		}
+		template<typename T>
+		const std::vector<T>& GetComponents() const
+		{
+			assert(ComponentPools[GenerateComponentID<T>()]);
+			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponents();
 		}
 
 		Entity CreateEntity();
 		bool ReleaseEntity(Entity entity);
 		Entity GetAmountOfEntities() const { return CurrentEntityCounter; }
 
+		void SetEntitySignature(const Entity entity, const EntitySignature sig) { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); EntitySignatures[entity] = sig; }
+		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true) { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); EntitySignatures[entity].set(id, val); }
+
+		const EntitySignature& GetEntitySignature(const Entity entity) const { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); return EntitySignatures.find(entity)->second; }
+
 	private:
-		void RemoveAllComponents(const Entity entity);
+		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
 
-		template<typename ... Ts>
-		__forceinline std::string GetCombinedTypeName() { return (std::string{ Utils::ConstexprTypeName<Ts>() } + ...); }
+		template<typename ... TComponents, size_t ... Indices>
+		void FilterVector(std::tuple<std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>...>& tuple,
+			std::index_sequence<Indices...>)
+		{
+			Entity val{};
+			for (Entity entity : Entities)
+			{
+				const EntitySignature& sig{ GetEntitySignature(entity) };
 
+				if (!(sig.test(GenerateComponentID<TComponents>()) && ...))
+				{
+					entity -= val;
+					(SafeRemove(std::get<Indices>(tuple), entity), ...);
+					val += entity;
+				}
+			}
+		}
+
+		template<typename T>
+		void SafeRemove(std::vector<std::reference_wrapper<T>, STLAllocator<std::reference_wrapper<T>, StackAllocator>>& v, const Entity entity)
+		{
+			if (v.cbegin() + entity < v.cend())
+			{
+				v.erase(v.begin() + entity);
+			}
+		}
+
+		/* [TODO]: Sort Entities based on their EntitySignature 
+		Keep pointers to each start and end entry of that sort value 
+		so we can make our loop smaller instead of Max Entities */
+		std::unordered_map<Entity, EntitySignature> EntitySignatures;
 		SparseSet<Entity> Entities;
 		Entity CurrentEntityCounter;
-		std::unordered_map<std::string, std::unique_ptr<IComponentStorage>> ComponentPools;
+		std::unordered_map<ComponentType, std::unique_ptr<IComponentArray>> ComponentPools;
+		StackAllocator Allocator;
 	};
 }
