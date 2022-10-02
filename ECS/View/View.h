@@ -56,7 +56,7 @@ namespace ECS
 		}
 
 		ViewContainerType Components;
-		std::vector<Entity>& Entities;
+		std::vector<Entity> Entities;
 		std::unordered_map<Entity, EntitySignature>& EntitySignatures;
 	};
 }
