@@ -50,6 +50,9 @@ namespace ECS
 		std::vector<T>& GetComponents() { return Components.GetValues(); }
 		const std::vector<T>& GetComponents() const { return Components.GetValues(); }
 
+		std::vector<Entity>& GetKeys() { return Components.GetKeys(); }
+		const std::vector<Entity>& GetKeys() const { return Components.GetKeys(); }
+
 	private:
 		DoubleStorage<Entity, T> Components;
 	};

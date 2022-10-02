@@ -9,6 +9,7 @@
 
 #include <assert.h> /* assert() */
 #include <unordered_map> /* unordered_map */
+#include <array> /* std::array */
 
 namespace ECS
 {
@@ -35,10 +36,13 @@ namespace ECS
 				}...
 			};
 
-			/* Loop over a vector and get rid of the elements in the vector that are attached to an entity but does not have all components */
-			FilterVector<TComponents...>(comps, std::make_index_sequence<sizeof ... (TComponents)>{});
+			std::array<std::vector<Entity>*, sizeof ... (TComponents)> ents{};
+			FillArray<TComponents...>(ents, std::make_index_sequence<sizeof ... (TComponents)>{});
 
-			return View<TComponents...>{ std::move(comps) };
+			/* Loop over a vector and get rid of the elements in the vector that are attached to an entity but does not have all components */
+			// FilterVector<TComponents...>(comps, std::make_index_sequence<sizeof ... (TComponents)>{});
+
+			return View<TComponents...>{ std::move(comps), std::move(ents), EntitySignatures };
 		}
 
 		template<typename T>
@@ -158,6 +162,12 @@ namespace ECS
 			{
 				v.erase(v.begin() + entity);
 			}
+		}
+
+		template<typename ... Ts, size_t ... Is>
+		void FillArray(std::array<std::vector<Entity>*, sizeof ... (Ts)>& arr, std::index_sequence<Is...>)
+		{
+			((arr[Is] = &static_cast<ComponentArray<Ts>*>(ComponentPools[GenerateComponentID<Ts>()].get())->GetKeys()), ...);
 		}
 
 		/* [TODO]: Sort Entities based on their EntitySignature 

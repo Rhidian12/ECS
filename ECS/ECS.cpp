@@ -43,24 +43,40 @@ void ENTTPhysicsUpdate(entt::registry& registry)
 		});
 }
 
+void A(const GravityComponent& gravity, RigidBodyComponent& b)
+{
+	b.Velocity.y += gravity.Gravity * b.Mass;
+}
+
 void GravityUpdate(ECS::Registry& registry)
 {
 	auto view = registry.CreateView<GravityComponent, RigidBodyComponent>();
 
-	view.ForEach([](const auto& gravity, auto& rigidBody)->void
-		{
-			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
-		});
+	//view.ForEach([](const auto& gravity, auto& rigidBody)->void
+	//	{
+	//		rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+	//	});
+
+	view.ForEach(A);
 }
+
+void B(const RigidBodyComponent& rigidBody, TransformComponent& transform)
+{
+	transform.Position.x += rigidBody.Velocity.x;
+	transform.Position.y += rigidBody.Velocity.y;
+}
+
 void PhysicsUpdate(ECS::Registry& registry)
 {
 	auto view = registry.CreateView<RigidBodyComponent, TransformComponent>();
 
-	view.ForEach([](const auto& rigidBody, auto& transform)->void
-		{
-			transform.Position.x += rigidBody.Velocity.x;
-			transform.Position.y += rigidBody.Velocity.y;
-		});
+	//view.ForEach([](const auto& rigidBody, auto& transform)->void
+	//	{
+	//		transform.Position.x += rigidBody.Velocity.x;
+	//		transform.Position.y += rigidBody.Velocity.y;
+	//	});
+
+	view.ForEach(B);
 }
 
 /* Defines! */
