@@ -5,7 +5,6 @@
 #include "../View/View.h"
 #include "../ComponentIDGenerator/ComponentIDGenerator.h"
 #include "../ComponentStorage/ComponentStorage.h"
-#include "RegisteredTypes.h"
 
 #include <assert.h> /* assert() */
 #include <unordered_map> /* unordered_map */
@@ -83,7 +82,6 @@ namespace ECS
 		template<typename ... Ts>
 		__forceinline std::string GetCombinedTypeName() { return (std::string{ Utils::ConstexprTypeName<Ts>() } + ...); }
 
-		std::vector<size_t> ComponentIDs;
 		SparseSet<Entity> Entities;
 		Entity CurrentEntityCounter;
 		std::unordered_map<std::string, std::unique_ptr<IComponentStorage>> ComponentPools;

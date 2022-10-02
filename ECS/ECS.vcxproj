@@ -153,7 +153,6 @@
     <ClInclude Include="ComponentStorage\ComponentStorage.h" />
     <ClInclude Include="DoubleStorage\DoubleStorage.h" />
     <ClInclude Include="ECSComponents\ECSComponents.h" />
-    <ClInclude Include="RegisterComponent\RegisterComponent.h" />
     <ClInclude Include="Registry\Registry.h" />
     <ClInclude Include="ENTTComponents\ENTTComponents.h" />
     <ClInclude Include="entt\config\config.h" />
@@ -231,9 +230,7 @@
     <ClInclude Include="GOComponents\GOComponents.h" />
     <ClInclude Include="GOComponent\GOComponent.h" />
     <ClInclude Include="Point2f\Point2f.h" />
-    <ClInclude Include="Registry\RegisteredTypes.h" />
     <ClInclude Include="SparseSet\SparseSet.h" />
-    <ClInclude Include="TypeList\TypeList.h" />
     <ClInclude Include="Utils\Utils.h" />
     <ClInclude Include="View\View.h" />
   </ItemGroup>

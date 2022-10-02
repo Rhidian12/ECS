@@ -281,14 +281,5 @@
     <ClInclude Include="ComponentStorage\ComponentStorage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TypeList\TypeList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RegisterComponent\RegisterComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Registry\RegisteredTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

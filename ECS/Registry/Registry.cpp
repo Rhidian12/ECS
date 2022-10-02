@@ -6,15 +6,7 @@ namespace ECS
 		: Entities{}
 		, CurrentEntityCounter{}
 		, ComponentPools{}
-		, ComponentIDs{}
-	{
-		ComponentIDs.resize(TypeListLength<ListOfTypes::type>::value);
-
-		for (size_t i{}; i < ComponentIDs.size(); ++i)
-		{
-			ComponentIDs[i] = i;
-		}
-	}
+	{}
 
 	Registry::~Registry()
 	{

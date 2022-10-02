@@ -36,8 +36,6 @@ void ENTTPhysicsUpdate(entt::registry& registry)
 
 void PhysicsUpdate(ECS::Registry& registry)
 {
-	using namespace ECS;
-
 	auto view = registry.CreateView<GravityComponent, RigidBodyComponent, TransformComponent>();
 
 	view.ForEach([](const auto& gravity, auto& rigidBody, auto& transform)->void
