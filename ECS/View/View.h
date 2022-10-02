@@ -8,8 +8,6 @@
 
 #include "../Memory/Memory.h"
 
-#include "../Optick/optick.h"
-
 namespace ECS
 {
 	template<typename ... TComponents>
@@ -23,14 +21,13 @@ namespace ECS
 			: Components{ std::move(components) }
 			, Entities{ *entities[0] }
 			, EntitySignatures{ sigs }
-			, NrOfComponents{ std::get<0>(components).size() }
-			, NrOfEntities{ entities[0]->size() }
 		{
+			size_t nrOfEntities{ Entities.size() };
 			for (size_t i{ 1 }; i < sizeof ... (TComponents); ++i)
 			{
-				if (entities[i]->size() < NrOfEntities)
+				if (entities[i]->size() < nrOfEntities)
 				{
-					NrOfEntities = entities[i]->size();
+					nrOfEntities = entities[i]->size();
 					Entities = *(entities[i]);
 				}
 			}
@@ -51,7 +48,6 @@ namespace ECS
 		template<size_t ... Indices>
 		void ForEach(const std::function<void(TComponents&...)>& function, Entity&& ent, size_t index, std::index_sequence<Indices...>)
 		{
-			OPTICK_EVENT()
 			if ((EntitySignatures.at(ent).test(GenerateComponentID<TComponents>()) && ...))
 			{
 				auto tuple{ std::tuple<TComponents&...>(std::get<Indices>(Components)[index].get()...) };
@@ -62,7 +58,5 @@ namespace ECS
 		ViewContainerType Components;
 		std::vector<Entity>& Entities;
 		std::unordered_map<Entity, EntitySignature>& EntitySignatures;
-		size_t NrOfComponents;
-		size_t NrOfEntities;
 	};
 }

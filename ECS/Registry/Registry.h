@@ -39,9 +39,6 @@ namespace ECS
 			std::array<std::vector<Entity>*, sizeof ... (TComponents)> ents{};
 			FillArray<TComponents...>(ents, std::make_index_sequence<sizeof ... (TComponents)>{});
 
-			/* Loop over a vector and get rid of the elements in the vector that are attached to an entity but does not have all components */
-			// FilterVector<TComponents...>(comps, std::make_index_sequence<sizeof ... (TComponents)>{});
-
 			return View<TComponents...>{ std::move(comps), std::move(ents), EntitySignatures };
 		}
 
