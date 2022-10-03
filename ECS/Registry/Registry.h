@@ -5,7 +5,6 @@
 #include "../View/View.h"
 #include "../ComponentIDGenerator/ComponentIDGenerator.h"
 #include "../ComponentArray/ComponentArray.h"
-#include "../Memory/Memory.h"
 
 #include <assert.h> /* assert() */
 #include <unordered_map> /* unordered_map */

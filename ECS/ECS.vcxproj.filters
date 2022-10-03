@@ -30,30 +30,6 @@
     <ClCompile Include="ComponentArray\ComponentArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Memory\Memory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Optick\optick_capi.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Optick\optick_core.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Optick\optick_gpu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Optick\optick_message.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Optick\optick_miniz.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Optick\optick_serialization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Optick\optick_server.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ECSConstants.h">
@@ -306,57 +282,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DoubleStorage\DoubleStorage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\Memory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick.config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_capi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_core.freebsd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_core.linux.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_core.macos.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_core.platform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_core.win.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_gpu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_memory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_message.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_miniz.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_serialization.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\optick_server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

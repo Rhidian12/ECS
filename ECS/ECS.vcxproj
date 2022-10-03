@@ -145,7 +145,6 @@
   <ItemGroup>
     <ClCompile Include="ComponentArray\ComponentArray.cpp" />
     <ClCompile Include="ECS.cpp" />
-    <ClCompile Include="Memory\Memory.cpp" />
     <ClCompile Include="Registry\Registry.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GOComponent\GOComponent.cpp" />
@@ -155,7 +154,6 @@
     <ClInclude Include="ComponentArray\ComponentArray.h" />
     <ClInclude Include="DoubleStorage\DoubleStorage.h" />
     <ClInclude Include="ECSComponents\ECSComponents.h" />
-    <ClInclude Include="Memory\Memory.h" />
     <ClInclude Include="Registry\Registry.h" />
     <ClInclude Include="ENTTComponents\ENTTComponents.h" />
     <ClInclude Include="entt\config\config.h" />
