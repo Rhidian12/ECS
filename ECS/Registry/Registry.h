@@ -28,18 +28,12 @@ namespace ECS
 		[[nodiscard]] View<TComponents...> CreateView()
 		{
 			/* Get all components asked for by the user */
-			std::tuple<std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>...> comps
+			std::tuple<DoubleStorage<Entity, TComponents>&...> comps
 			{
-				std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>
-				{
-					GetComponents<TComponents>().begin(), GetComponents<TComponents>().end(), Allocator
-				}...
+				static_cast<ComponentArray<TComponents>*>(ComponentPools[GenerateComponentID<TComponents>()].get())->GetStorage()...
 			};
 
-			std::array<std::vector<Entity>*, sizeof ... (TComponents)> ents{};
-			FillArray<TComponents...>(ents, std::make_index_sequence<sizeof ... (TComponents)>{});
-
-			return View<TComponents...>{ std::move(comps), std::move(ents), EntitySignatures };
+			return View<TComponents...>{ std::move(comps), EntitySignatures };
 		}
 
 		template<typename T>
