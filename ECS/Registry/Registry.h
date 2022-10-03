@@ -33,7 +33,7 @@ namespace ECS
 				static_cast<ComponentArray<TComponents>*>(ComponentPools[GenerateComponentID<TComponents>()].get())->GetStorage()...
 			};
 
-			return View<TComponents...>{ std::move(comps), EntitySignatures };
+			return View<TComponents...>{ std::move(comps) };
 		}
 
 		template<typename T>
