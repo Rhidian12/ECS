@@ -17,8 +17,9 @@ namespace ECS
 		using ViewContainerType = std::tuple<DoubleStorage<Entity, TComponents>&...>;
 
 	public:
-		explicit View(ViewContainerType&& components)
+		explicit View(ViewContainerType&& components, std::unordered_map<Entity, EntitySignature>& sigs)
 			: Components{ std::move(components) }
+			, EntitySignatures{ sigs }
 			, Entities{ std::get<0>(Components).GetKeys() }
 		{
 			SetEntities(std::make_index_sequence<sizeof ... (TComponents)>{});
@@ -52,6 +53,7 @@ namespace ECS
 		}
 
 		ViewContainerType Components;
+		std::unordered_map<Entity, EntitySignature>& EntitySignatures;
 		std::vector<Entity>& Entities;
 	};
 }

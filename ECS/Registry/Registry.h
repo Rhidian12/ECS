@@ -33,7 +33,7 @@ namespace ECS
 				static_cast<ComponentArray<TComponents>*>(ComponentPools[GenerateComponentID<TComponents>()].get())->GetStorage()...
 			};
 
-			return View<TComponents...>{ std::move(comps) };
+			return View<TComponents...>{ std::move(comps), EntitySignatures };
 		}
 
 		template<typename T>
@@ -48,15 +48,7 @@ namespace ECS
 				pool.reset(new ComponentArray<T>{});
 			}
 
-			T& comp{ static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity) };
-
-			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) >
-				Allocator.GetCapacity() * 2.f / 3.f)
-			{
-				Allocator.Reallocate(Allocator.GetCapacity() * 2);
-			}
-
-			return comp;
+			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
 		}
 		template<typename T, typename ... Ts>
 		T& AddComponent(const Entity entity, Ts&& ... args)
@@ -70,15 +62,7 @@ namespace ECS
 				pool.reset(new ComponentArray<T>{});
 			}
 
-			T& comp{ static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...) };
-
-			if (static_cast<ComponentArray<T>*>(pool.get())->GetComponents().size() * sizeof(T) > 
-				Allocator.GetCapacity() * 2.f / 3.f)
-			{
-				Allocator.Reallocate(Allocator.GetCapacity() * 2);
-			}
-
-			return comp;
+			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...);
 		}
 
 		template<typename T>
@@ -128,46 +112,9 @@ namespace ECS
 	private:
 		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
 
-		template<typename ... TComponents, size_t ... Indices>
-		void FilterVector(std::tuple<std::vector<std::reference_wrapper<TComponents>, STLAllocator<std::reference_wrapper<TComponents>, StackAllocator>>...>& tuple,
-			std::index_sequence<Indices...>)
-		{
-			Entity val{};
-			for (Entity entity : Entities)
-			{
-				const EntitySignature& sig{ GetEntitySignature(entity) };
-
-				if (!(sig.test(GenerateComponentID<TComponents>()) && ...))
-				{
-					entity -= val;
-					(SafeRemove(std::get<Indices>(tuple), entity), ...);
-					val += entity;
-				}
-			}
-		}
-
-		template<typename T>
-		void SafeRemove(std::vector<std::reference_wrapper<T>, STLAllocator<std::reference_wrapper<T>, StackAllocator>>& v, const Entity entity)
-		{
-			if (v.cbegin() + entity < v.cend())
-			{
-				v.erase(v.begin() + entity);
-			}
-		}
-
-		template<typename ... Ts, size_t ... Is>
-		void FillArray(std::array<std::vector<Entity>*, sizeof ... (Ts)>& arr, std::index_sequence<Is...>)
-		{
-			((arr[Is] = &static_cast<ComponentArray<Ts>*>(ComponentPools[GenerateComponentID<Ts>()].get())->GetKeys()), ...);
-		}
-
-		/* [TODO]: Sort Entities based on their EntitySignature 
-		Keep pointers to each start and end entry of that sort value 
-		so we can make our loop smaller instead of Max Entities */
 		std::unordered_map<Entity, EntitySignature> EntitySignatures;
 		SparseSet<Entity> Entities;
 		Entity CurrentEntityCounter;
 		std::unordered_map<ComponentType, std::unique_ptr<IComponentArray>> ComponentPools;
-		StackAllocator Allocator;
 	};
 }
