@@ -120,14 +120,24 @@ ECS::Registry TestInitECS(const ECS::Entity amount)
 
 	Registry registry{};
 
-	for (size_t i{}; i < amount; ++i)
-	{
-		Entity entity{ registry.CreateEntity() };
+	//for (size_t i{}; i < amount; ++i)
+	//{
+	//	Entity entity{ registry.CreateEntity() };
 
-		registry.AddComponent<TransformComponent>(entity);
-		registry.AddComponent<RigidBodyComponent>(entity);
+	//	registry.AddComponent<TransformComponent>(entity);
+	//	registry.AddComponent<RigidBodyComponent>(entity);
+	//	registry.AddComponent<GravityComponent>(entity);
+	//}
+
+	Entity entity{};
+	for (size_t i{}; i < 10; ++i)
+	{
+		entity = registry.CreateEntity();
+
 		registry.AddComponent<GravityComponent>(entity);
 	}
+
+	registry.AddComponent<RigidBodyComponent>(entity);
 
 	t2 = std::chrono::steady_clock::now();
 
@@ -253,47 +263,14 @@ int main(int*, char* [])
 	constexpr float TimeToUpdate{ 5.f };
 
 #ifdef CUSTOMECS
-	ECS::Registry ECS{};
+	ECS::Registry ECS{ TestInitECS(AmountOfEntities) };
 #endif
 #ifdef GAMEOBJECT
-	std::vector<GO::GameObject*> gameObjects{};
+	std::vector<GO::GameObject*> gameObjects{ TestInitGO(AmountOfEntities) };
 #endif
 #ifdef ENTT
-	entt::registry entt{};
+	entt::registry entt{ TestInitENTT(AmountOfEntities) };
 #endif
-
-	/* Initialize different systems */
-	for (int i{}; i < Iterations; ++i)
-	{
-#ifdef CUSTOMECS
-		ECS::Registry registry{ TestInitECS(AmountOfEntities) };
-		if (i == Iterations - 1)
-		{
-			ECS = std::move(registry);
-		}
-#endif
-#ifdef GAMEOBJECT
-		std::vector<GO::GameObject*> gos = TestInitGO(AmountOfEntities);
-		if (i == Iterations - 1)
-		{
-			gameObjects = std::move(gos);
-		}
-		else
-		{
-			for (auto pG : gos)
-			{
-				delete pG;
-			}
-		}
-#endif
-#ifdef ENTT
-		entt::registry enttRegistry = TestInitENTT(AmountOfEntities);
-		if (i == Iterations - 1)
-		{
-			entt = std::move(enttRegistry);
-		}
-#endif
-	}
 
 	/* Test different systems */
 	float deltaTime{};

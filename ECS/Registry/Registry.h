@@ -15,7 +15,7 @@ namespace ECS
 	class Registry final
 	{
 	public:
-		Registry();
+		Registry(const size_t nrOfEntitiesPerList = 1000);
 		~Registry();
 
 		Registry(const Registry&) noexcept = delete;
@@ -23,16 +23,16 @@ namespace ECS
 		Registry& operator=(const Registry&) noexcept = delete;
 		Registry& operator=(Registry&& other) noexcept;
 
-		template<typename ... TComponents>
-		[[nodiscard]] View<TComponents...> CreateView()
+		template<typename ... Ts>
+		[[nodiscard]] View<Ts...> CreateView()
 		{
 			/* Get all components asked for by the user */
-			std::tuple<DoubleStorage<Entity, TComponents>&...> comps
+			std::tuple<ComponentArray<Ts>&...> comps
 			{
-				static_cast<ComponentArray<TComponents>*>(ComponentPools[GenerateComponentID<TComponents>()].get())->GetStorage()...
+				(*static_cast<ComponentArray<Ts>*>(ComponentPools[GenerateComponentID<Ts>()].get()))...
 			};
 
-			return View<TComponents...>{ std::move(comps), EntitySignatures };
+			return View<Ts...>{ std::move(comps), EntitySignatures, Entities };
 		}
 
 		template<typename T>
@@ -44,7 +44,7 @@ namespace ECS
 
 			if (!pool)
 			{
-				pool.reset(new ComponentArray<T>{});
+				pool.reset(new ComponentArray<T>{ &Entities, NrOfEntitiesPerList });
 			}
 
 			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
@@ -58,7 +58,7 @@ namespace ECS
 
 			if (!pool)
 			{
-				pool.reset(new ComponentArray<T>{});
+				pool.reset(new ComponentArray<T>{ &Entities, NrOfEntitiesPerList });
 			}
 
 			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...);
@@ -67,7 +67,8 @@ namespace ECS
 		template<typename T>
 		void RemoveComponent(const Entity entity)
 		{
-			assert(Entities.Contains(entity));
+			// assert(Entities.Contains(entity));
+			assert(HasEntity(entity));
 
 			ComponentPools[GenerateComponentID<T>()]->Remove(entity);
 			SetEntitySignature(entity, GenerateComponentID<T>(), false);
@@ -77,23 +78,23 @@ namespace ECS
 		T& GetComponent(const Entity entity)
 		{
 			assert(ComponentPools[GenerateComponentID<T>()]);
-			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent<T>(entity);
+			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent(entity);
 		}
 		template<typename T>
 		const T& GetComponent(const Entity entity) const
 		{
 			assert(ComponentPools[GenerateComponentID<T>()]);
-			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent<T>(entity);
+			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent(entity);
 		}
 
 		template<typename T>
-		std::vector<T>& GetComponents()
+		auto& GetComponents()
 		{
 			assert(ComponentPools[GenerateComponentID<T>()]);
 			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponents();
 		}
 		template<typename T>
-		const std::vector<T>& GetComponents() const
+		const auto& GetComponents() const
 		{
 			assert(ComponentPools[GenerateComponentID<T>()]);
 			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponents();
@@ -110,10 +111,13 @@ namespace ECS
 
 	private:
 		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
+		bool HasEntity(const Entity entity) const;
 
 		std::unordered_map<Entity, EntitySignature> EntitySignatures;
-		SparseSet<Entity> Entities;
+		// SparseSet<Entity> Entities;
+		std::vector<std::vector<Entity>> Entities;
 		Entity CurrentEntityCounter;
 		std::unordered_map<ComponentType, std::unique_ptr<IComponentArray>> ComponentPools;
+		size_t NrOfEntitiesPerList;
 	};
 }

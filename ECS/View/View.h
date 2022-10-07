@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../DoubleStorage/DoubleStorage.h"
+#include "../ComponentArray/ComponentArray.h"
 
 #include <vector> /* std::vector */
 #include <assert.h> /* assert() */
@@ -10,49 +11,45 @@
 
 namespace ECS
 {
-	template<typename ... TComponents>
+	template<typename ... Ts>
 	class View final
 	{
-		using ViewContainerType = std::tuple<DoubleStorage<Entity, TComponents>&...>;
+		using ViewContainerType = std::tuple<ComponentArray<Ts>&...>;
 
 	public:
-		explicit View(ViewContainerType&& components, std::unordered_map<Entity, EntitySignature>& sigs)
+		explicit View(ViewContainerType&& components, std::unordered_map<Entity, EntitySignature>& sigs,
+			const std::vector<std::vector<Entity>>& entities)
 			: Components{ std::move(components) }
 			, EntitySignatures{ sigs }
-			, Entities{ std::get<0>(Components).GetKeys() }
-		{
-			SetEntities(std::make_index_sequence<sizeof ... (TComponents)>{});
-		}
+			, Entities{ entities }
+		{}
 
-		void ForEach(const std::function<void(TComponents&...)>& function)
+		void ForEach(const std::function<void(Ts&...)>& function)
 		{
-			auto indexSequence{ std::make_index_sequence<sizeof ... (TComponents)>{} };
+			auto indexSequence{ std::make_index_sequence<sizeof ... (Ts)>{} };
 
-			for (Entity entity : Entities)
+			for (const std::vector<Entity>& list : Entities)
 			{
-				ForEach(function, std::move(entity), indexSequence);
+				for (const Entity ent : list)
+				{
+					ForEach(function, ent, indexSequence);
+				}
 			}
 		}
 
 	private:
 		template<size_t ... Indices>
-		void ForEach(const std::function<void(TComponents&...)>& function, Entity&& ent, std::index_sequence<Indices...>)
+		void ForEach(const std::function<void(Ts&...)>& function, const Entity ent, std::index_sequence<Indices...>)
 		{
-			if ((EntitySignatures.at(ent).test(GenerateComponentID<TComponents>()) && ...))
+			if ((EntitySignatures.at(ent).test(GenerateComponentID<Ts>()) && ...))
 			{
-				auto tuple{ std::tuple<TComponents&...>(std::get<Indices>(Components).GetValue(ent)...)};
+				auto tuple{ std::tuple<Ts&...>(std::get<Indices>(Components).GetComponent(ent)...) };
 				std::apply(function, tuple);
 			}
 		}
 
-		template<size_t ... Is>
-		void SetEntities(std::index_sequence<Is...>)
-		{
-			((Entities = std::get<Is>(Components).GetKeys().size() < Entities.size() ? std::get<Is>(Components).GetKeys() : Entities), ...);
-		}
-
 		ViewContainerType Components;
 		std::unordered_map<Entity, EntitySignature>& EntitySignatures;
-		std::vector<Entity> Entities;
+		const std::vector<std::vector<Entity>>& Entities;
 	};
 }
