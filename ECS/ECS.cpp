@@ -1,5 +1,3 @@
-// ECS.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 #include "ECSConstants.h"
 
 #include "Registry/Registry.h"
@@ -23,6 +21,19 @@
 #include "ECSComponents/ECSComponents.h"
 #include "GOComponents/GOComponents.h"
 
+template<typename T, typename ... Ts, typename = std::enable_if_t<std::is_invocable_r_v<void, T, Ts...>>>
+double Benchmark(T&& fn, Ts&&... args)
+{
+	std::chrono::high_resolution_clock::time_point t1{ std::chrono::high_resolution_clock::now() };
+
+	fn(std::forward<Ts>(args)...);
+
+	std::chrono::high_resolution_clock::time_point t2{ std::chrono::high_resolution_clock::now() };
+
+	return std::chrono::duration<double, std::milli>(t2 - t1).count();
+}
+
+#pragma region Test Update Functions
 void ENTTGravityUpdate(entt::registry& registry)
 {
 	auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent>();
@@ -43,50 +54,31 @@ void ENTTPhysicsUpdate(entt::registry& registry)
 		});
 }
 
-void A(const GravityComponent& gravity, RigidBodyComponent& b)
-{
-	b.Velocity.y += gravity.Gravity * b.Mass;
-}
-
 void GravityUpdate(ECS::Registry& registry)
 {
 	auto view = registry.CreateView<GravityComponent, RigidBodyComponent>();
 
-	//view.ForEach([](const auto& gravity, auto& rigidBody)->void
-	//	{
-	//		rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
-	//	});
-
-	view.ForEach(A);
+	view.ForEach([](const auto& gravity, auto& rigidBody)->void
+		{
+			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+		});
 }
-
-void B(const RigidBodyComponent& rigidBody, TransformComponent& transform)
-{
-	transform.Position.x += rigidBody.Velocity.x;
-	transform.Position.y += rigidBody.Velocity.y;
-}
-
 void PhysicsUpdate(ECS::Registry& registry)
 {
 	auto view = registry.CreateView<RigidBodyComponent, TransformComponent>();
 
-	//view.ForEach([](const auto& rigidBody, auto& transform)->void
-	//	{
-	//		transform.Position.x += rigidBody.Velocity.x;
-	//		transform.Position.y += rigidBody.Velocity.y;
-	//	});
-
-	view.ForEach(B);
+	view.ForEach([](const auto& rigidBody, auto& transform)->void
+		{
+			transform.Position.x += rigidBody.Velocity.x;
+			transform.Position.y += rigidBody.Velocity.y;
+		});
 }
+#pragma endregion
 
 /* Defines! */
 #define GAMEOBJECT
 #define ENTT
 #define CUSTOMECS
-
-//#define WRITE_TO_FILE
-#define APPEND_TO_FILE
-// #define OVERWRITE_TO_FILE
 
 //#define UNIT_TESTS
 #define BENCHMARKS
@@ -96,161 +88,6 @@ void PhysicsUpdate(ECS::Registry& registry)
 #include "catch.hpp"
 #endif
 
-#ifdef CUSTOMECS
-std::deque<long long> g_ECSUpdateTimes{};
-std::deque<long long> g_ECSInitTimes{};
-#endif
-#ifdef GAMEOBJECT
-std::deque<long long> g_GOUpdateTimes{};
-std::deque<long long> g_GOInitTimes{};
-#endif
-#ifdef ENTT
-std::deque<long long> g_enttUpdateTimes{};
-std::deque<long long> g_enttInitTimes{};
-#endif
-
-#ifdef CUSTOMECS
-ECS::Registry TestInitECS(const ECS::Entity amount)
-{
-	using namespace ECS;
-
-	std::chrono::steady_clock::time_point t1{}, t2{};
-
-	t1 = std::chrono::steady_clock::now();
-
-	Registry registry{};
-
-	for (size_t i{}; i < amount; ++i)
-	{
-		Entity entity{ registry.CreateEntity() };
-
-		registry.AddComponent<TransformComponent>(entity);
-		registry.AddComponent<RigidBodyComponent>(entity);
-		registry.AddComponent<GravityComponent>(entity);
-	}
-
-	//Entity entity{};
-	//for (size_t i{}; i < 10; ++i)
-	//{
-	//	entity = registry.CreateEntity();
-
-	//	registry.AddComponent<GravityComponent>(entity);
-	//	registry.AddComponent<TransformComponent>(entity);
-	//}
-	//registry.AddComponent<RigidBodyComponent>(entity);
-
-	t2 = std::chrono::steady_clock::now();
-
-	g_ECSInitTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
-
-	return registry;
-}
-void TestUpdateECS(ECS::Registry& registry)
-{
-	using namespace ECS;
-
-	std::chrono::steady_clock::time_point t1{};
-	std::chrono::steady_clock::time_point t2{};
-
-	t1 = std::chrono::steady_clock::now();
-
-	GravityUpdate(registry);
-	PhysicsUpdate(registry);
-
-	t2 = std::chrono::steady_clock::now();
-
-	g_ECSUpdateTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
-}
-#endif
-#ifdef GAMEOBJECT
-std::vector<GO::GameObject*> TestInitGO(const ECS::Entity amount)
-{
-	using namespace GO;
-
-	std::chrono::steady_clock::time_point t1{};
-	std::chrono::steady_clock::time_point t2{};
-
-	t1 = std::chrono::steady_clock::now();
-
-	std::vector<GO::GameObject*> gameObjects{};
-
-	for (size_t i{}; i < amount; ++i)
-	{
-		GameObject* pG{ new GameObject{} };
-
-		pG->AddComponent(new GOGravityComponent{});
-		pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
-		pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
-
-		gameObjects.push_back(pG);
-	}
-
-	t2 = std::chrono::steady_clock::now();
-
-	g_GOInitTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
-
-	return gameObjects;
-}
-void TestUpdateGO(std::vector<GO::GameObject*>& gameObjects)
-{
-	using namespace GO;
-
-	std::chrono::steady_clock::time_point t1{};
-	std::chrono::steady_clock::time_point t2{};
-
-	t1 = std::chrono::steady_clock::now();
-
-	for (GameObject* const pG : gameObjects)
-	{
-		pG->Update();
-	}
-
-	t2 = std::chrono::steady_clock::now();
-
-	g_GOUpdateTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
-}
-#endif
-#ifdef ENTT
-entt::registry TestInitENTT(const ECS::Entity amount)
-{
-	using namespace entt;
-
-	std::chrono::steady_clock::time_point t1{}, t2{};
-
-	t1 = std::chrono::steady_clock::now();
-
-	entt::registry registry{};
-
-	for (size_t i{}; i < amount; ++i)
-	{
-		auto enttEntity{ registry.create() };
-		registry.emplace<ENTTGravity>(enttEntity);
-		registry.emplace<ENTTTransformComponent>(enttEntity);
-		registry.emplace<ENTTRigidBodyComponent>(enttEntity);
-	}
-
-	t2 = std::chrono::steady_clock::now();
-
-	g_enttInitTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
-
-	return registry;
-}
-void TestUpdateENTT(entt::registry& registry)
-{
-	std::chrono::steady_clock::time_point t1{};
-	std::chrono::steady_clock::time_point t2{};
-
-	t1 = std::chrono::steady_clock::now();
-
-	ENTTGravityUpdate(registry);
-	ENTTPhysicsUpdate(registry);
-
-	t2 = std::chrono::steady_clock::now();
-
-	g_enttUpdateTimes.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
-}
-#endif
-
 #ifdef BENCHMARKS
 int main(int*, char* [])
 {
@@ -258,80 +95,140 @@ int main(int*, char* [])
 	using namespace GO;
 
 	/* Benchmarking Constants */
-	constexpr Entity AmountOfEntities{ 100'000 };
 	constexpr int Iterations{ 1 };
+	constexpr Entity AmountOfEntities{ 100'000 };
 	constexpr float TimeToUpdate{ 5.f };
 
 #ifdef CUSTOMECS
-	ECS::Registry ECS{ TestInitECS(AmountOfEntities) };
+	std::deque<double> ecsUpdateTimes{};
+	std::deque<double> ecsInitTimes{};
 #endif
 #ifdef GAMEOBJECT
-	std::vector<GO::GameObject*> gameObjects{ TestInitGO(AmountOfEntities) };
+	std::deque<double> goUpdateTimes{};
+	std::deque<double> goInitTimes{};
 #endif
 #ifdef ENTT
-	entt::registry entt{ TestInitENTT(AmountOfEntities) };
+	std::deque<double> enttUpdateTimes{};
+	std::deque<double> enttInitTimes{};
 #endif
 
-	/* Test different systems */
-	float deltaTime{};
-	std::chrono::steady_clock::time_point now{ std::chrono::steady_clock::now() };
-
-	while (deltaTime < TimeToUpdate)
+	for (int i{}; i < Iterations; ++i)
 	{
 #ifdef CUSTOMECS
-		TestUpdateECS(ECS);
+		ECS::Registry ECS{};
+		ecsInitTimes.push_back(Benchmark([AmountOfEntities, &ECS]()
+			{
+				for (size_t i{}; i < AmountOfEntities; ++i)
+				{
+					Entity entity{ ECS.CreateEntity() };
+
+					ECS.AddComponent<TransformComponent>(entity);
+					ECS.AddComponent<RigidBodyComponent>(entity);
+					ECS.AddComponent<GravityComponent>(entity);
+				}
+			}));
 #endif
 #ifdef GAMEOBJECT
-		TestUpdateGO(gameObjects);
+		std::vector<GO::GameObject*> gameObjects{};
+		goInitTimes.push_back(Benchmark([AmountOfEntities, &gameObjects]()
+			{
+				for (size_t i{}; i < AmountOfEntities; ++i)
+				{
+					GameObject* pG{ new GameObject{} };
+
+					pG->AddComponent(new GOGravityComponent{});
+					pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
+					pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
+
+					gameObjects.push_back(pG);
+				}
+			}));
 #endif
 #ifdef ENTT
-		TestUpdateENTT(entt);
+		entt::registry entt{};
+		enttInitTimes.push_back(Benchmark([AmountOfEntities, &entt]()
+			{
+				for (size_t i{}; i < AmountOfEntities; ++i)
+				{
+					auto enttEntity{ entt.create() };
+					entt.emplace<ENTTGravity>(enttEntity);
+					entt.emplace<ENTTTransformComponent>(enttEntity);
+					entt.emplace<ENTTRigidBodyComponent>(enttEntity);
+				}
+			}));
 #endif
 
-		deltaTime += std::chrono::duration<float>(std::chrono::steady_clock::now() - now).count();
+		/* Test different systems */
+		float deltaTime{};
+		size_t nrOfLoops{};
+		std::chrono::steady_clock::time_point now{ std::chrono::steady_clock::now() };
 
-		now = std::chrono::steady_clock::now();
-	}
-
-	/* Cleanup results */
-#ifdef CUSTOMECS
-	std::sort(g_ECSUpdateTimes.begin(), g_ECSUpdateTimes.end());
-	std::sort(g_ECSInitTimes.begin(), g_ECSInitTimes.end());
-#endif
-#ifdef GAMEOBJECT
-	std::sort(g_GOUpdateTimes.begin(), g_GOUpdateTimes.end());
-	std::sort(g_GOInitTimes.begin(), g_GOInitTimes.end());
-#endif
-#ifdef ENTT
-	std::sort(g_enttUpdateTimes.begin(), g_enttUpdateTimes.end());
-	std::sort(g_enttInitTimes.begin(), g_enttInitTimes.end());
-#endif
-	if (Iterations / 10 > 0)
-	{
-		for (int i{}; i < Iterations / 10; ++i)
+		while (deltaTime < TimeToUpdate)
 		{
 #ifdef CUSTOMECS
-			g_ECSUpdateTimes.pop_back();
-			g_ECSUpdateTimes.pop_front();
-
-			g_ECSInitTimes.pop_back();
-			g_ECSInitTimes.pop_front();
+			ecsUpdateTimes.push_back(Benchmark(GravityUpdate, ECS) + Benchmark(PhysicsUpdate, ECS));
 #endif
 #ifdef GAMEOBJECT
-			g_GOUpdateTimes.pop_back();
-			g_GOUpdateTimes.pop_front();
-
-			g_GOInitTimes.pop_back();
-			g_GOInitTimes.pop_front();
+			goUpdateTimes.push_back(Benchmark([&gameObjects]()
+				{
+					for (GameObject* const pG : gameObjects)
+					{
+						pG->Update();
+					}
+				}));
 #endif
 #ifdef ENTT
-			g_enttUpdateTimes.pop_back();
-			g_enttUpdateTimes.pop_front();
+			enttUpdateTimes.push_back(Benchmark(ENTTGravityUpdate, entt) + Benchmark(ENTTPhysicsUpdate, entt));
+#endif
+			deltaTime += std::chrono::duration<float>(std::chrono::steady_clock::now() - now).count();
 
-			g_enttInitTimes.pop_back();
-			g_enttInitTimes.pop_front();
+			++nrOfLoops;
+			now = std::chrono::steady_clock::now();
+		}
+
+		/* Cleanup results */
+#ifdef CUSTOMECS
+		std::sort(ecsUpdateTimes.begin(), ecsUpdateTimes.end());
+		std::sort(ecsInitTimes.begin(), ecsInitTimes.end());
+#endif
+#ifdef GAMEOBJECT
+		std::sort(goUpdateTimes.begin(), goUpdateTimes.end());
+		std::sort(goInitTimes.begin(), goInitTimes.end());
+#endif
+#ifdef ENTT
+		std::sort(enttUpdateTimes.begin(), enttUpdateTimes.end());
+		std::sort(enttInitTimes.begin(), enttInitTimes.end());
+#endif
+		for (size_t i{}; i < nrOfLoops / 10u; ++i)
+		{
+#ifdef CUSTOMECS
+			ecsUpdateTimes.pop_back();
+			ecsUpdateTimes.pop_front();
+
+			ecsInitTimes.pop_back();
+			ecsInitTimes.pop_front();
+#endif
+#ifdef GAMEOBJECT
+			goUpdateTimes.pop_back();
+			goUpdateTimes.pop_front();
+
+			goInitTimes.pop_back();
+			goInitTimes.pop_front();
+#endif
+#ifdef ENTT
+			enttUpdateTimes.pop_back();
+			enttUpdateTimes.pop_front();
+
+			enttInitTimes.pop_back();
+			enttInitTimes.pop_front();
 #endif
 		}
+
+		/* Cleanup systems */
+#ifdef GAMEOBJECT
+		for (GameObject* pG : gameObjects)
+			delete pG;
+#endif
 	}
 
 	/* Print results */
@@ -340,74 +237,32 @@ int main(int*, char* [])
 	std::cout << "Update Run Time: " << TimeToUpdate << " seconds\n\n";
 
 #ifdef CUSTOMECS
-	std::cout << "ECS Init Average:\t\t" << std::accumulate(g_ECSInitTimes.cbegin(), g_ECSInitTimes.cend(), (long long)0) / g_ECSInitTimes.size() << " nanoseconds\n";
+	std::cout << "ECS Init Average:\t\t" << std::accumulate(ecsInitTimes.cbegin(), ecsInitTimes.cend(), 0.0) / ecsInitTimes.size() << " milliseconds\n";
 #endif
 #ifdef GAMEOBJECT
-	std::cout << "GO Init Average:\t\t" << std::accumulate(g_GOInitTimes.cbegin(), g_GOInitTimes.cend(), (long long)0) / g_GOInitTimes.size() << " nanoseconds\n";
+	std::cout << "GO Init Average:\t\t" << std::accumulate(goInitTimes.cbegin(), goInitTimes.cend(), 0.0) / goInitTimes.size() << " milliseconds\n";
 #endif
 #ifdef ENTT
-	std::cout << "ENTT Init Average:\t\t" << std::accumulate(g_enttInitTimes.cbegin(), g_enttInitTimes.cend(), (long long)0) / g_enttInitTimes.size() << " nanoseconds\n\n";
+	std::cout << "ENTT Init Average:\t\t" << std::accumulate(enttInitTimes.cbegin(), enttInitTimes.cend(), 0.0) / enttInitTimes.size() << " milliseconds\n\n";
 #endif
 #ifdef CUSTOMECS
-	std::cout << "ECS Update Average:\t\t" << std::accumulate(g_ECSUpdateTimes.cbegin(), g_ECSUpdateTimes.cend(), (long long)0) / g_ECSUpdateTimes.size() << " nanoseconds\n";
+	std::cout << "ECS Update Average:\t\t" << std::accumulate(ecsUpdateTimes.cbegin(), ecsUpdateTimes.cend(), 0.0) / ecsUpdateTimes.size() << " milliseconds\n";
 #endif
 #ifdef GAMEOBJECT
-	std::cout << "GO Update Average:\t\t" << std::accumulate(g_GOUpdateTimes.cbegin(), g_GOUpdateTimes.cend(), (long long)0) / g_GOUpdateTimes.size() << " nanoseconds\n";
+	std::cout << "GO Update Average:\t\t" << std::accumulate(goUpdateTimes.cbegin(), goUpdateTimes.cend(), 0.0) / goUpdateTimes.size() << " milliseconds\n";
 #endif
 #ifdef ENTT
-	std::cout << "ENTT Update Average:\t\t" << std::accumulate(g_enttUpdateTimes.cbegin(), g_enttUpdateTimes.cend(), (long long)0) / g_enttUpdateTimes.size() << " nanoseconds\n";
+	std::cout << "ENTT Update Average:\t\t" << std::accumulate(enttUpdateTimes.cbegin(), enttUpdateTimes.cend(), 0.0) / enttUpdateTimes.size() << " milliseconds\n";
 #endif
 
 #ifdef CUSTOMECS
-	std::cout << "\nECS Total:\t\t\t" << std::accumulate(g_ECSInitTimes.cbegin(), g_ECSInitTimes.cend(), (long long)0) + std::accumulate(g_ECSUpdateTimes.cbegin(), g_ECSUpdateTimes.cend(), (long long)0) << " nanoseconds\n";
+	std::cout << "\nECS Total:\t\t\t" << std::accumulate(ecsInitTimes.cbegin(), ecsInitTimes.cend(), 0.0) + std::accumulate(ecsUpdateTimes.cbegin(), ecsUpdateTimes.cend(), 0.0) << " milliseconds\n";
 #endif
 #ifdef GAMEOBJECT
-	std::cout << "GO Total:\t\t\t" << std::accumulate(g_GOInitTimes.cbegin(), g_GOInitTimes.cend(), (long long)0) + std::accumulate(g_GOUpdateTimes.cbegin(), g_GOUpdateTimes.cend(), (long long)0) << " nanoseconds\n";
+	std::cout << "GO Total:\t\t\t" << std::accumulate(goInitTimes.cbegin(), goInitTimes.cend(), 0.0) + std::accumulate(goUpdateTimes.cbegin(), goUpdateTimes.cend(), 0.0) << " milliseconds\n";
 #endif
 #ifdef ENTT
-	std::cout << "ENTT Total:\t\t\t" << std::accumulate(g_enttInitTimes.cbegin(), g_enttInitTimes.cend(), (long long)0) + std::accumulate(g_enttUpdateTimes.cbegin(), g_enttUpdateTimes.cend(), (long long)0) << " nanoseconds\n\n";
-#endif
-
-#ifdef WRITE_TO_FILE
-	/* Write results to file: */
-	std::fstream file{};
-
-#ifdef APPEND_TO_FILE
-	file.open("Benchmarks.txt", std::ios::out | std::ios::app);
-#elif defined(OVERWRITE_TO_FILE)
-	file.open("Benchmarks.txt", std::ios::out);
-#endif
-
-	if (file.is_open())
-	{
-		file << "Program Created " << AmountOfEntities << " Entities\n";
-		file << "Program ran update code " << Iterations << " amount of times\n";
-
-#ifdef CUSTOMECS
-		file << "ECS Init Average: " << std::accumulate(g_ECSInitTimes.cbegin(), g_ECSInitTimes.cend(), (long long)0) / g_ECSInitTimes.size() << " nanoseconds\n";
-#endif
-#ifdef GAMEOBJECT
-		file << "GO Init Average: " << std::accumulate(g_GOInitTimes.cbegin(), g_GOInitTimes.cend(), (long long)0) / g_GOInitTimes.size() << " nanoseconds\n";
-#endif
-#ifdef ENTT
-		file << "ENTT Init Average: " << std::accumulate(g_enttInitTimes.cbegin(), g_enttInitTimes.cend(), (long long)0) / g_enttInitTimes.size() << " nanoseconds\n\n";
-#endif
-#ifdef CUSTOMECS
-		file << "ECS Update Average: " << std::accumulate(g_ECSUpdateTimes.cbegin(), g_ECSUpdateTimes.cend(), (long long)0) / g_ECSUpdateTimes.size() << " nanoseconds\n\n";
-#endif
-#ifdef GAMEOBJECT
-		file << "GO Update Average: " << std::accumulate(g_GOUpdateTimes.cbegin(), g_GOUpdateTimes.cend(), (long long)0) / g_GOUpdateTimes.size() << " nanoseconds\n\n";
-#endif
-#ifdef ENTT
-		file << "ENTT Update Average: " << std::accumulate(g_enttUpdateTimes.cbegin(), g_enttUpdateTimes.cend(), (long long)0) / g_enttUpdateTimes.size() << " nanoseconds\n\n";
-#endif
-}
-#endif
-
-	/* Cleanup systems */
-#ifdef GAMEOBJECT
-	for (GameObject* pG : gameObjects)
-		delete pG;
+	std::cout << "ENTT Total:\t\t\t" << std::accumulate(enttInitTimes.cbegin(), enttInitTimes.cend(), 0.0) + std::accumulate(enttUpdateTimes.cbegin(), enttUpdateTimes.cend(), 0.0) << " milliseconds\n\n";
 #endif
 
 	return 0;
