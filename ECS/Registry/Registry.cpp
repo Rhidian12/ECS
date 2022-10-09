@@ -11,11 +11,6 @@ namespace ECS
 
 	Registry::~Registry()
 	{
-		//for (int i{ static_cast<int>(Entities.Size()) - 1 }; i >= 0; --i)
-		//{
-		//	ReleaseEntity(Entities[i]);
-		//}
-
 		for (std::vector<Entity>& list : Entities)
 		{
 			for (int i{ static_cast<int>(list.size()) - 1 }; i >= 0; --i)
@@ -33,15 +28,9 @@ namespace ECS
 		, NrOfEntitiesPerList{ std::move(other.NrOfEntitiesPerList) }
 	{
 		other.EntitySignatures.clear();
-		// other.Entities.Clear();
 		other.Entities.clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
-
-		for (auto& [key, val] : ComponentPools)
-		{
-			val->SetEntities(&Entities);
-		}
 	}
 
 	Registry& Registry::operator=(Registry&& other) noexcept
@@ -53,15 +42,9 @@ namespace ECS
 		NrOfEntitiesPerList = std::move(other.NrOfEntitiesPerList);
 
 		other.EntitySignatures.clear();
-		//other.Entities.Clear();
 		other.Entities.clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
-
-		for (auto& [key, val] : ComponentPools)
-		{
-			val->SetEntities(&Entities);
-		}
 
 		return *this;
 	}
@@ -71,7 +54,6 @@ namespace ECS
 		assert(CurrentEntityCounter <= MaxEntities);
 
 		const Entity entity(CurrentEntityCounter++);
-		//Entities.Add(entity);
 
 		if (entity % NrOfEntitiesPerList == 0)
 		{
@@ -87,14 +69,12 @@ namespace ECS
 
 	bool Registry::ReleaseEntity(Entity entity)
 	{
-		//if (Entities.Contains(entity))
 		if (HasEntity(entity))
 		{
 			RemoveAllComponents(entity, GetEntitySignature(entity));
 
 			EntitySignatures.erase(entity);
 
-			// Entities.Remove(entity);
 			Entities[entity / NrOfEntitiesPerList].erase(
 				std::remove(
 					Entities[entity / NrOfEntitiesPerList].begin(),
@@ -118,7 +98,6 @@ namespace ECS
 			{
 				assert(ComponentPools[i]);
 
-				// ComponentPools[i]->Remove(Entities.GetIndex(entity));
 				ComponentPools[i]->Remove(entity);
 			}
 		}

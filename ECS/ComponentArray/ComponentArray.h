@@ -13,25 +13,25 @@ namespace ECS
 		virtual ~IComponentArray() = default;
 
 		virtual void Remove(const Entity entity) = 0;
-
-		virtual void SetEntities(std::vector<std::vector<Entity>>* const entities) = 0;
 	};
 
 	template<typename T>
 	class ComponentArray final : public IComponentArray
 	{
 	public:
-		ComponentArray(std::vector<std::vector<Entity>>* const entities, const size_t nrOfComponentsPerList)
-			: Entities{ entities }
+		ComponentArray(const size_t nrOfComponentsPerList)
+			: Entities{}
 			, Components{}
 			, NrOfComponentsPerList{ nrOfComponentsPerList }
+			, NrOfEntities{}
 		{}
 
 		ComponentArray(const ComponentArray&) noexcept = delete;
 		ComponentArray(ComponentArray&& other) noexcept
 			: Entities{ std::move(other.Entities) }
 			, Components{ std::move(other.Components) }
-			, NrOfComponentsPerList{std::move(other.NrOfComponentsPerList)}
+			, NrOfComponentsPerList{ std::move(other.NrOfComponentsPerList) }
+			, NrOfEntities{ std::move(other.NrOfEntities) }
 		{
 			other.Components.clear();
 			other.Entities = nullptr;
@@ -43,6 +43,7 @@ namespace ECS
 			Entities = std::move(other.Entities);
 			Components = std::move(other.Components);
 			NrOfComponentsPerList = std::move(other.NrOfComponentsPerList);
+			NrOfEntities = std::move(other.NrOfEntities);
 
 			other.Entities = nullptr;
 			other.Components.clear();
@@ -52,93 +53,76 @@ namespace ECS
 
 		T& AddComponent(const Entity entity)
 		{
-			// return Components.Add(entity, T{});
 			while (entity / NrOfComponentsPerList >= Components.size())
 			{
+				Entities.push_back(std::vector<Entity>{});
 				Components.push_back(std::vector<T>{});
 			}
 
+			++NrOfEntities;
+
+			Entities[entity / NrOfComponentsPerList].emplace_back(entity);
 			return Components[entity / NrOfComponentsPerList].emplace_back(T{});
 		}
 		template<typename ... Ts>
 		T& AddComponent(const Entity entity, Ts&& ... args)
 		{
-			// return Components.Add(entity, T{ std::forward<Ts>(args)... });
 			while (entity / NrOfComponentsPerList >= Components.size())
 			{
+				Entities.push_back(std::vector<Entity>{});
 				Components.push_back(std::vector<T>{});
 			}
 
+			++NrOfEntities;
+
+			Entities[entity / NrOfComponentsPerList].emplace_back(entity);
 			return Components[entity / NrOfComponentsPerList].emplace_back(T{ std::forward<Ts>(args)... });
 		}
 
-		//bool HasComponent(const Entity entity) const
-		//{
-		//	// return Components.ContainsKey(entity);
-		//	return Components[entity / NrOfComponentsPerList].ContainsKey(entity);
-		//}
-
 		virtual void Remove(const Entity entity) override
 		{
-			// Components.Remove(entity);
+			--NrOfEntities;
+
 			Components[entity / NrOfComponentsPerList].erase(
 				Components[entity / NrOfComponentsPerList].begin() +
 				(std::find(
-					(*Entities)[entity / NrOfComponentsPerList].cbegin(),
-					(*Entities)[entity / NrOfComponentsPerList].cend(),
-					entity) - 
-				(*Entities)[entity / NrOfComponentsPerList].cbegin()));
+					Entities[entity / NrOfComponentsPerList].cbegin(),
+					Entities[entity / NrOfComponentsPerList].cend(),
+					entity) -
+					Entities[entity / NrOfComponentsPerList].cbegin()));
 		}
-
-		// void SafeRemove(const Entity entity)
-		// {
-		// 	Components.SafeRemove(entity);
-		// }
-
-		//T& GetComponent(const Entity entity) { return Components.GetValue(entity); }
-		//const T& GetComponent(const Entity entity) const { return Components.GetValue(entity); }
-
-		//std::vector<T>& GetComponents() { return Components.GetValues(); }
-		//const std::vector<T>& GetComponents() const { return Components.GetValues(); }
-
-		//std::vector<Entity>& GetKeys() { return Components.GetKeys(); }
-		//const std::vector<Entity>& GetKeys() const { return Components.GetKeys(); }
-
-		//DoubleStorage<Entity, T>& GetStorage() { return Components; }
-		//const DoubleStorage<Entity, T>& GetStorage() const { return Components; }
 
 		T& GetComponent(const Entity entity)
 		{
 			return Components[entity / NrOfComponentsPerList][
 				std::find(
-					(*Entities)[entity / NrOfComponentsPerList].cbegin(),
-					(*Entities)[entity / NrOfComponentsPerList].cend(),
+					Entities[entity / NrOfComponentsPerList].cbegin(),
+					Entities[entity / NrOfComponentsPerList].cend(),
 					entity) -
-				(*Entities)[entity / NrOfComponentsPerList].cbegin()];
+					Entities[entity / NrOfComponentsPerList].cbegin()];
 		}
 		const T& GetComponent(const Entity entity) const
 		{
 			return Components[entity / NrOfComponentsPerList][
 				std::find(
-					(*Entities)[entity / NrOfComponentsPerList].cbegin(),
-					(*Entities)[entity / NrOfComponentsPerList].cend(),
+					Entities[entity / NrOfComponentsPerList].cbegin(),
+					Entities[entity / NrOfComponentsPerList].cend(),
 					entity) -
-					(*Entities)[entity / NrOfComponentsPerList].cbegin()];
+					Entities[entity / NrOfComponentsPerList].cbegin()];
 		}
 
 		std::vector<std::vector<T>>& GetComponents() { return Components; }
 		const std::vector<std::vector<T>>& GetComponents() const { return Components; }
 
-		virtual void SetEntities(std::vector<std::vector<Entity>>* const entities) override
-		{
-			Entities = entities;
-		}
+		std::vector<std::vector<Entity>>& GetEntities() { return Entities; }
+		const std::vector<std::vector<Entity>>& GetEntities() const { return Entities; }
+
+		size_t GetNrOfEntities() const { return NrOfEntities; }
 
 	private:
-		// DoubleStorage<Entity, T> Components;
-		// SparseSet<Entity>* Entities;
-		std::vector<std::vector<Entity>>* Entities;
+		std::vector<std::vector<Entity>> Entities;
 		std::vector<std::vector<T>> Components;
 		size_t NrOfComponentsPerList;
+		size_t NrOfEntities;
 	};
 }

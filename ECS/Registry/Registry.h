@@ -32,7 +32,7 @@ namespace ECS
 				(*static_cast<ComponentArray<Ts>*>(ComponentPools[GenerateComponentID<Ts>()].get()))...
 			};
 
-			return View<Ts...>{ std::move(comps), EntitySignatures, Entities };
+			return View<Ts...>{ std::move(comps), EntitySignatures };
 		}
 
 		template<typename T>
@@ -44,7 +44,7 @@ namespace ECS
 
 			if (!pool)
 			{
-				pool.reset(new ComponentArray<T>{ &Entities, NrOfEntitiesPerList });
+				pool.reset(new ComponentArray<T>{ NrOfEntitiesPerList });
 			}
 
 			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
@@ -58,7 +58,7 @@ namespace ECS
 
 			if (!pool)
 			{
-				pool.reset(new ComponentArray<T>{ &Entities, NrOfEntitiesPerList });
+				pool.reset(new ComponentArray<T>{ NrOfEntitiesPerList });
 			}
 
 			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...);
@@ -67,7 +67,6 @@ namespace ECS
 		template<typename T>
 		void RemoveComponent(const Entity entity)
 		{
-			// assert(Entities.Contains(entity));
 			assert(HasEntity(entity));
 
 			ComponentPools[GenerateComponentID<T>()]->Remove(entity);
@@ -114,7 +113,6 @@ namespace ECS
 		bool HasEntity(const Entity entity) const;
 
 		std::unordered_map<Entity, EntitySignature> EntitySignatures;
-		// SparseSet<Entity> Entities;
 		std::vector<std::vector<Entity>> Entities;
 		Entity CurrentEntityCounter;
 		std::unordered_map<ComponentType, std::unique_ptr<IComponentArray>> ComponentPools;

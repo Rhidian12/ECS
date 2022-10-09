@@ -120,24 +120,24 @@ ECS::Registry TestInitECS(const ECS::Entity amount)
 
 	Registry registry{};
 
-	//for (size_t i{}; i < amount; ++i)
-	//{
-	//	Entity entity{ registry.CreateEntity() };
-
-	//	registry.AddComponent<TransformComponent>(entity);
-	//	registry.AddComponent<RigidBodyComponent>(entity);
-	//	registry.AddComponent<GravityComponent>(entity);
-	//}
-
-	Entity entity{};
-	for (size_t i{}; i < 10; ++i)
+	for (size_t i{}; i < amount; ++i)
 	{
-		entity = registry.CreateEntity();
+		Entity entity{ registry.CreateEntity() };
 
+		registry.AddComponent<TransformComponent>(entity);
+		registry.AddComponent<RigidBodyComponent>(entity);
 		registry.AddComponent<GravityComponent>(entity);
 	}
 
-	registry.AddComponent<RigidBodyComponent>(entity);
+	//Entity entity{};
+	//for (size_t i{}; i < 10; ++i)
+	//{
+	//	entity = registry.CreateEntity();
+
+	//	registry.AddComponent<GravityComponent>(entity);
+	//	registry.AddComponent<TransformComponent>(entity);
+	//}
+	//registry.AddComponent<RigidBodyComponent>(entity);
 
 	t2 = std::chrono::steady_clock::now();
 
