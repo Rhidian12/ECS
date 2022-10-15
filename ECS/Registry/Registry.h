@@ -87,13 +87,13 @@ namespace ECS
 		}
 
 		template<typename T>
-		auto& GetComponents()
+		std::vector<T>& GetComponents()
 		{
 			assert(ComponentPools[GenerateComponentID<T>()]);
 			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponents();
 		}
 		template<typename T>
-		const auto& GetComponents() const
+		const std::vector<T>& GetComponents() const
 		{
 			assert(ComponentPools[GenerateComponentID<T>()]);
 			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponents();
