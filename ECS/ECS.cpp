@@ -4,6 +4,7 @@
 
 #include "GOComponent/GOComponent.h"
 #include "GameObject/GameObject.h"
+#include "Timer/Timer.h"
 
 #include <iostream>
 #include <chrono>
@@ -21,16 +22,23 @@
 #include "ECSComponents/ECSComponents.h"
 #include "GOComponents/GOComponents.h"
 
-template<typename T, typename ... Ts, typename = std::enable_if_t<std::is_invocable_r_v<void, T, Ts...>>>
-double Benchmark(T&& fn, Ts&&... args)
+template<typename Fn>
+double Benchmark(Fn&& fn)
 {
-	std::chrono::high_resolution_clock::time_point t1{ std::chrono::high_resolution_clock::now() };
+	using namespace ECS::Time;
 
-	fn(std::forward<Ts>(args)...);
+	Timepoint t1{ Timer::Now() };
 
-	std::chrono::high_resolution_clock::time_point t2{ std::chrono::high_resolution_clock::now() };
+	fn();
 
-	return std::chrono::duration<double, std::milli>(t2 - t1).count();
+	Timepoint t2{ Timer::Now() };
+
+	return (t2 - t1).Count();
+}
+
+double GetAverage(const std::deque<double>& arr)
+{
+	return std::accumulate(arr.cbegin(), arr.cend(), 0.0) / static_cast<double>(arr.size());
 }
 
 #pragma region Test Update Functions
@@ -166,7 +174,11 @@ int main(int*, char* [])
 		while (deltaTime < TimeToUpdate)
 		{
 #ifdef CUSTOMECS
-			ecsUpdateTimes.push_back(Benchmark(GravityUpdate, ECS) + Benchmark(PhysicsUpdate, ECS));
+			ecsUpdateTimes.push_back(Benchmark([&ECS]()
+				{
+					GravityUpdate(ECS);
+					PhysicsUpdate(ECS);
+				}));
 #endif
 #ifdef GAMEOBJECT
 			goUpdateTimes.push_back(Benchmark([&gameObjects]()
@@ -178,7 +190,11 @@ int main(int*, char* [])
 				}));
 #endif
 #ifdef ENTT
-			enttUpdateTimes.push_back(Benchmark(ENTTGravityUpdate, entt) + Benchmark(ENTTPhysicsUpdate, entt));
+			enttUpdateTimes.push_back(Benchmark([&entt]()
+				{
+					ENTTGravityUpdate(entt);
+					ENTTPhysicsUpdate(entt);
+				}));
 #endif
 			deltaTime += std::chrono::duration<float>(std::chrono::steady_clock::now() - now).count();
 

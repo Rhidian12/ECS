@@ -148,6 +148,7 @@
     <ClCompile Include="Registry\Registry.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GOComponent\GOComponent.cpp" />
+    <ClCompile Include="Timer\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
@@ -232,6 +233,9 @@
     <ClInclude Include="GOComponent\GOComponent.h" />
     <ClInclude Include="Point2f\Point2f.h" />
     <ClInclude Include="SparseSet\SparseSet.h" />
+    <ClInclude Include="Timer\TimeLength.h" />
+    <ClInclude Include="Timer\Timepoint\Timepoint.h" />
+    <ClInclude Include="Timer\Timer.h" />
     <ClInclude Include="Utils\Utils.h" />
     <ClInclude Include="View\View.h" />
   </ItemGroup>

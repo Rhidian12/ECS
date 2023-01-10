@@ -63,5 +63,13 @@ namespace ECS
 		{
 			return abs(a - b) <= epsilon;
 		}
+
+		template<typename T>
+		constexpr bool AreEqual(const T a, const T b, const T epsilon = std::numeric_limits<T>::epsilon())
+		{
+			static_assert(std::is_fundamental_v<T>, "Utils::AreEqual<T>() > T must be a fundamental type");
+
+			return static_cast<T>(abs(a - b)) <= epsilon;
+		}
 	}
 }
