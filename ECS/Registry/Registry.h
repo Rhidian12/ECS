@@ -44,7 +44,7 @@ namespace ECS
 
 			if (!pool)
 			{
-				pool.reset(new ComponentArray<T>{ NrOfEntitiesPerList });
+				pool.reset(new ComponentArray<T>{});
 			}
 
 			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent(entity);
@@ -58,7 +58,7 @@ namespace ECS
 
 			if (!pool)
 			{
-				pool.reset(new ComponentArray<T>{ NrOfEntitiesPerList });
+				pool.reset(new ComponentArray<T>{});
 			}
 
 			return static_cast<ComponentArray<T>*>(pool.get())->AddComponent<Ts...>(entity, std::forward<Ts>(args)...);

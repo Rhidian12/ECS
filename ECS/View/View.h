@@ -17,47 +17,28 @@ namespace ECS
 		using ViewContainerType = std::tuple<ComponentArray<Ts>&...>;
 
 	public:
-		explicit View(ViewContainerType&& components, std::unordered_map<Entity, EntitySignature>& sigs)
+		explicit View(ViewContainerType&& components, const std::unordered_map<Entity, EntitySignature>& sigs)
 			: Components{ std::move(components) }
 			, EntitySignatures{ sigs }
-			, Entities{}
-		{
-			SetEntities(std::make_index_sequence<sizeof ... (Ts)>{});
-		}
+		{}
 
 		void ForEach(const std::function<void(Ts&...)>& function)
 		{
 			auto indexSequence{ std::make_index_sequence<sizeof ... (Ts)>{} };
 
-			for (const std::vector<Entity>& list : *Entities)
-			{
-				for (const Entity ent : list)
-				{
-					ForEach(function, ent, indexSequence);
-				}
-			}
+			for (const auto& [entity, sig] : EntitySignatures)
+				ForEach(function, entity, sig, indexSequence);
 		}
 
 	private:
 		template<size_t ... Is>
-		void ForEach(const std::function<void(Ts&...)>& function, const Entity ent, std::index_sequence<Is...>)
+		void ForEach(const std::function<void(Ts&...)>& function, const Entity ent, const EntitySignature& sig, const std::index_sequence<Is...>&)
 		{
-			if ((EntitySignatures.at(ent).test(GenerateComponentID<Ts>()) && ...))
-			{
-				auto tuple{ std::tuple<Ts&...>(std::get<Is>(Components).GetComponent(ent)...) };
-				std::apply(function, tuple);
-			}
-		}
-
-		template<size_t ... Is>
-		void SetEntities(std::index_sequence<Is...>)
-		{
-			((Entities = std::get<0>(Components).GetNrOfEntities() > std::get<Is>(Components).GetNrOfEntities() ?
-				&std::get<0>(Components).GetEntities() : &std::get<Is>(Components).GetEntities()), ...);
+			if ((sig.test(GenerateComponentID<Ts>()) && ...))
+				std::apply(function, std::tuple<Ts&...>(std::get<Is>(Components).GetComponent(ent)...));
 		}
 
 		ViewContainerType Components;
-		std::unordered_map<Entity, EntitySignature>& EntitySignatures;
-		std::vector<std::vector<Entity>>* Entities;
+		const std::unordered_map<Entity, EntitySignature>& EntitySignatures;
 	};
 }

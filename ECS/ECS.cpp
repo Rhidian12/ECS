@@ -89,11 +89,11 @@ void PhysicsUpdate(ECS::Registry& registry)
 #define CUSTOMECS_UPDATE
 
 // #define GAMEOBJECT
-#define GAMEOBJECT_CREATION
+// #define GAMEOBJECT_CREATION
 #define GAMEOBJECT_UPDATE
 
 // #define ENTT
-#define ENTT_CREATION
+// #define ENTT_CREATION
 #define ENTT_UPDATE
 
 //#define UNIT_TESTS
@@ -106,7 +106,7 @@ int main(int*, char* [])
 	using namespace GO;
 
 	/* Benchmarking Constants */
-	constexpr int Iterations{ 10 };
+	constexpr int Iterations{ 1 };
 	constexpr Entity AmountOfEntities{ 100'000 };
 
 #ifdef CUSTOMECS

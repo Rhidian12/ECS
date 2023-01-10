@@ -12,12 +12,8 @@ namespace ECS
 	Registry::~Registry()
 	{
 		for (std::vector<Entity>& list : Entities)
-		{
 			for (int i{ static_cast<int>(list.size()) - 1 }; i >= 0; --i)
-			{
 				ReleaseEntity(list[i]);
-			}
-		}
 	}
 
 	Registry::Registry(Registry&& other) noexcept
