@@ -107,7 +107,7 @@ int main(int*, char* [])
 
 	/* Benchmarking Constants */
 	constexpr int Iterations{ 1 };
-	constexpr Entity AmountOfEntities{ 100'000 };
+	constexpr Entity AmountOfEntities{ 100'000'00 };
 
 #ifdef CUSTOMECS
 
@@ -290,7 +290,7 @@ int main(int*, char* [])
 #endif // CUSTOMECS_CREATION
 
 #ifdef CUSTOMECS_UPDATE
-	std::cout << "ECS Update Average:\t\t" << GetAverage(ecsUpdateTimes) << " milliseconds\n";
+	std::cout << "ECS Update Average:\t\t" << GetAverage(ecsUpdateTimes) << " milliseconds\n\n";
 #endif // CUSTOMECS_UPDATE
 
 #endif // CUSTOMECS
@@ -302,7 +302,7 @@ int main(int*, char* [])
 #endif // GAMEOBJECT_CREATION
 
 #ifdef GAMEOBJECT_UPDATE
-	std::cout << "GO Update Average:\t\t" << GetAverage(goUpdateTimes) << " milliseconds\n";
+	std::cout << "GO Update Average:\t\t" << GetAverage(goUpdateTimes) << " milliseconds\n\n";
 #endif // GAMEOBJECT_UPDATE
 
 #endif // GAMEOBJECT
@@ -314,7 +314,7 @@ int main(int*, char* [])
 #endif // ENTT_CREATION
 
 #ifdef ENTT_UPDATE
-	std::cout << "ENTT Update Average:\t\t" << GetAverage(enttUpdateTimes) << " milliseconds\n";
+	std::cout << "ENTT Update Average:\t\t" << GetAverage(enttUpdateTimes) << " milliseconds\n\n";
 #endif // ENTT_UPDATE
 
 #endif // ENTT
