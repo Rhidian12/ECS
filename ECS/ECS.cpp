@@ -96,8 +96,8 @@ void PhysicsUpdate(ECS::Registry& registry)
 #define ENTT_CREATION
 #define ENTT_UPDATE
 
-#define UNIT_TESTS
-// #define BENCHMARKS
+// #define UNIT_TESTS
+#define BENCHMARKS
 
 #ifdef BENCHMARKS
 int main(int*, char* [])
@@ -423,12 +423,12 @@ TEST_CASE("Testing custom ECS")
 
 		view.ForEach([](const auto& grav, auto& trans)
 			{
-				trans.Position.y -= grav.Gravity;
+				trans.Position.y += grav.Gravity; // - 981.0
 			});
 
 		for (int i{}; i < size; ++i)
 		{
-			REQUIRE(startPositions[i] != registry.GetComponent<TransformComponent>(i).Position.y);
+			REQUIRE(startPositions[i] > registry.GetComponent<TransformComponent>(i).Position.y);
 		}
 	}
 	
