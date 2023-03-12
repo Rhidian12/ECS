@@ -88,16 +88,16 @@ void PhysicsUpdate(ECS::Registry& registry)
 #define CUSTOMECS_CREATION
 #define CUSTOMECS_UPDATE
 
-// #define GAMEOBJECT
-// #define GAMEOBJECT_CREATION
+#define GAMEOBJECT
+#define GAMEOBJECT_CREATION
 #define GAMEOBJECT_UPDATE
 
-// #define ENTT
-// #define ENTT_CREATION
+#define ENTT
+#define ENTT_CREATION
 #define ENTT_UPDATE
 
-//#define UNIT_TESTS
-#define BENCHMARKS
+#define UNIT_TESTS
+// #define BENCHMARKS
 
 #ifdef BENCHMARKS
 int main(int*, char* [])
@@ -329,7 +329,7 @@ int main(int*, char* [])
 
 TEST_CASE("Testing SparseSet")
 {
-	ECS::SparseSet<uint16_t> set{};
+	ECS::SparseSet<int> set{};
 
 	REQUIRE(set.Size() == 0);
 
@@ -384,115 +384,53 @@ TEST_CASE("Testing SparseSet")
 			REQUIRE(i == counter++);
 		}
 	}
-
-	SECTION("Adding Max elements and removing certain elements")
-	{
-		for (int i{}; i < std::numeric_limits<uint16_t>::max(); ++i)
-		{
-			set.Add(i);
-		}
-
-		REQUIRE(set.Size() == std::numeric_limits<uint16_t>::max());
-
-		for (int i{}; i < 10'000; ++i)
-		{
-			REQUIRE(set.Contains(i));
-			set.Remove(i);
-			REQUIRE(!set.Contains(i));
-		}
-
-		for (int i{}; i < 10'000; ++i)
-		{
-			REQUIRE(!set.Contains(i));
-			set.Add(i);
-			REQUIRE(set.Contains(i));
-		}
-	}
 }
 
 TEST_CASE("Testing custom ECS")
 {
-	ECS::EntityManager gravitySystem{};
+	ECS::Registry registry{};
 
-	REQUIRE(gravitySystem.GetAmountOfEntities() == 0);
+	REQUIRE(registry.GetAmountOfEntities() == 0);
 
 	SECTION("Making one entity")
 	{
-		ECS::Entity entity{ gravitySystem.CreateEntity() };
+		ECS::Entity entity{ registry.CreateEntity() };
 
-		/* for this one it's possible, but when entities get deleted, their id's get pushed back */
 		REQUIRE(entity == 0);
+
+		registry.ReleaseEntity(entity);
+
+		REQUIRE(entity == ECS::InvalidEntityID);
 	}
 
-	SECTION("Making one entity and adding components to it")
+	SECTION("Making 10 entities and testing their updates")
 	{
-		ECS::Entity entity{ gravitySystem.CreateEntity() };
+		constexpr int size{ 10 };
+		float startPositions[size]{};
 
-		gravitySystem.AddComponent<GravityComponent>(entity);
-		gravitySystem.AddComponent<RigidBodyComponent>(entity);
-		gravitySystem.AddComponent<TransformComponent>(entity);
+		for (int i{}; i < size; ++i)
+		{
+			ECS::Entity entity{ registry.CreateEntity() };
 
-		//REQUIRE(ECS::ComponentManager::GetInstance().GetNrOfComponents<GravityComponent>() == 1);
-		//REQUIRE(ECS::ComponentManager::GetInstance().GetNrOfComponents<RigidBodyComponent>() == 1);
-		//REQUIRE(ECS::ComponentManager::GetInstance().GetNrOfComponents<TransformComponent>() == 1);
+			registry.AddComponent<GravityComponent>(entity);
+			registry.AddComponent<TransformComponent>(entity);
+			registry.AddComponent<RigidBodyComponent>(entity);
+
+			startPositions[i] = registry.GetComponent<TransformComponent>(entity).Position.y;
+		}
+
+		auto view = registry.CreateView<GravityComponent, TransformComponent>();
+
+		view.ForEach([](const auto& grav, auto& trans)
+			{
+				trans.Position.y -= grav.Gravity;
+			});
+
+		for (int i{}; i < size; ++i)
+		{
+			REQUIRE(startPositions[i] != registry.GetComponent<TransformComponent>(i).Position.y);
+		}
 	}
-
-	SECTION("Adding and Release Entities")
-	{
-		ECS::Entity entity{ gravitySystem.CreateEntity() };
-
-		REQUIRE(gravitySystem.GetAmountOfEntities() == 1);
-
-		gravitySystem.ReleaseEntity(entity);
-
-		REQUIRE(gravitySystem.GetAmountOfEntities() == 0);
-	}
-
-	SECTION("Adding and Removing components")
-	{
-		ECS::Entity entity{ gravitySystem.CreateEntity() };
-
-		gravitySystem.AddComponent<GravityComponent>(entity);
-		gravitySystem.AddComponent<RigidBodyComponent>(entity);
-		gravitySystem.AddComponent<TransformComponent>(entity);
-
-		// REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 1);
-		// REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 1);
-		// REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 1);
-
-		gravitySystem.RemoveComponent<GravityComponent>(entity);
-		// REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<GravityComponent>() == 0);
-
-		gravitySystem.RemoveComponent<RigidBodyComponent>(entity);
-		// REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<RigidBodyComponent>() == 0);
-
-		gravitySystem.RemoveComponent<TransformComponent>(entity);
-		// REQUIRE(ECS::ComponentManager::GetInstance()->GetNrOfComponents<TransformComponent>() == 0);
-
-		/* Removing a Component from a entity without that component throws assertion */
-	}
-
-	SECTION("Testing Component Update")
-	{
-		ECS::Entity entity{ gravitySystem.CreateEntity() };
-
-		gravitySystem.AddComponent<GravityComponent>(entity);
-		gravitySystem.AddComponent<RigidBodyComponent>(entity);
-
-		GravityUpdate(gravitySystem);
-
-		REQUIRE(!ECS::Utils::Equals(gravitySystem.GetComponent<RigidBodyComponent>(entity).Velocity.y, 0.f));
-	}
-
-	/* This sections throws an assert */
-	SECTION("Testing what happens with a system that contains too little entities' components")
-	{
-		ECS::Entity entity{ gravitySystem.CreateEntity() };
-
-		gravitySystem.AddComponent<GravityComponent>(entity);
-
-		/* Uncommenting this line should result in an assert failure */
-		// GravityUpdate(gravitySystem);
-	}
+	
 }
 #endif

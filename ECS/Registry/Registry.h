@@ -7,7 +7,6 @@
 #include "../ComponentArray/ComponentArray.h"
 
 #include <assert.h> /* assert() */
-#include <unordered_map> /* unordered_map */
 #include <array> /* std::array */
 
 namespace ECS
@@ -15,7 +14,7 @@ namespace ECS
 	class Registry final
 	{
 	public:
-		Registry(const size_t nrOfEntitiesPerList = 1000);
+		Registry();
 		~Registry();
 
 		Registry(const Registry&) noexcept = delete;
@@ -29,7 +28,7 @@ namespace ECS
 			/* Get all components asked for by the user */
 			std::tuple<ComponentArray<Ts>&...> comps
 			{
-				(*static_cast<ComponentArray<Ts>*>(ComponentPools[GenerateComponentID<Ts>()].get()))...
+				(*static_cast<ComponentArray<Ts>*>(GetComponentArray(GenerateComponentID<Ts>()).get()))...
 			};
 
 			return View<Ts...>{ std::move(comps), EntitySignatures };
@@ -40,7 +39,7 @@ namespace ECS
 		{
 			SetEntitySignature(entity, GenerateComponentID<T>());
 
-			std::unique_ptr<IComponentArray>& pool{ ComponentPools[GenerateComponentID<T>()] };
+			std::unique_ptr<IComponentArray>& pool{ GetComponentArray(GenerateComponentID<T>()) };
 
 			if (!pool)
 			{
@@ -54,7 +53,7 @@ namespace ECS
 		{
 			SetEntitySignature(entity, GenerateComponentID<T>());
 
-			std::unique_ptr<IComponentArray>& pool{ ComponentPools[GenerateComponentID<T>()] };
+			std::unique_ptr<IComponentArray>& pool{ GetComponentArray(GenerateComponentID<T>()) };
 
 			if (!pool)
 			{
@@ -69,53 +68,54 @@ namespace ECS
 		{
 			assert(HasEntity(entity));
 
-			ComponentPools[GenerateComponentID<T>()]->Remove(entity);
+			GetComponentArray(GenerateComponentID<T>())->Remove(entity);
 			SetEntitySignature(entity, GenerateComponentID<T>(), false);
 		}
 
 		template<typename T>
 		T& GetComponent(const Entity entity)
 		{
-			assert(ComponentPools[GenerateComponentID<T>()]);
-			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent(entity);
+			assert(GetComponentArray(GenerateComponentID<T>()));
+			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponent(entity);
 		}
 		template<typename T>
 		const T& GetComponent(const Entity entity) const
 		{
-			assert(ComponentPools[GenerateComponentID<T>()]);
-			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponent(entity);
+			assert(GetComponentArray(GenerateComponentID<T>()));
+			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponent(entity);
 		}
 
 		template<typename T>
 		std::vector<T>& GetComponents()
 		{
-			assert(ComponentPools[GenerateComponentID<T>()]);
-			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponents();
+			assert(GetComponentArray(GenerateComponentID<T>()));
+			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponents();
 		}
 		template<typename T>
 		const std::vector<T>& GetComponents() const
 		{
-			assert(ComponentPools[GenerateComponentID<T>()]);
-			return static_cast<ComponentArray<T>*>(ComponentPools[GenerateComponentID<T>()].get())->GetComponents();
+			assert(GetComponentArray(GenerateComponentID<T>()));
+			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponents();
 		}
 
 		Entity CreateEntity();
-		bool ReleaseEntity(Entity entity);
+		bool ReleaseEntity(Entity& entity);
 		Entity GetAmountOfEntities() const { return CurrentEntityCounter; }
 
-		void SetEntitySignature(const Entity entity, const EntitySignature sig) { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); EntitySignatures[entity] = sig; }
-		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true) { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); EntitySignatures[entity].set(id, val); }
-
-		const EntitySignature& GetEntitySignature(const Entity entity) const { assert(EntitySignatures.find(entity) != EntitySignatures.cend()); return EntitySignatures.find(entity)->second; }
+		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true);
+		const EntitySignature& GetEntitySignature(const Entity entity) const;
 
 	private:
 		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
 		bool HasEntity(const Entity entity) const;
+		std::unique_ptr<IComponentArray>& GetComponentArray(const ComponentType cType);
 
-		std::unordered_map<Entity, EntitySignature> EntitySignatures;
-		std::vector<std::vector<Entity>> Entities;
+		// Entities
+		std::vector<std::pair<Entity, EntitySignature>> EntitySignatures; // [TODO]: Make a map that uses arrays 
+		std::vector<Entity> Entities;
 		Entity CurrentEntityCounter;
-		std::unordered_map<ComponentType, std::unique_ptr<IComponentArray>> ComponentPools;
-		size_t NrOfEntitiesPerList;
+
+		// Components
+		std::vector<std::pair<ComponentType, std::unique_ptr<IComponentArray>>> ComponentPools; // [TODO]: Make a map that uses arrays 
 	};
 }

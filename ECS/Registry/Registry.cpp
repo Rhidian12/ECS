@@ -1,19 +1,21 @@
 #include "Registry.h"
 
+#include <algorithm>
+
 namespace ECS
 {
-	Registry::Registry(const size_t nrOfEntitiesPerList)
+	Registry::Registry()
 		: EntitySignatures{}
 		, Entities{}
 		, CurrentEntityCounter{}
-		, NrOfEntitiesPerList{ nrOfEntitiesPerList }
 	{}
 
 	Registry::~Registry()
 	{
-		for (std::vector<Entity>& list : Entities)
-			for (int i{ static_cast<int>(list.size()) - 1 }; i >= 0; --i)
-				ReleaseEntity(list[i]);
+		for (Entity& entity : Entities)
+			ReleaseEntity(entity);
+
+		Entities.clear();
 	}
 
 	Registry::Registry(Registry&& other) noexcept
@@ -21,7 +23,6 @@ namespace ECS
 		, ComponentPools{ std::move(other.ComponentPools) }
 		, Entities{ std::move(other.Entities) }
 		, CurrentEntityCounter{ std::move(other.CurrentEntityCounter) }
-		, NrOfEntitiesPerList{ std::move(other.NrOfEntitiesPerList) }
 	{
 		other.EntitySignatures.clear();
 		other.Entities.clear();
@@ -35,7 +36,6 @@ namespace ECS
 		Entities = std::move(other.Entities);
 		CurrentEntityCounter = std::move(other.CurrentEntityCounter);
 		ComponentPools = std::move(other.ComponentPools);
-		NrOfEntitiesPerList = std::move(other.NrOfEntitiesPerList);
 
 		other.EntitySignatures.clear();
 		other.Entities.clear();
@@ -49,36 +49,25 @@ namespace ECS
 	{
 		assert(CurrentEntityCounter <= MaxEntities);
 
-		const Entity entity(CurrentEntityCounter++);
+		const Entity entity{ CurrentEntityCounter++ }; // [TODO]: We should recycle used entities
 
-		if (entity % NrOfEntitiesPerList == 0)
-		{
-			Entities.push_back(std::vector<Entity>{});
-		}
+		Entities.push_back(entity);
 
-		Entities[entity / NrOfEntitiesPerList].push_back(entity);
-
-		EntitySignatures.insert(std::make_pair(entity, EntitySignature{}));
+		EntitySignatures.push_back(std::make_pair(entity, EntitySignature{}));
 
 		return entity;
 	}
 
-	bool Registry::ReleaseEntity(Entity entity)
+	bool Registry::ReleaseEntity(Entity& entity)
 	{
 		if (HasEntity(entity))
 		{
-			RemoveAllComponents(entity, GetEntitySignature(entity));
+			RemoveAllComponents(entity, GetEntitySignature(entity)); // [TODO]: Come up with a better way to handle this
 
-			EntitySignatures.erase(entity);
+			EntitySignatures[entity].first = InvalidEntityID;
+			EntitySignatures[entity].second = EntitySignature{};
 
-			Entities[entity / NrOfEntitiesPerList].erase(
-				std::remove(
-					Entities[entity / NrOfEntitiesPerList].begin(),
-					Entities[entity / NrOfEntitiesPerList].end(),
-					entity),
-				Entities[entity / NrOfEntitiesPerList].end());
-
-			--CurrentEntityCounter;
+			entity = InvalidEntityID;
 
 			return true;
 		}
@@ -92,17 +81,44 @@ namespace ECS
 		{
 			if (sig.test(i))
 			{
-				assert(ComponentPools[i]);
+				assert(GetComponentArray(i));
 
-				ComponentPools[i]->Remove(entity);
+				GetComponentArray(i)->Remove(entity);
 			}
 		}
 	}
 
 	bool Registry::HasEntity(const Entity entity) const
 	{
-		return std::find(Entities[entity / NrOfEntitiesPerList].cbegin(),
-			Entities[entity / NrOfEntitiesPerList].cend(),
-			entity) != Entities[entity / NrOfEntitiesPerList].cend();
+		return (entity < Entities.size() && Entities[entity] != InvalidEntityID);
+	}
+
+	void Registry::SetEntitySignature(const Entity entity, const ComponentType id, const bool val)
+	{
+		assert(HasEntity(entity));
+		EntitySignatures[entity].second.set(id, val);
+	}
+
+	const EntitySignature& Registry::GetEntitySignature(const Entity entity) const
+	{
+		assert(HasEntity(entity));
+		return EntitySignatures[entity].second;
+	}
+
+	std::unique_ptr<IComponentArray>& Registry::GetComponentArray(const ComponentType cType)
+	{
+		const auto cIt{ std::find_if(ComponentPools.begin(), ComponentPools.end(), [cType](const auto& kvPair) -> bool
+			{
+				return kvPair.first == cType;
+			}) };
+
+		if (cIt != ComponentPools.end())
+		{
+			return cIt->second;
+		}
+		else
+		{
+			return ComponentPools.emplace_back(std::make_pair(cType, nullptr)).second;
+		}
 	}
 }

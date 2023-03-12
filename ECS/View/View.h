@@ -17,7 +17,7 @@ namespace ECS
 		using ViewContainerType = std::tuple<ComponentArray<Ts>&...>;
 
 	public:
-		explicit View(ViewContainerType&& components, const std::unordered_map<Entity, EntitySignature>& sigs)
+		explicit View(ViewContainerType&& components, const std::vector<std::pair<Entity, EntitySignature>>& sigs)
 			: Components{ std::move(components) }
 			, EntitySignatures{ sigs }
 		{}
@@ -39,6 +39,6 @@ namespace ECS
 		}
 
 		ViewContainerType Components;
-		const std::unordered_map<Entity, EntitySignature>& EntitySignatures;
+		const std::vector<std::pair<Entity, EntitySignature>>& EntitySignatures;
 	};
 }

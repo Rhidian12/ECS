@@ -130,7 +130,10 @@ namespace ECS
 			return AddImpl(std::move(value));
 		}
 
-		bool Contains(const T value) const { return (value < Sparse.size()) && (Sparse[value] != InvalidEntityID); }
+		bool Contains(const T value) const
+		{
+			return (value < Sparse.size()) && (Sparse[value] != InvalidEntityID);
+		}
 		T GetIndex(const T value) const { assert(Contains(value)); return Sparse[value]; }
 
 		size_t Size() const { return _Size; }
@@ -152,8 +155,14 @@ namespace ECS
 
 		void Reserve(const size_t capacity) { Sparse.reserve(capacity); Packed.reserve(capacity); }
 
-		T& operator[](const size_t index) { assert(index < _Size); return Packed[index]; }
-		const T operator[](const size_t index) const { assert(index < _Size); return Packed[index]; }
+		T& operator[](const size_t index)
+		{ 
+			return Packed[Sparse[index]];
+		}
+		const T operator[](const size_t index) const
+		{ 
+			return Packed[Sparse[index]]; 
+		}
 
 		RandomIterator<T> begin() { return RandomIterator(Packed.data()); }
 		RandomIterator<const T> begin() const { return RandomIterator<const T>(Packed.data()); }
