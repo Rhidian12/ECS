@@ -136,6 +136,14 @@ namespace ECS
 		}
 		T GetIndex(const T value) const { assert(Contains(value)); return Sparse[value]; }
 
+		void Swap(const T a, const T b)
+		{
+			assert(Contains(a) && Contains(b));
+
+			// std::swap(Packed[Sparse[a]], Packed[Sparse[b]]);
+			std::swap(Sparse[a], Sparse[b]);
+		}
+
 		size_t Size() const { return _Size; }
 		void Clear() { Sparse.clear(); Packed.clear(); _Size = 0; }
 

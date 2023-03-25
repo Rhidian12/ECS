@@ -15,7 +15,7 @@ namespace ECS
 		for (Entity& entity : Entities)
 			ReleaseEntity(entity);
 
-		Entities.clear();
+		Entities.Clear();
 	}
 
 	Registry::Registry(Registry&& other) noexcept
@@ -23,11 +23,13 @@ namespace ECS
 		, ComponentPools{ std::move(other.ComponentPools) }
 		, Entities{ std::move(other.Entities) }
 		, CurrentEntityCounter{ std::move(other.CurrentEntityCounter) }
+		, RecycledEntities{std::move(other.RecycledEntities)}
 	{
 		other.EntitySignatures.clear();
-		other.Entities.clear();
+		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
+		other.RecycledEntities.clear();
 	}
 
 	Registry& Registry::operator=(Registry&& other) noexcept
@@ -36,11 +38,13 @@ namespace ECS
 		Entities = std::move(other.Entities);
 		CurrentEntityCounter = std::move(other.CurrentEntityCounter);
 		ComponentPools = std::move(other.ComponentPools);
+		RecycledEntities = std::move(other.RecycledEntities);
 
 		other.EntitySignatures.clear();
-		other.Entities.clear();
+		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
+		other.RecycledEntities.clear();
 
 		return *this;
 	}
@@ -49,16 +53,26 @@ namespace ECS
 	{
 		assert(CurrentEntityCounter <= MaxEntities);
 
-		const Entity entity{ CurrentEntityCounter++ }; // [TODO]: We should recycle used entities
+		Entity entity{};
 
-		Entities.push_back(entity);
+		if (!RecycledEntities.empty())
+		{
+			entity = RecycledEntities.back();
+			RecycledEntities.pop_back();
+		}
+		else
+		{
+			entity = CurrentEntityCounter++;
+		}
+
+		Entities.Add(entity);
 
 		EntitySignatures.push_back(std::make_pair(entity, EntitySignature{}));
 
 		return entity;
 	}
 
-	bool Registry::ReleaseEntity(Entity& entity)
+	bool Registry::ReleaseEntity(const Entity entity)
 	{
 		if (HasEntity(entity))
 		{
@@ -67,7 +81,9 @@ namespace ECS
 			EntitySignatures[entity].first = InvalidEntityID;
 			EntitySignatures[entity].second = EntitySignature{};
 
-			entity = InvalidEntityID;
+			Entities.Remove(entity);
+
+			RecycledEntities.push_back(entity);
 
 			return true;
 		}
@@ -90,7 +106,7 @@ namespace ECS
 
 	bool Registry::HasEntity(const Entity entity) const
 	{
-		return (entity < Entities.size() && Entities[entity] != InvalidEntityID);
+		return (entity < Entities.Size() && Entities[entity] != InvalidEntityID);
 	}
 
 	void Registry::SetEntitySignature(const Entity entity, const ComponentType id, const bool val)

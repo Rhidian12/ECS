@@ -99,8 +99,11 @@ namespace ECS
 		}
 
 		Entity CreateEntity();
-		bool ReleaseEntity(Entity& entity);
-		Entity GetAmountOfEntities() const { return CurrentEntityCounter; }
+		bool ReleaseEntity(const Entity entity);
+		size_t GetAmountOfEntities() const
+		{
+			return Entities.Size();
+		}
 
 		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true);
 		const EntitySignature& GetEntitySignature(const Entity entity) const;
@@ -112,7 +115,8 @@ namespace ECS
 
 		// Entities
 		std::vector<std::pair<Entity, EntitySignature>> EntitySignatures; // [TODO]: Make a map that uses arrays 
-		std::vector<Entity> Entities;
+		SparseSet<Entity> Entities;
+		std::vector<Entity> RecycledEntities;
 		Entity CurrentEntityCounter;
 
 		// Components

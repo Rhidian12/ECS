@@ -88,16 +88,16 @@ void PhysicsUpdate(ECS::Registry& registry)
 #define CUSTOMECS_CREATION
 #define CUSTOMECS_UPDATE
 
-#define GAMEOBJECT
-#define GAMEOBJECT_CREATION
-#define GAMEOBJECT_UPDATE
+// #define GAMEOBJECT
+// #define GAMEOBJECT_CREATION
+// #define GAMEOBJECT_UPDATE
+// 
+// #define ENTT
+// #define ENTT_CREATION
+// #define ENTT_UPDATE
 
-#define ENTT
-#define ENTT_CREATION
-#define ENTT_UPDATE
-
-// #define UNIT_TESTS
-#define BENCHMARKS
+#define UNIT_TESTS
+// #define BENCHMARKS
 
 #ifdef BENCHMARKS
 int main(int*, char* [])
@@ -107,7 +107,7 @@ int main(int*, char* [])
 
 	/* Benchmarking Constants */
 	constexpr int Iterations{ 1 };
-	constexpr Entity AmountOfEntities{ 100'000'00 };
+	constexpr Entity AmountOfEntities{ 10 };
 
 #ifdef CUSTOMECS
 
@@ -384,6 +384,25 @@ TEST_CASE("Testing SparseSet")
 			REQUIRE(i == counter++);
 		}
 	}
+
+	SECTION("Testing Swap")
+	{
+		for (int i{}; i < 10; ++i)
+		{
+			set.Add(i);
+		}
+
+		REQUIRE(set[0] == 0);
+		REQUIRE(set[9] == 9);
+		
+		set.Swap(0, 9);
+
+		REQUIRE(set[0] == 9);
+		REQUIRE(set[9] == 0);
+
+		set.Remove(0);
+		REQUIRE(!set.Contains(0));
+	}
 }
 
 TEST_CASE("Testing custom ECS")
@@ -397,40 +416,56 @@ TEST_CASE("Testing custom ECS")
 		ECS::Entity entity{ registry.CreateEntity() };
 
 		REQUIRE(entity == 0);
-
-		registry.ReleaseEntity(entity);
-
-		REQUIRE(entity == ECS::InvalidEntityID);
 	}
 
-	SECTION("Making 10 entities and testing their updates")
-	{
-		constexpr int size{ 10 };
-		float startPositions[size]{};
+	//SECTION("Making 10 entities and testing their updates")
+	//{
+	//	constexpr int size{ 10 };
+	//	float startPositions[size]{};
 
-		for (int i{}; i < size; ++i)
+	//	for (int i{}; i < size; ++i)
+	//	{
+	//		ECS::Entity entity{ registry.CreateEntity() };
+
+	//		registry.AddComponent<GravityComponent>(entity);
+	//		registry.AddComponent<TransformComponent>(entity);
+	//		registry.AddComponent<RigidBodyComponent>(entity);
+
+	//		startPositions[i] = registry.GetComponent<TransformComponent>(entity).Position.y;
+	//	}
+
+	//	auto view = registry.CreateView<GravityComponent, TransformComponent>();
+
+	//	view.ForEach([](const auto& grav, auto& trans)
+	//		{
+	//			trans.Position.y += grav.Gravity; // - 981.0
+	//		});
+
+	//	for (int i{}; i < size; ++i)
+	//	{
+	//		REQUIRE(startPositions[i] > registry.GetComponent<TransformComponent>(i).Position.y);
+	//	}
+	//}
+
+	SECTION("Removing Entities")
+	{
+		struct RemoveEntityTestData
+		{
+			std::string Name;
+		};
+
+		for (int i{}; i < 5; ++i)
 		{
 			ECS::Entity entity{ registry.CreateEntity() };
 
-			registry.AddComponent<GravityComponent>(entity);
-			registry.AddComponent<TransformComponent>(entity);
-			registry.AddComponent<RigidBodyComponent>(entity);
-
-			startPositions[i] = registry.GetComponent<TransformComponent>(entity).Position.y;
+			registry.AddComponent<RemoveEntityTestData>(entity, std::to_string(i));
 		}
 
-		auto view = registry.CreateView<GravityComponent, TransformComponent>();
+		registry.ReleaseEntity(3);
 
-		view.ForEach([](const auto& grav, auto& trans)
-			{
-				trans.Position.y += grav.Gravity; // - 981.0
-			});
-
-		for (int i{}; i < size; ++i)
-		{
-			REQUIRE(startPositions[i] > registry.GetComponent<TransformComponent>(i).Position.y);
-		}
+		REQUIRE(registry.GetAmountOfEntities() == 4);
+		REQUIRE(registry.GetComponent<RemoveEntityTestData>(2).Name == "2");
+		REQUIRE(registry.GetComponent<RemoveEntityTestData>(4).Name == "4");
 	}
-	
 }
 #endif

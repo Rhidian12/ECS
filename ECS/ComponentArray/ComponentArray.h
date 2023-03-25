@@ -42,12 +42,11 @@ namespace ECS
 		{
 			if (m_Entities.Contains(entity))
 			{
-				// problem: When we add components, the id's in m_Entities point to the correct spot in m_Components,
-				// however the moment we remove a component, everything after that removed component is no longer in the correct
-				// spot. How do I fix this?
-				
-				// m_Components.erase(m_Components.begin() + m_Entities[entity]);
-				// m_Entities.Remove(entity);
+				std::swap(*(m_Components.begin() + m_Entities[entity]), m_Components.back());
+				m_Entities.Swap(entity, m_Components.size() - 1);
+
+				m_Components.pop_back();
+				m_Entities.Remove(entity);
 			}
 		}
 
