@@ -3,11 +3,10 @@
 #include "../DoubleStorage/DoubleStorage.h"
 #include "../ComponentArray/ComponentArray.h"
 
-#include <vector> /* std::vector */
-#include <assert.h> /* assert() */
-#include <utility> /* std::move(), ... */
+#include <bitset>
 #include <functional> /* std::function, std::reference_wrapper */
-#include <array> /* std::array */
+#include <utility> /* std::move(), ... */
+#include <vector> /* std::vector */
 
 namespace ECS
 {
@@ -34,7 +33,7 @@ namespace ECS
 		template<size_t ... Is>
 		void ForEach(const std::function<void(Ts&...)>& function, const Entity ent, const EntitySignature& sig, const std::index_sequence<Is...>&)
 		{
-			if ((sig.test(GenerateComponentID<Ts>()) && ...))
+			if ((ent != InvalidEntityID) && (sig.test(GenerateComponentID<Ts>()) && ...))
 				std::apply(function, std::tuple<Ts&...>(std::get<Is>(Components).GetComponent(ent)...));
 		}
 

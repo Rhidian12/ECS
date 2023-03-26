@@ -79,7 +79,7 @@ namespace ECS
 			RemoveAllComponents(entity, GetEntitySignature(entity)); // [TODO]: Come up with a better way to handle this
 
 			EntitySignatures[entity].first = InvalidEntityID;
-			EntitySignatures[entity].second = EntitySignature{};
+			EntitySignatures[entity].second.reset();
 
 			Entities.Remove(entity);
 
@@ -106,7 +106,7 @@ namespace ECS
 
 	bool Registry::HasEntity(const Entity entity) const
 	{
-		return (entity < Entities.Size() && Entities[entity] != InvalidEntityID);
+		return Entities.Contains(entity);
 	}
 
 	void Registry::SetEntitySignature(const Entity entity, const ComponentType id, const bool val)

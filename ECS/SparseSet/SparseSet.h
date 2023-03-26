@@ -140,8 +140,7 @@ namespace ECS
 		{
 			assert(Contains(a) && Contains(b));
 
-			// std::swap(Packed[Sparse[a]], Packed[Sparse[b]]);
-			std::swap(Sparse[a], Sparse[b]);
+			std::swap(Packed[Sparse[a]], Packed[Sparse[b]]);
 		}
 
 		size_t Size() const { return _Size; }
@@ -170,6 +169,11 @@ namespace ECS
 		const T operator[](const size_t index) const
 		{ 
 			return Packed[Sparse[index]]; 
+		}
+
+		const std::vector<T>& GetSparse() const
+		{
+			return Sparse;
 		}
 
 		RandomIterator<T> begin() { return RandomIterator(Packed.data()); }

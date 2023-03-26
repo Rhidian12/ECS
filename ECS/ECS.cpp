@@ -86,18 +86,18 @@ void PhysicsUpdate(ECS::Registry& registry)
 /* Defines! */
 #define CUSTOMECS
 #define CUSTOMECS_CREATION
-#define CUSTOMECS_UPDATE
+// #define CUSTOMECS_UPDATE
 
 // #define GAMEOBJECT
 // #define GAMEOBJECT_CREATION
 // #define GAMEOBJECT_UPDATE
-// 
+
 // #define ENTT
 // #define ENTT_CREATION
 // #define ENTT_UPDATE
 
-#define UNIT_TESTS
-// #define BENCHMARKS
+// #define UNIT_TESTS
+#define BENCHMARKS
 
 #ifdef BENCHMARKS
 int main(int*, char* [])
@@ -107,7 +107,7 @@ int main(int*, char* [])
 
 	/* Benchmarking Constants */
 	constexpr int Iterations{ 1 };
-	constexpr Entity AmountOfEntities{ 10 };
+	constexpr Entity AmountOfEntities{ 1'000'000 };
 
 #ifdef CUSTOMECS
 
@@ -418,34 +418,34 @@ TEST_CASE("Testing custom ECS")
 		REQUIRE(entity == 0);
 	}
 
-	//SECTION("Making 10 entities and testing their updates")
-	//{
-	//	constexpr int size{ 10 };
-	//	float startPositions[size]{};
+	SECTION("Making 10 entities and testing their updates")
+	{
+		constexpr int size{ 10 };
+		float startPositions[size]{};
 
-	//	for (int i{}; i < size; ++i)
-	//	{
-	//		ECS::Entity entity{ registry.CreateEntity() };
+		for (int i{}; i < size; ++i)
+		{
+			ECS::Entity entity{ registry.CreateEntity() };
 
-	//		registry.AddComponent<GravityComponent>(entity);
-	//		registry.AddComponent<TransformComponent>(entity);
-	//		registry.AddComponent<RigidBodyComponent>(entity);
+			registry.AddComponent<GravityComponent>(entity);
+			registry.AddComponent<TransformComponent>(entity);
+			registry.AddComponent<RigidBodyComponent>(entity);
 
-	//		startPositions[i] = registry.GetComponent<TransformComponent>(entity).Position.y;
-	//	}
+			startPositions[i] = registry.GetComponent<TransformComponent>(entity).Position.y;
+		}
 
-	//	auto view = registry.CreateView<GravityComponent, TransformComponent>();
+		auto view = registry.CreateView<GravityComponent, TransformComponent>();
 
-	//	view.ForEach([](const auto& grav, auto& trans)
-	//		{
-	//			trans.Position.y += grav.Gravity; // - 981.0
-	//		});
+		view.ForEach([](const auto& grav, auto& trans)
+			{
+				trans.Position.y += grav.Gravity; // - 981.0
+			});
 
-	//	for (int i{}; i < size; ++i)
-	//	{
-	//		REQUIRE(startPositions[i] > registry.GetComponent<TransformComponent>(i).Position.y);
-	//	}
-	//}
+		for (int i{}; i < size; ++i)
+		{
+			REQUIRE(startPositions[i] > registry.GetComponent<TransformComponent>(i).Position.y);
+		}
+	}
 
 	SECTION("Removing Entities")
 	{

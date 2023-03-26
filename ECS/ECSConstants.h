@@ -1,7 +1,8 @@
 #pragma once
+
+#include <bitset> 
 #include <cstdint> /* uint64_t */
 #include <limits> /* std::numeric_limits */
-#include <bitset> /* std::bitset */
 
 namespace ECS
 {
