@@ -16,8 +16,8 @@ namespace ECS
 		constexpr ComponentType hash(
 			static_cast<ComponentType>(
 				ConstexprStringHash(
-					std::string{ typeName }.data(),
-					std::string{ typeName }.size()
+					typeName.data(),
+					typeName.size()
 				))
 		);
 
