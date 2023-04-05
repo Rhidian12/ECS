@@ -13,6 +13,7 @@ namespace ECS
 		virtual ~IComponentArray() = default;
 
 		virtual void Remove(const Entity entity) = 0;
+		virtual void RemoveAll() = 0;
 	};
 
 	template<typename T>
@@ -42,12 +43,14 @@ namespace ECS
 		{
 			if (m_Entities.Contains(entity))
 			{
-				std::swap(*(m_Components.begin() + m_Entities[entity]), m_Components.back());
-				m_Entities.Swap(entity, m_Entities.GetSparse().back());
-
-				m_Components.pop_back();
-				m_Entities.Remove(entity);
+				m_Entities[entity] = InvalidEntityID;
 			}
+		}
+
+		virtual void RemoveAll() override
+		{
+			m_Entities.Clear();
+			m_Components.clear();
 		}
 
 		T& GetComponent(const Entity entity)

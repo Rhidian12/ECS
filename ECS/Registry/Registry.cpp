@@ -12,10 +12,7 @@ namespace ECS
 
 	Registry::~Registry()
 	{
-		for (Entity& entity : Entities)
-			ReleaseEntity(entity);
-
-		Entities.Clear();
+		Clear();
 	}
 
 	Registry::Registry(Registry&& other) noexcept
@@ -107,6 +104,21 @@ namespace ECS
 	bool Registry::HasEntity(const Entity entity) const
 	{
 		return Entities.Contains(entity);
+	}
+
+	void Registry::Clear()
+	{
+		Entities.Clear();
+		EntitySignatures.clear();
+		CurrentEntityCounter = 0;
+
+		for (const auto& [component, compArray] : ComponentPools)
+		{
+			compArray->RemoveAll();
+		}
+
+		ComponentPools.clear();
+		RecycledEntities.clear();
 	}
 
 	void Registry::SetEntitySignature(const Entity entity, const ComponentType id, const bool val)

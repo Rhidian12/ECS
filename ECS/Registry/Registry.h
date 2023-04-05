@@ -105,6 +105,8 @@ namespace ECS
 			return Entities.Size();
 		}
 
+		void Clear();
+
 		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true);
 		const EntitySignature& GetEntitySignature(const Entity entity) const;
 

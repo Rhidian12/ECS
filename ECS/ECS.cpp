@@ -6,121 +6,103 @@
 #include "GameObject/GameObject.h"
 #include "Timer/Timer.h"
 
-#include <iostream>
-#include <chrono>
-#include <deque>
-#include <algorithm>
-#include <numeric>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <vld.h>
-
 #include "entt/entt.hpp"
 
 #include "ENTTComponents/ENTTComponents.h"
 #include "ECSComponents/ECSComponents.h"
 #include "GOComponents/GOComponents.h"
 
-template<typename Fn>
-double Benchmark(Fn&& fn)
-{
-	using namespace ECS::Time;
+#include "Benchmark/BenchmarkUtils.h"
 
-	Timepoint t1{ Timer::Now() };
+#include <iostream>
+#include <numeric>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <vld.h>
 
-	fn();
-
-	Timepoint t2{ Timer::Now() };
-
-	return (t2 - t1).Count<TimeLength::MilliSeconds>();
-}
-
-double GetAverage(const std::deque<double>& arr)
+__forceinline static double GetAverage(const std::vector<double>& arr)
 {
 	return std::accumulate(arr.cbegin(), arr.cend(), 0.0) / static_cast<double>(arr.size());
 }
 
-#pragma region Test Update Functions
-void ENTTGravityUpdate(entt::registry& registry)
+static void WriteTimesToCSVFile(const std::string& file, const std::vector<double>& times)
 {
-	auto view = registry.view<const ENTTGravity, ENTTRigidBodyComponent>();
+	std::fstream stream{ file, std::ios::out | std::ios::trunc };
 
-	view.each([](const auto& gravity, auto& rigidBody)
-		{
-			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
-		});
+	for (size_t i{}; i < times.size() - 1; ++i)
+		stream << times[i] << ",";
+
+	stream << times.back();
+
+	stream.close();
 }
-void ENTTPhysicsUpdate(entt::registry& registry)
-{
-	auto view = registry.view<const ENTTRigidBodyComponent, ENTTTransformComponent>();
-
-	view.each([](const auto& rigidBody, auto& transform)
-		{
-			transform.Position.x += rigidBody.Velocity.x;
-			transform.Position.y += rigidBody.Velocity.y;
-		});
-}
-
-void GravityUpdate(ECS::Registry& registry)
-{
-	auto view = registry.CreateView<GravityComponent, RigidBodyComponent>();
-
-	view.ForEach([](const auto& gravity, auto& rigidBody)->void
-		{
-			rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
-		});
-}
-void PhysicsUpdate(ECS::Registry& registry)
-{
-	auto view = registry.CreateView<RigidBodyComponent, TransformComponent>();
-
-	view.ForEach([](const auto& rigidBody, auto& transform)->void
-		{
-			transform.Position.x += rigidBody.Velocity.x;
-			transform.Position.y += rigidBody.Velocity.y;
-		});
-}
-#pragma endregion
 
 /* Defines! */
-#define CUSTOMECS
-#define CUSTOMECS_CREATION
+// #define CUSTOMECS
+// #define CUSTOMECS_CREATION
 // #define CUSTOMECS_UPDATE
 
 // #define GAMEOBJECT
 // #define GAMEOBJECT_CREATION
 // #define GAMEOBJECT_UPDATE
 
-// #define ENTT
-// #define ENTT_CREATION
-// #define ENTT_UPDATE
+#define ENTT
+#define ENTT_CREATION
+#define ENTT_UPDATE
+
+#define WRITE_TO_FILE
 
 // #define UNIT_TESTS
 #define BENCHMARKS
 
 #ifdef BENCHMARKS
+
 int main(int*, char* [])
 {
 	using namespace ECS;
 	using namespace GO;
 
 	/* Benchmarking Constants */
-	constexpr int Iterations{ 1 };
+	constexpr int Iterations{ 100 };
 	constexpr Entity AmountOfEntities{ 1'000'000 };
 
 #ifdef CUSTOMECS
 
 #ifdef CUSTOMECS_CREATION
-	std::deque<double> ecsInitTimes{};
+
+	std::vector<double> ecsInitTimes{};
+
+	{
+		Benchmark::BenchmarkUtils benchmarker{};
+		ECS::Registry registry{};
+
+		benchmarker.SetOnFunctionStart([&registry]()->void
+			{
+				registry.Clear();
+			});
+
+		ecsInitTimes = benchmarker.BenchmarkFunction(Iterations, [&registry, AmountOfEntities]()->void
+				{
+					for (size_t i{}; i < AmountOfEntities; ++i)
+					{
+						Entity entity{ registry.CreateEntity() };
+
+						registry.AddComponent<TransformComponent>(entity);
+						registry.AddComponent<RigidBodyComponent>(entity);
+						registry.AddComponent<GravityComponent>(entity);
+					}
+				});
+	}
+
 #endif // CUSTOMECS_CREATION
 
 #ifdef CUSTOMECS_UPDATE
-	std::deque<double> ecsUpdateTimes{};
-#endif // CUSTOMECS_UPDATE
+
+	std::vector<double> ecsUpdateTimes{};
 
 	{
-	#ifdef CUSTOMECS_UPDATE
+		Benchmark::BenchmarkUtils benchmarker{};
 		ECS::Registry ecsRegistry{};
 
 		for (size_t i{}; i < AmountOfEntities; ++i)
@@ -131,49 +113,71 @@ int main(int*, char* [])
 			ecsRegistry.AddComponent<RigidBodyComponent>(entity);
 			ecsRegistry.AddComponent<GravityComponent>(entity);
 		}
-	#endif // CUSTOMECS_UPDATE
 
-		for (int i{}; i < Iterations; ++i)
-		{
-		#ifdef CUSTOMECS_CREATION
-			ecsInitTimes.push_back(Benchmark([AmountOfEntities]()->void
-				{
-					ECS::Registry registry{};
+		ecsUpdateTimes = benchmarker.BenchmarkFunction(Iterations, [&ecsRegistry]()->void
+			{
+				auto gravityView = ecsRegistry.CreateView<GravityComponent, RigidBodyComponent>();
 
-					for (size_t i{}; i < AmountOfEntities; ++i)
+				gravityView.ForEach([](const auto& gravity, auto& rigidBody)->void
 					{
-						Entity entity{ registry.CreateEntity() };
+						rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+					});
 
-						registry.AddComponent<TransformComponent>(entity);
-						registry.AddComponent<RigidBodyComponent>(entity);
-						registry.AddComponent<GravityComponent>(entity);
-					}
-				}));
-		#endif // CUSTOMECS_CREATION
+				auto physicsView = ecsRegistry.CreateView<RigidBodyComponent, TransformComponent>();
 
-		#ifdef CUSTOMECS_UPDATE
-			ecsUpdateTimes.push_back(Benchmark([&ecsRegistry]()->void
-				{
-					GravityUpdate(ecsRegistry);
-					PhysicsUpdate(ecsRegistry);
-				}));
-		#endif // CUSTOMECS_UPDATE
-		}
+				physicsView.ForEach([](const auto& rigidBody, auto& transform)->void
+					{
+						transform.Position.x += rigidBody.Velocity.x;
+						transform.Position.y += rigidBody.Velocity.y;
+					});
+			});
 	}
+
+#endif // CUSTOMECS_UPDATE
+
 #endif // CUSTOMECS
 
 #ifdef GAMEOBJECT
 
 #ifdef GAMEOBJECT_CREATION
-	std::deque<double> goInitTimes{};
+
+	std::vector<double> goInitTimes{};
+
+	{
+		Benchmark::BenchmarkUtils benchmarker{};
+		std::vector<GO::GameObject*> gameObjects{};
+
+		benchmarker.SetOnFunctionStart([&gameObjects]()->void
+			{
+				for (auto* pG : gameObjects)
+					delete pG;
+
+				gameObjects.clear();
+			});
+
+		goInitTimes = benchmarker.BenchmarkFunction(Iterations, [&gameObjects, AmountOfEntities]()->void
+			{
+				for (size_t i{}; i < AmountOfEntities; ++i)
+				{
+					GameObject* pG{ new GameObject{} };
+
+					pG->AddComponent(new GOGravityComponent{});
+					pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
+					pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
+
+					gameObjects.push_back(pG);
+				}
+			});
+	}
+
 #endif // GAMEOBJECT_CREATION
 
 #ifdef GAMEOBJECT_UPDATE
-	std::deque<double> goUpdateTimes{};
-#endif // GAMEOBJECT_UPDATE
+
+	std::vector<double> goUpdateTimes{};
 
 	{
-	#ifdef GAMEOBJECT_UPDATE
+		Benchmark::BenchmarkUtils benchmarker{};
 		std::vector<GO::GameObject*> gameObjects{};
 
 		for (size_t i{}; i < AmountOfEntities; ++i)
@@ -186,98 +190,87 @@ int main(int*, char* [])
 
 			gameObjects.push_back(pG);
 		}
-	#endif // GAMEOBJECT_UPDATE
 
-		for (int i{}; i < Iterations; ++i)
-		{
-		#ifdef GAMEOBJECT_CREATION
-			goInitTimes.push_back(Benchmark([AmountOfEntities]()->void
-				{
-					std::vector<GameObject*> initGameobjects{};
-
-					for (size_t i{}; i < AmountOfEntities; ++i)
-					{
-						GameObject* pG{ new GameObject{} };
-
-						pG->AddComponent(new GOGravityComponent{});
-						pG->AddComponent(new GORigidBodyComponent{ pG->GetComponent<GOGravityComponent>() });
-						pG->AddComponent(new GOTransformComponent{ pG->GetComponent<GORigidBodyComponent>() });
-
-						initGameobjects.push_back(pG);
-					}
-
-					for (GameObject* pG : initGameobjects)
-						delete pG;
-				}));
-		#endif // GAMEOBJECT_CREATION
-
-		#ifdef GAMEOBJECT_UPDATE
-			goUpdateTimes.push_back(Benchmark([&gameObjects]()
-				{
-					for (GameObject* const pG : gameObjects)
-					{
-						pG->Update();
-					}
-				}));
-		#endif // GAMEOBJECT_UPDATE
-		}
-
-	#ifdef GAMEOBJECT_UPDATE
-		for (GameObject* pG : gameObjects)
-			delete pG;
-	#endif // GAMEOBJECT_UPDATE
+		goUpdateTimes = benchmarker.BenchmarkFunction(Iterations, [&gameObjects]()->void
+			{
+				for (GameObject* pG : gameObjects)
+					pG->Update();
+			});
 	}
-#endif
+
+#endif // GAMEOBJECT_UPDATE
+
+#endif // GAMEOBJECT
 
 #ifdef ENTT
 
 #ifdef ENTT_CREATION
-	std::deque<double> enttInitTimes{};
+
+	std::vector<double> enttInitTimes{};
+
+	{
+		Benchmark::BenchmarkUtils benchmarker{};
+		entt::registry registry{};
+
+		benchmarker.SetOnFunctionStart([&registry]()->void
+			{
+				registry.clear();
+			});
+
+		enttInitTimes = benchmarker.BenchmarkFunction(Iterations, [&registry, AmountOfEntities]()->void
+			{
+				for (size_t i{}; i < AmountOfEntities; ++i)
+				{
+					auto enttEntity{ registry.create() };
+
+					registry.emplace<ENTTGravity>(enttEntity);
+					registry.emplace<ENTTTransformComponent>(enttEntity);
+					registry.emplace<ENTTRigidBodyComponent>(enttEntity);
+				}
+			});
+	}
+
 #endif // ENTT_CREATION
 
 #ifdef ENTT_UPDATE
-	std::deque<double> enttUpdateTimes{};
-#endif // ENTT_UPDATE
+
+	std::vector<double> enttUpdateTimes{};
 
 	{
-	#ifdef ENTT_UPDATE
-		entt::registry entt{};
+		Benchmark::BenchmarkUtils benchmarker{};
+		entt::registry registry{};
+
 		for (size_t i{}; i < AmountOfEntities; ++i)
 		{
-			auto enttEntity{ entt.create() };
-			entt.emplace<ENTTGravity>(enttEntity);
-			entt.emplace<ENTTTransformComponent>(enttEntity);
-			entt.emplace<ENTTRigidBodyComponent>(enttEntity);
+			auto enttEntity{ registry.create() };
+
+			registry.emplace<ENTTGravity>(enttEntity);
+			registry.emplace<ENTTTransformComponent>(enttEntity);
+			registry.emplace<ENTTRigidBodyComponent>(enttEntity);
 		}
-	#endif // ENTT_UPDATE
 
-		for (int i{}; i < Iterations; ++i)
-		{
-		#ifdef ENTT_CREATION
-			enttInitTimes.push_back(Benchmark([AmountOfEntities]()->void
-				{
-					entt::registry initRegistry{};
+		enttUpdateTimes = benchmarker.BenchmarkFunction(Iterations, [&registry]()->void
+			{
+				auto gravityView = registry.view<const ENTTGravity, ENTTRigidBodyComponent>();
 
-					for (size_t i{}; i < AmountOfEntities; ++i)
+				gravityView.each([](const auto& gravity, auto& rigidBody)
 					{
-						auto enttEntity{ initRegistry.create() };
-						initRegistry.emplace<ENTTGravity>(enttEntity);
-						initRegistry.emplace<ENTTTransformComponent>(enttEntity);
-						initRegistry.emplace<ENTTRigidBodyComponent>(enttEntity);
-					}
-				}));
-		#endif // ENTT_CREATION
+						rigidBody.Velocity.y += gravity.Gravity * rigidBody.Mass;
+					});
 
-		#ifdef ENTT_UPDATE
-			enttUpdateTimes.push_back(Benchmark([&entt]()
-				{
-					ENTTGravityUpdate(entt);
-					ENTTPhysicsUpdate(entt);
-				}));
-		#endif // ENTT_UPDATE
-		}
+				auto physicsView = registry.view<const ENTTRigidBodyComponent, ENTTTransformComponent>();
+
+				physicsView.each([](const auto& rigidBody, auto& transform)
+					{
+						transform.Position.x += rigidBody.Velocity.x;
+						transform.Position.y += rigidBody.Velocity.y;
+					});
+			});
 	}
-#endif
+
+#endif // ENTT_UPDATE
+
+#endif // ENTT
 
 	/* Print results */
 	std::cout << "Amount of entities: " << AmountOfEntities << "\n";
@@ -286,11 +279,27 @@ int main(int*, char* [])
 #ifdef CUSTOMECS
 
 #ifdef CUSTOMECS_CREATION
+
 	std::cout << "ECS Init Average:\t\t" << GetAverage(ecsInitTimes) << " milliseconds\n";
+
+#ifdef WRITE_TO_FILE
+
+	WriteTimesToCSVFile(R"(.\Benchmarks/CE_CREATION_BM.csv)", ecsInitTimes);
+
+#endif
+
 #endif // CUSTOMECS_CREATION
 
 #ifdef CUSTOMECS_UPDATE
+
 	std::cout << "ECS Update Average:\t\t" << GetAverage(ecsUpdateTimes) << " milliseconds\n\n";
+
+#ifdef WRITE_TO_FILE
+
+	WriteTimesToCSVFile(R"(.\Benchmarks\CE_UPDATE_BM.csv)", ecsUpdateTimes);
+
+#endif
+
 #endif // CUSTOMECS_UPDATE
 
 #endif // CUSTOMECS
@@ -298,11 +307,27 @@ int main(int*, char* [])
 #ifdef GAMEOBJECT
 
 #ifdef GAMEOBJECT_CREATION
+
 	std::cout << "GO Init Average:\t\t" << GetAverage(goInitTimes) << " milliseconds\n";
+
+#ifdef WRITE_TO_FILE
+
+	WriteTimesToCSVFile(R"(Benchmarks/GO_CREATION_BM.csv)", goInitTimes);
+
+#endif
+
 #endif // GAMEOBJECT_CREATION
 
 #ifdef GAMEOBJECT_UPDATE
+
 	std::cout << "GO Update Average:\t\t" << GetAverage(goUpdateTimes) << " milliseconds\n\n";
+
+#ifdef WRITE_TO_FILE
+
+	WriteTimesToCSVFile(R"(Benchmarks/GO_UPDATE_BM.csv)", goUpdateTimes);
+
+#endif
+
 #endif // GAMEOBJECT_UPDATE
 
 #endif // GAMEOBJECT
@@ -310,17 +335,34 @@ int main(int*, char* [])
 #ifdef ENTT
 
 #ifdef ENTT_CREATION
+
 	std::cout << "ENTT Init Average:\t\t" << GetAverage(enttInitTimes) << " milliseconds\n";
+
+#ifdef WRITE_TO_FILE
+
+	WriteTimesToCSVFile(R"(Benchmarks/ET_CREATION_BM.csv)", enttInitTimes);
+
+#endif
+
 #endif // ENTT_CREATION
 
 #ifdef ENTT_UPDATE
+
 	std::cout << "ENTT Update Average:\t\t" << GetAverage(enttUpdateTimes) << " milliseconds\n\n";
+
+#ifdef WRITE_TO_FILE
+
+	WriteTimesToCSVFile(R"(Benchmarks/ET_UPDATE_BM.csv)", enttUpdateTimes);
+
+#endif
+
 #endif // ENTT_UPDATE
 
 #endif // ENTT
 
 	return 0;
 }
+
 #endif
 
 #ifdef UNIT_TESTS
@@ -394,7 +436,7 @@ TEST_CASE("Testing SparseSet")
 
 		REQUIRE(set[0] == 0);
 		REQUIRE(set[9] == 9);
-		
+
 		set.Swap(0, 9);
 
 		REQUIRE(set[0] == 9);
@@ -466,6 +508,6 @@ TEST_CASE("Testing custom ECS")
 		REQUIRE(registry.GetAmountOfEntities() == 4);
 		REQUIRE(registry.GetComponent<RemoveEntityTestData>(2).Name == "2");
 		REQUIRE(registry.GetComponent<RemoveEntityTestData>(4).Name == "4");
-	}
+}
 }
 #endif
