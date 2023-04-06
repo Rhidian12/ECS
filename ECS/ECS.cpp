@@ -13,6 +13,7 @@
 #include "GOComponents/GOComponents.h"
 
 #include "Benchmark/BenchmarkUtils.h"
+#include "Benchmark/ProfilerInformation/ProfilerInformation.h"
 
 #include <iostream>
 #include <numeric>
@@ -39,17 +40,17 @@ static void WriteTimesToCSVFile(const std::string& file, const std::vector<doubl
 }
 
 /* Defines! */
-// #define CUSTOMECS
-// #define CUSTOMECS_CREATION
-// #define CUSTOMECS_UPDATE
+#define CUSTOMECS
+#define CUSTOMECS_CREATION
+#define CUSTOMECS_UPDATE
 
 // #define GAMEOBJECT
 // #define GAMEOBJECT_CREATION
 // #define GAMEOBJECT_UPDATE
 
-#define ENTT
-#define ENTT_CREATION
-#define ENTT_UPDATE
+// #define ENTT
+// #define ENTT_CREATION
+// #define ENTT_UPDATE
 
 #define WRITE_TO_FILE
 
@@ -359,6 +360,8 @@ int main(int*, char* [])
 #endif // ENTT_UPDATE
 
 #endif // ENTT
+
+	Benchmark::ProfilerInformation::GetInstance().WriteTimesToOutput();
 
 	return 0;
 }

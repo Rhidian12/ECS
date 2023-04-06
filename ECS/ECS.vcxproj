@@ -154,9 +154,11 @@
     <ClCompile Include="Benchmark\BenchmarkUtils.cpp" />
     <ClCompile Include="ComponentArray\ComponentArray.cpp" />
     <ClCompile Include="ECS.cpp" />
+    <ClCompile Include="Benchmark\ProfilerInformation\ProfilerInformation.cpp" />
     <ClCompile Include="Registry\Registry.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GOComponent\GOComponent.cpp" />
+    <ClCompile Include="Benchmark\ScopedTimer\ScopedTimer.cpp" />
     <ClCompile Include="Timer\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +167,7 @@
     <ClInclude Include="ComponentArray\ComponentArray.h" />
     <ClInclude Include="DoubleStorage\DoubleStorage.h" />
     <ClInclude Include="ECSComponents\ECSComponents.h" />
+    <ClInclude Include="Benchmark\ProfilerInformation\ProfilerInformation.h" />
     <ClInclude Include="Registry\Registry.h" />
     <ClInclude Include="ENTTComponents\ENTTComponents.h" />
     <ClInclude Include="entt\config\config.h" />
@@ -242,6 +245,7 @@
     <ClInclude Include="GOComponents\GOComponents.h" />
     <ClInclude Include="GOComponent\GOComponent.h" />
     <ClInclude Include="Point2f\Point2f.h" />
+    <ClInclude Include="Benchmark\ScopedTimer\ScopedTimer.h" />
     <ClInclude Include="SparseSet\SparseSet.h" />
     <ClInclude Include="Timer\TimeLength.h" />
     <ClInclude Include="Timer\Timepoint\Timepoint.h" />

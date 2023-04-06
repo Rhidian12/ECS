@@ -6,6 +6,8 @@
 #include "../ComponentIDGenerator/ComponentIDGenerator.h"
 #include "../ComponentArray/ComponentArray.h"
 
+#include "../Benchmark/BenchmarkUtils.h"
+
 #include <assert.h> /* assert() */
 #include <array> /* std::array */
 
@@ -25,6 +27,8 @@ namespace ECS
 		template<typename ... Ts>
 		[[nodiscard]] View<Ts...> CreateView()
 		{
+			PROFILE_SCOPE()
+
 			/* Get all components asked for by the user */
 			std::tuple<ComponentArray<Ts>&...> comps
 			{
@@ -37,6 +41,8 @@ namespace ECS
 		template<typename T>
 		T& AddComponent(const Entity entity)
 		{
+			PROFILE_SCOPE()
+
 			SetEntitySignature(entity, GenerateComponentID<T>());
 
 			std::unique_ptr<IComponentArray>& pool{ GetComponentArray(GenerateComponentID<T>()) };

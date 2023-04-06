@@ -3,6 +3,8 @@
 #include "../ECSConstants.h"
 #include "../SparseSet/SparseSet.h"
 
+#include "../Benchmark/BenchmarkUtils.h"
+
 #include <vector> /* std::vector */
 
 namespace ECS
@@ -29,6 +31,8 @@ namespace ECS
 
 		T& AddComponent(const Entity entity)
 		{
+			PROFILE_SCOPE()
+
 			m_Entities.Add(entity);
 			return m_Components.emplace_back(T{});
 		}
