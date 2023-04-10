@@ -23,17 +23,17 @@
 /* Defines! */
 // These benchmarks should best be done 1 (category) at a time to avoid trashing of the cache
 
-#define ENABLE_CUSTOMECS_BENCHMARKS
-#define BENCHMARK_CUSTOMECS_CREATION
-#define BENCHMARK_CUSTOMECS_UPDATE
+// #define ENABLE_CUSTOMECS_BENCHMARKS
+// #define BENCHMARK_CUSTOMECS_CREATION
+// #define BENCHMARK_CUSTOMECS_UPDATE
 
-//#define ENABLE_GAMEOBJECT_BENCHMARKS
-//#define BENCHMARK_GAMEOBJECT_CREATION
-//#define BENCHMARK_GAMEOBJECT_UPDATE
-//
-//#define ENABLE_ENTT_BENCHMARKS
-//#define BENCHMARK_ENTT_CREATION
-//#define BENCHMARK_ENTT_UPDATE
+// #define ENABLE_GAMEOBJECT_BENCHMARKS
+// #define BENCHMARK_GAMEOBJECT_CREATION
+// #define BENCHMARK_GAMEOBJECT_UPDATE
+
+#define ENABLE_ENTT_BENCHMARKS
+#define BENCHMARK_ENTT_CREATION
+#define BENCHMARK_ENTT_UPDATE
 
 // #define WRITE_TIMES_TO_CSV_FILES
 
@@ -156,9 +156,9 @@ int RunBenchmarks(const int iterations, const size_t amountOfEntities)
 				gameObjects.clear();
 			});
 
-		goInitTimes = benchmarker.BenchmarkFunction(Iterations, [&gameObjects, AmountOfEntities]()->void
+		goInitTimes = benchmarker.BenchmarkFunction(iterations, [&gameObjects, amountOfEntities]()->void
 			{
-				for (size_t i{}; i < AmountOfEntities; ++i)
+				for (size_t i{}; i < amountOfEntities; ++i)
 				{
 					GameObject* pG{ new GameObject{} };
 
@@ -181,7 +181,7 @@ int RunBenchmarks(const int iterations, const size_t amountOfEntities)
 		Benchmark::BenchmarkUtils benchmarker{};
 		std::vector<GO::GameObject*> gameObjects{};
 
-		for (size_t i{}; i < AmountOfEntities; ++i)
+		for (size_t i{}; i < amountOfEntities; ++i)
 		{
 			GameObject* pG{ new GameObject{} };
 
@@ -192,7 +192,7 @@ int RunBenchmarks(const int iterations, const size_t amountOfEntities)
 			gameObjects.push_back(pG);
 		}
 
-		goUpdateTimes = benchmarker.BenchmarkFunction(Iterations, [&gameObjects]()->void
+		goUpdateTimes = benchmarker.BenchmarkFunction(iterations, [&gameObjects]()->void
 			{
 				for (GameObject* pG : gameObjects)
 					pG->Update();
@@ -219,9 +219,9 @@ int RunBenchmarks(const int iterations, const size_t amountOfEntities)
 				registry.clear();
 			});
 
-		enttInitTimes = benchmarker.BenchmarkFunction(Iterations, [&registry, AmountOfEntities]()->void
+		enttInitTimes = benchmarker.BenchmarkFunction(iterations, [&registry, amountOfEntities]()->void
 			{
-				for (size_t i{}; i < AmountOfEntities; ++i)
+				for (size_t i{}; i < amountOfEntities; ++i)
 				{
 					auto enttEntity{ registry.create() };
 
@@ -242,7 +242,7 @@ int RunBenchmarks(const int iterations, const size_t amountOfEntities)
 		Benchmark::BenchmarkUtils benchmarker{};
 		entt::registry registry{};
 
-		for (size_t i{}; i < AmountOfEntities; ++i)
+		for (size_t i{}; i < amountOfEntities; ++i)
 		{
 			auto enttEntity{ registry.create() };
 
@@ -251,7 +251,7 @@ int RunBenchmarks(const int iterations, const size_t amountOfEntities)
 			registry.emplace<ENTTRigidBodyComponent>(enttEntity);
 		}
 
-		enttUpdateTimes = benchmarker.BenchmarkFunction(Iterations, [&registry]()->void
+		enttUpdateTimes = benchmarker.BenchmarkFunction(iterations, [&registry]()->void
 			{
 				auto gravityView = registry.view<const ENTTGravity, ENTTRigidBodyComponent>();
 
