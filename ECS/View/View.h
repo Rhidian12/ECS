@@ -19,7 +19,7 @@ namespace ECS
 			, EntitySignatures{ sigs }
 		{}
 
-		void ForEach(const std::function<void(Ts&...)>& function)
+		void ForEach(const std::function<void(Ts&...)>& function) const
 		{
 			auto indexSequence{ std::make_index_sequence<sizeof ... (Ts)>{} };
 
@@ -29,7 +29,7 @@ namespace ECS
 
 	private:
 		template<size_t ... Is>
-		void ForEachImpl(const std::function<void(Ts&...)>& function, const Entity ent, const EntitySignature& sig, const std::index_sequence<Is...>&)
+		void ForEachImpl(const std::function<void(Ts&...)>& function, const Entity ent, const EntitySignature& sig, const std::index_sequence<Is...>&) const
 		{
 			if ((ent != InvalidEntityID) && (sig.test(GenerateComponentID<Ts>()) && ...))
 				std::apply(function, std::tuple<Ts&...>(std::get<Is>(Components).GetComponent(ent)...));

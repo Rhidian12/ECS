@@ -35,7 +35,7 @@
 //#define BENCHMARK_ENTT_CREATION
 //#define BENCHMARK_ENTT_UPDATE
 
-#define WRITE_TIMES_TO_CSV_FILES
+// #define WRITE_TIMES_TO_CSV_FILES
 
 namespace
 {
