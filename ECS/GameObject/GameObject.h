@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector> /* std::vector */
-#include <typeinfo>
+#include <typeinfo> 
+#include <vector>
 
 namespace GO
 {
+	// Naive and simple implementation of GameObject and Components
 	class GameObject final
 	{
 	public:

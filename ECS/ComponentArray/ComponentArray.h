@@ -3,8 +3,6 @@
 #include "../ECSConstants.h"
 #include "../SparseSet/SparseSet.h"
 
-#include "../Benchmark/BenchmarkUtils.h"
-
 #include <vector> /* std::vector */
 
 namespace ECS
@@ -55,11 +53,11 @@ namespace ECS
 			m_Components.clear();
 		}
 
-		T& GetComponent(const Entity entity)
+		[[nodiscard]] T& GetComponent(const Entity entity)
 		{
 			return m_Components[m_Entities[entity]];
 		}
-		const T& GetComponent(const Entity entity) const
+		[[nodiscard]] const T& GetComponent(const Entity entity) const
 		{
 			return m_Components[m_Entities[entity]];
 		}

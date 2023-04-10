@@ -27,9 +27,6 @@
     <ClCompile Include="Registry\Registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ComponentArray\ComponentArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Timer\Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -291,9 +288,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ComponentArray\ComponentArray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DoubleStorage\DoubleStorage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Timer\Timepoint\Timepoint.h">

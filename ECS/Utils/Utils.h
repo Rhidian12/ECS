@@ -10,23 +10,23 @@ namespace ECS
 		/* Reference for TypeName: https://stackoverflow.com/questions/35941045/can-i-obtain-c-type-names-in-a-constexpr-way */
 
 		template<typename T>
-		constexpr std::string_view ConstexprTypeName();
+		[[nodiscard]] constexpr std::string_view ConstexprTypeName();
 
 		template<>
-		constexpr std::string_view ConstexprTypeName<void>() { return "void"; }
+		[[nodiscard]] constexpr std::string_view ConstexprTypeName<void>() { return "void"; }
 
 		/* Should have internal linkage and therefore be unavailable to other files */
 		namespace
 		{
 			template<typename T>
-			constexpr const char* WrappedTypeName()
+			[[nodiscard]] constexpr static const char* WrappedTypeName()
 			{
 				return __FUNCSIG__;
 			}
 		}
 
 		template <typename T>
-		constexpr std::string_view ConstexprTypeName()
+		[[nodiscard]] constexpr std::string_view ConstexprTypeName()
 		{
 			constexpr std::string_view wrappedName(WrappedTypeName<T>());
 
@@ -36,7 +36,7 @@ namespace ECS
 			return wrappedName.substr(beginOfType + 1, endOfType - beginOfType - 1);
 		}
 
-		__forceinline constexpr uint32_t ConstexprStringHash(const char* pKey, size_t count)
+		[[nodiscard]] inline constexpr uint32_t ConstexprStringHash(const char* pKey, size_t count)
 		{
 			uint32_t p = 31;
 			const uint32_t m = static_cast<uint32_t>(1e9) + 9;
@@ -54,18 +54,13 @@ namespace ECS
 			return hash_value;
 		}
 
-		inline float RandomFloat(float min, float max)
+		[[nodiscard]] __forceinline float RandomFloat(float min, float max)
 		{
 			return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
 		}
 
-		inline bool Equals(const float a, const float b, const float epsilon = std::numeric_limits<float>::epsilon())
-		{
-			return abs(a - b) <= epsilon;
-		}
-
 		template<typename T>
-		constexpr bool AreEqual(const T a, const T b, const T epsilon = std::numeric_limits<T>::epsilon())
+		[[nodiscard]] __forceinline constexpr bool AreEqual(const T a, const T b, const T epsilon = std::numeric_limits<T>::epsilon())
 		{
 			static_assert(std::is_fundamental_v<T>, "Utils::AreEqual<T>() > T must be a fundamental type");
 

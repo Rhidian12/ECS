@@ -7,7 +7,7 @@
 namespace ECS
 {
 	template<typename T>
-	consteval ComponentType GenerateComponentID()
+	[[nodiscard]] consteval ComponentType GenerateComponentID()
 	{
 		using namespace Utils;
 

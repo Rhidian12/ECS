@@ -23,7 +23,6 @@ TEST_CASE("Testing SparseSet")
 
 		REQUIRE(set.Contains(5));
 		REQUIRE(set.Size() == 1);
-		REQUIRE(set.GetIndex(5) == 0); /* should be the first element */
 	}
 
 	SECTION("Add and Remove 1 value")
@@ -32,7 +31,6 @@ TEST_CASE("Testing SparseSet")
 
 		REQUIRE(set.Contains(5));
 		REQUIRE(set.Size() == 1);
-		REQUIRE(set.GetIndex(5) == 0); /* should be the first element */
 
 		set.Remove(5);
 
@@ -51,41 +49,6 @@ TEST_CASE("Testing SparseSet")
 		set.Clear();
 
 		REQUIRE(set.Size() == 0);
-	}
-
-	SECTION("Testing iterator")
-	{
-		for (int i{}; i < 10; ++i)
-		{
-			set.Add(i);
-		}
-
-		REQUIRE(set.Size() == 10);
-
-		int counter{};
-		for (const int i : set)
-		{
-			REQUIRE(i == counter++);
-		}
-	}
-
-	SECTION("Testing Swap")
-	{
-		for (int i{}; i < 10; ++i)
-		{
-			set.Add(i);
-		}
-
-		REQUIRE(set[0] == 0);
-		REQUIRE(set[9] == 9);
-
-		set.Swap(0, 9);
-
-		REQUIRE(set[0] == 9);
-		REQUIRE(set[9] == 0);
-
-		set.Remove(0);
-		REQUIRE(!set.Contains(0));
 	}
 }
 

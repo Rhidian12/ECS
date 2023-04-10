@@ -7,7 +7,7 @@ namespace ECS::Time
 {
 	/// <summary>
 	/// A Timepoint is similar to std::chrono::time_point and should be viewed as it
-	/// Timepoints can be initialised with a time value, received from Integrian3D::Time::Timer
+	/// Timepoints can be initialised with a time value, received from Time::Timer
 	/// They can later then be used to do arithmetics to calculate time
 	/// </summary>
 	class Timepoint final
@@ -81,6 +81,7 @@ namespace ECS::Time
 	};
 
 #pragma region Operators
+
 	constexpr Timepoint operator-(const Timepoint& a, const Timepoint& b)
 	{
 		return Timepoint{ a.m_Time - b.m_Time };

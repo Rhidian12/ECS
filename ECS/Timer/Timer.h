@@ -22,11 +22,12 @@ namespace ECS::Time
 		void Start();
 		void Update();
 
+		// Implementation of this is based on MSVC STL std::chrono implementation
 		static Timepoint Now();
+
 		double GetElapsedSeconds() const { return m_ElapsedSeconds; }
 		double GetFixedElapsedSeconds() const { return m_TimePerFrame; }
 		double GetTotalElapsedSeconds() const { return m_TotalElapsedSeconds; }
-		int GetFPS() const { return m_FPS; }
 		double GetTimePerFrame() const { return m_TimePerFrame; }
 
 #pragma region GetElapsedTime
@@ -142,8 +143,6 @@ namespace ECS::Time
 		const double m_MaxElapsedSeconds;
 		double m_ElapsedSeconds;
 		double m_TotalElapsedSeconds;
-		int m_FPS;
-		int m_FPSCounter;
 		double m_FPSTimer;
 		double m_TimePerFrame;
 

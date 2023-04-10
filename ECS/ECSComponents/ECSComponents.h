@@ -12,9 +12,9 @@ public:
 class TransformComponent final
 {
 public:
-	Point2f Position{ Point2f::CreateRandomPoint2f(0.f, 1000.f) };
-	Point2f Rotation{ Point2f::CreateRandomPoint2f(0.f, 360.f) };
-	Point2f Scale{ Point2f::CreateRandomPoint2f(0.f, 3.f) };
+	Point2f Position{ CreateRandomPoint2f(0.f, 1000.f) };
+	Point2f Rotation{ CreateRandomPoint2f(0.f, 360.f) };
+	Point2f Scale{ CreateRandomPoint2f(0.f, 3.f) };
 };
 
 class RigidBodyComponent final

@@ -1,15 +1,12 @@
 #pragma once
 
 #include "../ECSConstants.h"
-#include "../SparseSet/SparseSet.h"
-#include "../View/View.h"
-#include "../ComponentIDGenerator/ComponentIDGenerator.h"
 #include "../ComponentArray/ComponentArray.h"
-
-#include "../Benchmark/BenchmarkUtils.h"
+#include "../ComponentIDGenerator/ComponentIDGenerator.h"
+#include "../View/View.h"
+#include "../SparseSet/SparseSet.h"
 
 #include <assert.h> /* assert() */
-#include <array> /* std::array */
 
 namespace ECS
 {
@@ -75,47 +72,34 @@ namespace ECS
 		}
 
 		template<typename T>
-		T& GetComponent(const Entity entity)
+		[[nodiscard]] T& GetComponent(const Entity entity)
 		{
 			assert(GetComponentArray(GenerateComponentID<T>()));
 			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponent(entity);
 		}
 		template<typename T>
-		const T& GetComponent(const Entity entity) const
+		[[nodiscard]] const T& GetComponent(const Entity entity) const
 		{
 			assert(GetComponentArray(GenerateComponentID<T>()));
 			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponent(entity);
 		}
 
-		template<typename T>
-		std::vector<T>& GetComponents()
-		{
-			assert(GetComponentArray(GenerateComponentID<T>()));
-			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponents();
-		}
-		template<typename T>
-		const std::vector<T>& GetComponents() const
-		{
-			assert(GetComponentArray(GenerateComponentID<T>()));
-			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponents();
-		}
-
-		Entity CreateEntity();
-		bool ReleaseEntity(const Entity entity);
-		size_t GetAmountOfEntities() const
+		[[nodiscard]] Entity CreateEntity();
+		[[nodiscard]] size_t GetAmountOfEntities() const
 		{
 			return Entities.Size();
 		}
+		[[nodiscard]] bool HasEntity(const Entity entity) const;
+		bool ReleaseEntity(const Entity entity);
 
 		void Clear();
 
 		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true);
-		const EntitySignature& GetEntitySignature(const Entity entity) const;
+		[[nodiscard]] const EntitySignature& GetEntitySignature(const Entity entity) const;
 
 	private:
 		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
-		bool HasEntity(const Entity entity) const;
-		std::unique_ptr<IComponentArray>& GetComponentArray(const ComponentType cType);
+		[[nodiscard]] std::unique_ptr<IComponentArray>& GetComponentArray(const ComponentType cType);
 
 		// Entities
 		std::vector<std::pair<Entity, EntitySignature>> EntitySignatures; // [TODO]: Make a map that uses arrays 

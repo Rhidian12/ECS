@@ -5,18 +5,21 @@
 
 namespace ECS::Benchmark
 {
-	static void TrimVector(const int nrOfIterations, std::vector<double>& times)
+	namespace
 	{
-		std::sort(times.begin(), times.end());
+		static void TrimVector(const int nrOfIterations, std::vector<double>& times)
+		{
+			std::sort(times.begin(), times.end());
 
-		// Remove top 10% bottom and top elements
-		const int nrOfElementsToRemove{ static_cast<int>(nrOfIterations * 0.1f) };
+			// Remove top 10% bottom and top elements
+			const int nrOfElementsToRemove{ static_cast<int>(nrOfIterations * 0.1f) };
 
-		if (times.size() > nrOfElementsToRemove)
-			times.erase(times.begin(), times.begin() + nrOfElementsToRemove);
+			if (times.size() > nrOfElementsToRemove)
+				times.erase(times.begin(), times.begin() + nrOfElementsToRemove);
 
-		if (times.size() > nrOfElementsToRemove)
-			times.erase(times.begin() + times.size() - nrOfElementsToRemove, times.end());
+			if (times.size() > nrOfElementsToRemove)
+				times.erase(times.begin() + times.size() - nrOfElementsToRemove, times.end());
+		}
 	}
 
 	std::vector<double> BenchmarkUtils::BenchmarkFunction(const int nrOfIterations, const std::function<void()>& fn)
