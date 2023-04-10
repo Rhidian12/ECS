@@ -48,8 +48,6 @@ namespace ECS
 
 	Entity Registry::CreateEntity()
 	{
-		PROFILE_SCOPE()
-
 		assert(CurrentEntityCounter <= MaxEntities);
 
 		Entity entity{};
@@ -125,8 +123,6 @@ namespace ECS
 
 	void Registry::SetEntitySignature(const Entity entity, const ComponentType id, const bool val)
 	{
-		PROFILE_SCOPE()
-
 		assert(HasEntity(entity));
 		EntitySignatures[entity].second.set(id, val);
 	}
@@ -139,8 +135,6 @@ namespace ECS
 
 	std::unique_ptr<IComponentArray>& Registry::GetComponentArray(const ComponentType cType)
 	{
-		PROFILE_SCOPE()
-
 		const auto cIt{ std::find_if(ComponentPools.begin(), ComponentPools.end(), [cType](const auto& kvPair) -> bool
 			{
 				return kvPair.first == cType;

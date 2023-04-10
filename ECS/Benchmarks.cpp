@@ -13,7 +13,6 @@
 #include "GOComponents/GOComponents.h"
 
 #include "Benchmark/BenchmarkUtils.h"
-#include "Benchmark/ProfilerInformation/ProfilerInformation.h"
 
 #include <fstream>
 #include <iostream>
@@ -368,8 +367,6 @@ int RunBenchmarks()
 #endif // BENCHMARK_ENTT_UPDATE
 
 #endif // ENABLE_ENTT_BENCHMARKS
-
-	Benchmark::ProfilerInformation::GetInstance().WriteTimesToOutput();
 
 	return 0;
 }

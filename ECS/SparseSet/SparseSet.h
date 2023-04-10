@@ -191,8 +191,6 @@ namespace ECS
 		template<typename U>
 		bool AddImpl(U&& value)
 		{
-			PROFILE_SCOPE()
-
 			if (Contains(value))
 			{
 				return false;

@@ -25,8 +25,6 @@ namespace ECS
 
 		void ForEach(const std::function<void(Ts&...)>& function)
 		{
-			PROFILE_SCOPE()
-
 			auto indexSequence{ std::make_index_sequence<sizeof ... (Ts)>{} };
 
 			for (const auto& [entity, sig] : EntitySignatures)
@@ -37,8 +35,6 @@ namespace ECS
 		template<size_t ... Is>
 		void ForEach(const std::function<void(Ts&...)>& function, const Entity ent, const EntitySignature& sig, const std::index_sequence<Is...>&)
 		{
-			PROFILE_SCOPE() 
-
 			if ((ent != InvalidEntityID) && (sig.test(GenerateComponentID<Ts>()) && ...))
 				std::apply(function, std::tuple<Ts&...>(std::get<Is>(Components).GetComponent(ent)...));
 		}

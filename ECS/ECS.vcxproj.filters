@@ -36,12 +36,6 @@
     <ClCompile Include="Benchmark\BenchmarkUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Benchmark\ScopedTimer\ScopedTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Benchmark\ProfilerInformation\ProfilerInformation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Benchmarks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -312,12 +306,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Benchmark\BenchmarkUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Benchmark\ScopedTimer\ScopedTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Benchmark\ProfilerInformation\ProfilerInformation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
