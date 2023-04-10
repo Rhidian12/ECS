@@ -15,7 +15,7 @@
 
 #ifdef BENCHMARKS
 
-int RunBenchmarks();
+int RunBenchmarks(const int iterations, const size_t amountOfEntities);
 
 #elif defined UNIT_TESTS
 
@@ -37,7 +37,10 @@ int main(int argc, char* argv[])
 {
 #ifdef BENCHMARKS
 
-	return RunBenchmarks();
+	constexpr int iterations{ 100 };
+	constexpr size_t nrOfEntities{ 1'000'000 };
+
+	return RunBenchmarks(iterations, nrOfEntities);
 
 #elif defined UNIT_TESTS
 

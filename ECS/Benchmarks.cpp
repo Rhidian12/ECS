@@ -62,14 +62,10 @@ namespace
 
 }
 
-int RunBenchmarks()
+int RunBenchmarks(const int iterations, const size_t amountOfEntities)
 {
 	using namespace ECS;
 	using namespace GO;
-
-	/* Benchmarking Constants */
-	constexpr int Iterations{ 100 };
-	constexpr Entity AmountOfEntities{ 1'000 };
 
 #ifdef ENABLE_CUSTOMECS_BENCHMARKS
 
@@ -86,9 +82,9 @@ int RunBenchmarks()
 				registry.Clear();
 			});
 
-		ecsInitTimes = benchmarker.BenchmarkFunction(Iterations, [&registry, AmountOfEntities]()->void
+		ecsInitTimes = benchmarker.BenchmarkFunction(iterations, [&registry, amountOfEntities]()->void
 			{
-				for (size_t i{}; i < AmountOfEntities; ++i)
+				for (size_t i{}; i < amountOfEntities; ++i)
 				{
 					Entity entity{ registry.CreateEntity() };
 
@@ -109,7 +105,7 @@ int RunBenchmarks()
 		Benchmark::BenchmarkUtils benchmarker{};
 		ECS::Registry ecsRegistry{};
 
-		for (size_t i{}; i < AmountOfEntities; ++i)
+		for (size_t i{}; i < amountOfEntities; ++i)
 		{
 			Entity entity{ ecsRegistry.CreateEntity() };
 
@@ -118,7 +114,7 @@ int RunBenchmarks()
 			ecsRegistry.AddComponent<GravityComponent>(entity);
 		}
 
-		ecsUpdateTimes = benchmarker.BenchmarkFunction(Iterations, [&ecsRegistry]()->void
+		ecsUpdateTimes = benchmarker.BenchmarkFunction(iterations, [&ecsRegistry]()->void
 			{
 				auto gravityView = ecsRegistry.CreateView<GravityComponent, RigidBodyComponent>();
 
@@ -279,8 +275,8 @@ int RunBenchmarks()
 #endif // ENABLE_ENTT_BENCHMARKS
 
 	/* Print results */
-	std::cout << "Amount of entities: " << AmountOfEntities << "\n";
-	std::cout << "Iterations: " << Iterations << "\n\n";
+	std::cout << "Amount of entities: " << amountOfEntities << "\n";
+	std::cout << "Iterations: " << iterations << "\n\n";
 
 #ifdef ENABLE_CUSTOMECS_BENCHMARKS
 
