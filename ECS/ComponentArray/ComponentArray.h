@@ -50,6 +50,11 @@ namespace ECS
 			m_Components.clear();
 		}
 
+		[[nodiscard]] bool HasEntity(const Entity entity) const
+		{
+			return m_Entities.Contains(entity);
+		}
+
 		[[nodiscard]] T& GetComponent(const Entity entity)
 		{
 			return m_Components[m_Entities.GetSecond(entity)];

@@ -1,9 +1,3 @@
-#include <iostream>
-#include <numeric>
-#include <vector>
-#include <string>
-#include <fstream>
-
 #if defined __has_include
 #	if __has_include (<vld.h>)
 #		include <vld.h>

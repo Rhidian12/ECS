@@ -22,23 +22,21 @@ namespace ECS
 		Registry& operator=(Registry&& other) noexcept;
 
 		template<typename ... Ts>
-		[[nodiscard]] View<Ts...> CreateView()
+		[[nodiscard]] View<Ts...> CreateView() const
 		{
 			/* Get all components asked for by the user */
 			std::tuple<ComponentArray<Ts>&...> comps
 			{
-				(*static_cast<ComponentArray<Ts>*>(GetComponentArray(GenerateComponentID<Ts>()).get()))...
+				(*static_cast<ComponentArray<Ts>*>(GetComponentArray(ECS::GenerateComponentID<Ts>()).get()))...
 			};
 
-			return View<Ts...>{ std::move(comps), EntitySignatures };
+			return View<Ts...>(std::move(comps), Entities);
 		}
 
 		template<typename T>
 		T& AddComponent(const Entity entity)
 		{
-			SetEntitySignature(entity, GenerateComponentID<T>());
-
-			std::unique_ptr<IComponentArray>& pool{ GetComponentArray(GenerateComponentID<T>()) };
+			std::unique_ptr<IComponentArray>& pool{ GetComponentArray(ECS::GenerateComponentID<T>()) };
 
 			if (!pool)
 			{
@@ -50,9 +48,7 @@ namespace ECS
 		template<typename T, typename ... Ts>
 		T& AddComponent(const Entity entity, Ts&& ... args)
 		{
-			SetEntitySignature(entity, GenerateComponentID<T>());
-
-			std::unique_ptr<IComponentArray>& pool{ GetComponentArray(GenerateComponentID<T>()) };
+			std::unique_ptr<IComponentArray>& pool{ GetComponentArray(ECS::GenerateComponentID<T>()) };
 
 			if (!pool)
 			{
@@ -67,47 +63,66 @@ namespace ECS
 		{
 			assert(HasEntity(entity));
 
-			GetComponentArray(GenerateComponentID<T>())->Remove(entity);
-			SetEntitySignature(entity, GenerateComponentID<T>(), false);
+			GetComponentArray(ECS::GenerateComponentID<T>())->Remove(entity);
+		}
+
+		template<typename T>
+		[[nodiscard]] bool HasComponent(const Entity entity) const
+		{
+			return static_cast<ComponentArray<T>*>(GetComponentArray(ECS::GenerateComponentID<T>()).get())->HasEntity(entity);
 		}
 
 		template<typename T>
 		[[nodiscard]] T& GetComponent(const Entity entity)
 		{
-			assert(GetComponentArray(GenerateComponentID<T>()));
-			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponent(entity);
+			assert(GetComponentArray(ECS::GenerateComponentID<T>()));
+			return static_cast<ComponentArray<T>*>(GetComponentArray(ECS::GenerateComponentID<T>()).get())->GetComponent(entity);
 		}
 		template<typename T>
 		[[nodiscard]] const T& GetComponent(const Entity entity) const
 		{
-			assert(GetComponentArray(GenerateComponentID<T>()));
-			return static_cast<ComponentArray<T>*>(GetComponentArray(GenerateComponentID<T>()).get())->GetComponent(entity);
+			assert(GetComponentArray(ECS::GenerateComponentID<T>()));
+			return static_cast<ComponentArray<T>*>(GetComponentArray(ECS::GenerateComponentID<T>()).get())->GetComponent(entity);
+		}
+
+		template<typename T>
+		[[nodiscard]] Entity FindEntity(const T& comp)
+		{
+			assert(GetComponentArray(ECS::GenerateComponentID<T>()));
+			return static_cast<ComponentArray<T>*>(GetComponentArray(ECS::GenerateComponentID<T>()).get())->FindEntity(comp);
 		}
 
 		[[nodiscard]] Entity CreateEntity();
-		[[nodiscard]] size_t GetAmountOfEntities() const
-		{
-			return Entities.Size();
-		}
+		[[nodiscard]] size_t GetAmountOfEntities() const { return Entities.Size(); }
 		[[nodiscard]] bool HasEntity(const Entity entity) const;
 		bool ReleaseEntity(const Entity entity);
 
+		template<typename ... Ts>
+		[[nodiscard]] bool CanViewBeCreated() const
+		{
+			return[this]<size_t ... Is>(std::index_sequence<Is...>)->bool
+			{
+				return ((std::find_if(ComponentPools.cbegin(), ComponentPools.cend(), [](const auto& cPool)->bool
+					{
+						return ECS::GenerateComponentID<Ts>() == cPool.first;
+					}) != ComponentPools.cend()) && ...);
+
+			}(std::make_index_sequence<sizeof ... (Ts)>{});
+		}
+
 		void Clear();
 
-		void SetEntitySignature(const Entity entity, const ComponentType id, const bool val = true);
-		[[nodiscard]] const EntitySignature& GetEntitySignature(const Entity entity) const;
-
 	private:
-		void RemoveAllComponents(const Entity entity, const EntitySignature& sig);
-		[[nodiscard]] std::unique_ptr<IComponentArray>& GetComponentArray(const ComponentType cType);
+		void RemoveAllComponents(const Entity entity);
+		[[nodiscard]] std::unique_ptr<IComponentArray>& GetComponentArray(const size_t cType);
+		[[nodiscard]] const std::unique_ptr<IComponentArray>& GetComponentArray(const size_t cType) const;
 
 		// Entities
-		std::vector<std::pair<Entity, EntitySignature>> EntitySignatures; // [TODO]: Make a map that uses arrays 
 		SparseSet<Entity> Entities;
 		std::vector<Entity> RecycledEntities;
 		Entity CurrentEntityCounter;
 
 		// Components
-		std::vector<std::pair<ComponentType, std::unique_ptr<IComponentArray>>> ComponentPools; // [TODO]: Make a map that uses arrays 
+		std::vector<std::pair<size_t, std::unique_ptr<IComponentArray>>> ComponentPools; // [TODO]: Make a map that uses arrays 
 	};
 }

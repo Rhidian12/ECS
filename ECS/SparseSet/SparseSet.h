@@ -8,6 +8,10 @@ namespace ECS
 	template<typename T>
 	class SparseSet final
 	{
+	private:
+		using VectorIt = std::vector<T>::iterator;
+		using VectorCIt = std::vector<T>::const_iterator;
+
 	public:
 		SparseSet()
 			: Sparse{}
@@ -33,6 +37,21 @@ namespace ECS
 			return (value < Sparse.size()) && (Sparse[value] != InvalidEntityID);
 		}
 
+		T GetSparse(const T value) const
+		{
+			for (const T sparse : Sparse)
+			{
+				if (sparse != InvalidEntityID && sparse == value)
+				{
+					return sparse;
+				}
+			}
+
+			assert(false);
+
+			return static_cast<T>(0);
+		}
+
 		size_t Size() const { return _Size; }
 		void Clear() { Sparse.clear(); Packed.clear(); _Size = 0; }
 
@@ -52,16 +71,25 @@ namespace ECS
 
 		void Reserve(const size_t capacity) { Sparse.reserve(capacity); Packed.reserve(capacity); }
 
-		__forceinline T& operator[](const T val)
-		{ 
+		[[nodiscard]] __forceinline T & operator[](const T val)
+		{
 			assert(Contains(val));
 			return Packed[Sparse[val]];
 		}
-		__forceinline const T operator[](const T val) const
-		{ 
+		[[nodiscard]] __forceinline const T operator[](const T val) const
+		{
 			assert(Contains(val));
-			return Packed[Sparse[val]]; 
+			return Packed[Sparse[val]];
 		}
+
+		VectorIt begin() { return Packed.begin(); }
+		VectorCIt begin() const { return Packed.begin(); }
+
+		VectorIt end() { return Packed.end(); }
+		VectorCIt end() const { return Packed.end(); }
+
+		VectorCIt cbegin() const { return Packed.cbegin(); }
+		VectorCIt cend() const { return Packed.cend(); }
 
 	private:
 		template<typename U>
