@@ -302,5 +302,8 @@
     <ClInclude Include="Benchmark\BenchmarkUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SparseSet\DenseSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

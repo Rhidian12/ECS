@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../ECSConstants.h"
-#include "../SparseSet/SparseSet.h"
+#include "../SparseSet/DenseSet.h"
 
 #include <vector> /* std::vector */
 
@@ -29,22 +29,19 @@ namespace ECS
 
 		T& AddComponent(const Entity entity)
 		{
-			m_Entities.Add(entity);
+			m_Entities.Add(entity, static_cast<Entity>(m_Components.size()));
 			return m_Components.emplace_back(T{});
 		}
 		template<typename ... Ts>
 		T& AddComponent(const Entity entity, Ts&& ... args)
 		{
-			m_Entities.Add(entity);
+			m_Entities.Add(entity, static_cast<Entity>(m_Components.size()));
 			return m_Components.emplace_back(T{ std::forward<Ts>(args)... });
 		}
 
 		virtual void Remove(const Entity entity) override
 		{
-			if (m_Entities.Contains(entity))
-			{
-				m_Entities[entity] = InvalidEntityID;
-			}
+			m_Entities.Remove(entity);
 		}
 
 		virtual void RemoveAll() override
@@ -55,15 +52,15 @@ namespace ECS
 
 		[[nodiscard]] T& GetComponent(const Entity entity)
 		{
-			return m_Components[m_Entities[entity]];
+			return m_Components[m_Entities.GetSecond(entity)];
 		}
 		[[nodiscard]] const T& GetComponent(const Entity entity) const
 		{
-			return m_Components[m_Entities[entity]];
+			return m_Components[m_Entities.GetSecond(entity)];
 		}
 
 	private:
-		SparseSet<Entity> m_Entities;
+		DenseSet<Entity> m_Entities;
 		std::vector<T> m_Components;
 	};
 }

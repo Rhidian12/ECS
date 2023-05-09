@@ -114,4 +114,28 @@ TEST_CASE("Testing custom ECS")
 		REQUIRE(registry.GetComponent<RemoveEntityTestData>(2).Name == "2");
 		REQUIRE(registry.GetComponent<RemoveEntityTestData>(4).Name == "4");
 	}
+
+	SECTION("Creating many entities")
+	{
+		struct EntityTest final
+		{
+			std::string Name;
+		};
+
+#pragma warning ( push )
+#pragma warning ( disable:4834 )
+		for (size_t i{}; i < 10; ++i) registry.CreateEntity();
+#pragma warning ( pop )
+
+		ECS::Entity entity{ registry.CreateEntity() };
+
+		registry.AddComponent<EntityTest>(entity, "Entity");
+
+		auto view = registry.CreateView<EntityTest>();
+
+		view.ForEach([](const auto& test)->void
+			{
+				REQUIRE(test.Name == "Entity");
+			});
+	}
 }

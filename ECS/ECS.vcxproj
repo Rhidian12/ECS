@@ -242,6 +242,7 @@
     <ClInclude Include="GOComponents\GOComponents.h" />
     <ClInclude Include="GOComponent\GOComponent.h" />
     <ClInclude Include="Point2f\Point2f.h" />
+    <ClInclude Include="SparseSet\DenseSet.h" />
     <ClInclude Include="SparseSet\SparseSet.h" />
     <ClInclude Include="Timer\TimeLength.h" />
     <ClInclude Include="Timer\Timepoint\Timepoint.h" />
