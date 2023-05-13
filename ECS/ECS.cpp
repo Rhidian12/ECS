@@ -4,8 +4,8 @@
 #	endif
 #endif
 
-// #define BENCHMARKS
-#define UNIT_TESTS
+#define BENCHMARKS
+// #define UNIT_TESTS
 
 #ifdef BENCHMARKS
 
@@ -20,7 +20,7 @@ int RunUnitTests(int argc, char* argv[]);
 
 #ifdef BENCHMARKS
 
-int main(int, char*[])
+int main(int, char* [])
 
 #elif defined UNIT_TESTS
 
@@ -34,11 +34,16 @@ int main(int argc, char* argv[])
 	constexpr int iterations{ 100 };
 	constexpr size_t nrOfEntities{ 1'000'000 };
 
-	return RunBenchmarks(iterations, nrOfEntities);
+	for (int i{}; i < 1; ++i)
+	{
+		RunBenchmarks(iterations, nrOfEntities);
+	}
+
+	return 0;
 
 #elif defined UNIT_TESTS
 
 	return RunUnitTests(argc, argv);
 
 #endif
-}
+	}
