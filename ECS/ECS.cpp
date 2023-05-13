@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 	constexpr int iterations{ 100 };
 	constexpr size_t nrOfEntities{ 1'000'000 };
 
-	for (int i{}; i < 1; ++i)
+	for (int i{}; i < 10; ++i)
 	{
 		RunBenchmarks(iterations, nrOfEntities);
 	}

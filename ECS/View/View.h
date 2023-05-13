@@ -39,7 +39,9 @@ namespace ECS
 		void ForEachImpl(const std::function<void(Ts&...)>& function, const Entity ent, const std::index_sequence<Is...>&) const
 		{
 			if ((ent != InvalidEntityID) && (std::get<Is>(m_Components).HasEntity(ent) && ...))
+			{
 				std::apply(function, std::tuple<Ts&...>(std::get<Is>(m_Components).GetComponent(ent)...));
+			}
 		}
 
 		ViewContainerType m_Components;
