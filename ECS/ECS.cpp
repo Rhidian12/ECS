@@ -4,8 +4,8 @@
 #	endif
 #endif
 
-#define BENCHMARKS
-// #define UNIT_TESTS
+// #define BENCHMARKS
+#define UNIT_TESTS
 
 #ifdef BENCHMARKS
 

@@ -7,6 +7,7 @@
 #include "../SparseSet/SparseSet.h"
 
 #include <assert.h> /* assert() */
+#include <queue>
 
 namespace ECS
 {
@@ -119,7 +120,7 @@ namespace ECS
 
 		// Entities
 		SparseSet<Entity> Entities;
-		std::vector<Entity> RecycledEntities;
+		std::queue<Entity> RecycledEntities;
 		Entity CurrentEntityCounter;
 
 		// Components

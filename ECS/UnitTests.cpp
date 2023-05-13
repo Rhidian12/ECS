@@ -65,32 +65,77 @@ TEST_CASE("Testing custom ECS")
 		REQUIRE(entity == 0);
 	}
 
+	SECTION("Create one entity and make sure it is reused")
+	{
+		ECS::Entity entity{ registry.CreateEntity() };
+
+		REQUIRE(entity == 0);
+
+		registry.ReleaseEntity(entity);
+
+		REQUIRE(registry.CreateEntity() == 0);
+	}
+
 	SECTION("Making 10 entities and testing their updates")
 	{
 		constexpr int size{ 10 };
-		float startPositions[size]{};
 
-		for (int i{}; i < size; ++i)
 		{
-			ECS::Entity entity{ registry.CreateEntity() };
+			float startPositions[size]{};
 
-			registry.AddComponent<GravityComponent>(entity);
-			registry.AddComponent<TransformComponent>(entity);
-			registry.AddComponent<RigidBodyComponent>(entity);
+			for (int i{}; i < size; ++i)
+			{
+				ECS::Entity entity{ registry.CreateEntity() };
 
-			startPositions[i] = registry.GetComponent<TransformComponent>(entity).Position.y;
+				registry.AddComponent<GravityComponent>(entity);
+				registry.AddComponent<TransformComponent>(entity);
+				registry.AddComponent<RigidBodyComponent>(entity);
+
+				startPositions[i] = registry.GetComponent<TransformComponent>(entity).Position.y;
+			}
+
+			auto view = registry.CreateView<GravityComponent, TransformComponent>();
+
+			view.ForEach([](const auto& grav, auto& trans)
+				{
+					trans.Position.y += grav.Gravity; // - 981.0
+				});
+
+			for (int i{}; i < size; ++i)
+			{
+				REQUIRE(startPositions[i] > registry.GetComponent<TransformComponent>(i).Position.y);
+			}
 		}
 
-		auto view = registry.CreateView<GravityComponent, TransformComponent>();
-
-		view.ForEach([](const auto& grav, auto& trans)
-			{
-				trans.Position.y += grav.Gravity; // - 981.0
-			});
-
-		for (int i{}; i < size; ++i)
 		{
-			REQUIRE(startPositions[i] > registry.GetComponent<TransformComponent>(i).Position.y);
+			struct SomeStringData
+			{
+				std::string Value;
+			};
+
+			ECS::Entity entities[size]{};
+
+			for (int i{}; i < size; ++i)
+			{
+				ECS::Entity entity{ registry.CreateEntity() };
+
+				registry.AddComponent<SomeStringData>(entity, std::to_string(i));
+
+				entities[i] = entity;
+			}
+
+			auto view = registry.CreateView<SomeStringData>();
+
+			view.ForEach([](SomeStringData& data)->void
+				{
+					if (std::stoi(data.Value) % 2 == 0) data.Value = "-1";
+				});
+
+			for (int i{}; i < size; ++i)
+			{
+				if (i % 2 == 0) REQUIRE(registry.GetComponent<SomeStringData>(entities[i]).Value == "-1");
+				else REQUIRE(registry.GetComponent<SomeStringData>(entities[i]).Value == std::to_string(i));
+			}
 		}
 	}
 

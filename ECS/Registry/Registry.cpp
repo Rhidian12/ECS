@@ -24,7 +24,8 @@ namespace ECS
 		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
-		other.RecycledEntities.clear();
+
+		while (!other.RecycledEntities.empty()) other.RecycledEntities.pop();
 	}
 
 	Registry& Registry::operator=(Registry&& other) noexcept
@@ -37,7 +38,8 @@ namespace ECS
 		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
-		other.RecycledEntities.clear();
+
+		while (!other.RecycledEntities.empty()) other.RecycledEntities.pop();
 
 		return *this;
 	}
@@ -50,8 +52,8 @@ namespace ECS
 
 		if (!RecycledEntities.empty())
 		{
-			entity = RecycledEntities.back();
-			RecycledEntities.pop_back();
+			entity = RecycledEntities.front();
+			RecycledEntities.pop();
 		}
 		else
 		{
@@ -71,7 +73,7 @@ namespace ECS
 
 			Entities.Remove(entity);
 
-			RecycledEntities.push_back(entity);
+			RecycledEntities.push(entity);
 
 			return true;
 		}
@@ -103,7 +105,8 @@ namespace ECS
 		}
 
 		ComponentPools.clear();
-		RecycledEntities.clear();
+		
+		while (!RecycledEntities.empty()) RecycledEntities.pop();
 	}
 
 	const std::unique_ptr<IComponentArray>& Registry::GetComponentArray(const size_t cType) const
