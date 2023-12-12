@@ -24,8 +24,7 @@ namespace ECS
 		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
-
-		while (!other.RecycledEntities.empty()) other.RecycledEntities.pop();
+		other.RecycledEntities.clear();
 	}
 
 	Registry& Registry::operator=(Registry&& other) noexcept
@@ -38,27 +37,26 @@ namespace ECS
 		other.Entities.Clear();
 		other.CurrentEntityCounter = 0;
 		other.ComponentPools.clear();
-
-		while (!other.RecycledEntities.empty()) other.RecycledEntities.pop();
+		other.RecycledEntities.clear();
 
 		return *this;
 	}
 
 	Entity Registry::CreateEntity()
 	{
-		assert(CurrentEntityCounter <= MaxEntities);
-
-		Entity entity{};
+		Entity entity{ InvalidEntityID };
 
 		if (!RecycledEntities.empty())
 		{
-			entity = RecycledEntities.front();
-			RecycledEntities.pop();
+			entity = RecycledEntities.back();
+			RecycledEntities.pop_back();
 		}
 		else
 		{
 			entity = CurrentEntityCounter++;
 		}
+
+		assert(entity != InvalidEntityID && "Registry::CreateEntity() > The maximum amount of entities has been created. Consider increasing MAX_ENTITIES");
 
 		Entities.Add(entity);
 
@@ -73,7 +71,7 @@ namespace ECS
 
 			Entities.Remove(entity);
 
-			RecycledEntities.push(entity);
+			RecycledEntities.push_back(entity);
 
 			return true;
 		}
@@ -105,8 +103,7 @@ namespace ECS
 		}
 
 		ComponentPools.clear();
-		
-		while (!RecycledEntities.empty()) RecycledEntities.pop();
+		RecycledEntities.clear();
 	}
 
 	const std::unique_ptr<IComponentArray>& Registry::GetComponentArray(const size_t cType) const

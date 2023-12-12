@@ -7,7 +7,7 @@
 #include "../SparseSet/SparseSet.h"
 
 #include <assert.h> /* assert() */
-#include <queue>
+#include <memory>
 
 namespace ECS
 {
@@ -101,14 +101,10 @@ namespace ECS
 		template<typename ... Ts>
 		[[nodiscard]] bool CanViewBeCreated() const
 		{
-			return[this]<size_t ... Is>(std::index_sequence<Is...>)->bool
-			{
-				return ((std::find_if(ComponentPools.cbegin(), ComponentPools.cend(), [](const auto& cPool)->bool
-					{
-						return ECS::GenerateComponentID<Ts>() == cPool.first;
-					}) != ComponentPools.cend()) && ...);
-
-			}(std::make_index_sequence<sizeof ... (Ts)>{});
+			return ((std::find_if(ComponentPools.cbegin(), ComponentPools.cend(), [](const auto& cPool)->bool
+				{
+					return ECS::GenerateComponentID<Ts>() == cPool.first;
+				}) != ComponentPools.cend()) && ...);
 		}
 
 		void Clear();
@@ -120,7 +116,7 @@ namespace ECS
 
 		// Entities
 		SparseSet<Entity> Entities;
-		std::queue<Entity> RecycledEntities;
+		std::vector<Entity> RecycledEntities;
 		Entity CurrentEntityCounter;
 
 		// Components
